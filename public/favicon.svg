@@ -1,0 +1,14 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_55_61)">
+<rect x="4" y="1" width="16.25" height="21.25" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M4 1H21V18H4V1ZM7.5 9.5L12.5 4.5L17.5 9.5L12.5 14.5L7.5 9.5Z" fill="#727272"/>
+<path d="M7.75 20.75V22.75L9.5 21.25L11.25 22.75V20.75L9.5 21.25L7.75 20.75Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M11.5 0.75L3.75 8.5V10.5L11.5 18.25H13.5L21.25 10.5V8.5L13.5 0.75H11.5ZM7.5 9.5L12.5 4.5L17.5 9.5L12.5 14.5L7.5 9.5Z" fill="black"/>
+<path d="M21.25 22.25H20.25M3.75 20.2548C3.75 19.1298 4.47901 18.25 5.75 18.25H11.5M3.75 20.2548C3.75 21.3238 4.30272 22.0278 5.25 22.2057M3.75 20.2548V10.5M20.25 22.25V20.5M20.25 22.25H13.75M7.75 20.75V22.75L9.5 21.25M7.75 20.75L9.5 21.25M7.75 20.75H11.25M9.5 21.25L11.25 22.75V20.75M9.5 21.25L11.25 20.75M11.5 0.75L3.75 8.5M11.5 0.75H5.25C4.4 0.75 3.75 1.4 3.75 2.25V8.5M11.5 0.75H13.5M3.75 8.5V10.5M13.5 0.75L21.25 8.5M13.5 0.75H21.25V8.5M21.25 8.5V10.5M3.75 10.5L11.5 18.25M11.5 18.25H13.5M21.25 10.5V18.25H13.5M21.25 10.5L13.5 18.25M12.5 4.5L7.5 9.5L12.5 14.5L17.5 9.5L12.5 4.5Z" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+</g>
+<defs>
+<clipPath id="clip0_55_61">
+<rect width="24" height="24" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-size: 16px;
+    scrollbar-width: thin;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ::selection {
+    background: theme('colors.indigo.500');
+  } */
+
+  /* desktop scrollbar */
+  @media (hover: hover) and (pointer: fine) {
+
+    ::-webkit-scrollbar {
+      @apply h-4 w-4;
+    }
+
+    ::-webkit-scrollbar-track {
+    }
+
+    ::-webkit-scrollbar-button:end:increment,::-webkit-scrollbar-button:start:decrement {
+      background: 0 0;
+      display: none;
+    }
+
+    ::-webkit-scrollbar-track-piece {
+
+    }
+
+    ::-webkit-scrollbar-track-piece:horizontal:start {
+      @apply rounded-l;
+    }
+
+    ::-webkit-scrollbar-track-piece:horizontal:end {
+      @apply rounded-r;
+    }
+
+    ::-webkit-scrollbar-track-piece:vertical:start {
+      @apply rounded-t;
+    }
+
+    ::-webkit-scrollbar-track-piece:vertical:end {
+      @apply rounded-b;
+    }
+
+    ::-webkit-scrollbar-thumb,
+    ::-webkit-scrollbar-thumb:horizontal,
+    ::-webkit-scrollbar-thumb:vertical {
+      @apply bg-indigo-500/40 block rounded-full border-4 border-solid border-transparent;
+      background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover,
+    ::-webkit-scrollbar-thumb:horizontal:hover,
+    ::-webkit-scrollbar-thumb:vertical:hover {
+      @apply bg-indigo-500/50;
+    }
+
+    ::-webkit-scrollbar-corner {
+      @apply bg-transparent;
+    }
+  }
+}
