@@ -1,6 +1,7 @@
+import NoteszError from '@/utils/NoteszError';
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 
-export function useFromDb<T, WatchParams>({
+export default function useFromDb<T, WatchParams>({
   get,
   put,
   putThrottling = 1000,
@@ -12,7 +13,8 @@ export function useFromDb<T, WatchParams>({
   putThrottling?: number
 }) {
   const data = ref<T | undefined>(undefined);
-  const error = ref<Error | undefined>(undefined);
+  const isFetching = ref(false);
+  const error = ref<NoteszError | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let lastPutTime = 0;
   let putThrottlingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -33,11 +35,18 @@ export function useFromDb<T, WatchParams>({
       await flushThrottledPut();
       stopUpdateWatch();
       error.value = undefined;
+      isFetching.value = true;
       data.value = await get(params) as UnwrapRef<T>;
-    } catch(err: any) {
-      console.error('useFromDb get failed', err);
-      error.value = err as Error;
+    } catch(err) {
+      if (err instanceof Error) {
+        error.value = err as NoteszError;
+      } else {
+        error.value = new NoteszError('Failed to get resource', {
+          cause: err
+        });
+      }
     } finally {
+      isFetching.value = false;
       if (put && data.value !== undefined) {
         startUpdateWatch();
       }
@@ -101,6 +110,7 @@ export function useFromDb<T, WatchParams>({
   return reactive({
     data,
     error,
+    isFetching,
     refetch: _get,
     put: _put,
     flushThrottledPut

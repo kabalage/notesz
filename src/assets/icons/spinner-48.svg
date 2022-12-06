@@ -1,0 +1,134 @@
+<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+<path d="M24.5 6V14" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="0s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M15.433 8.16156L19.433 15.0898" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.0833s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M8.66154 14.567L15.5897 18.567" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.167s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M6 23.5H14" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.2497s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M8.16154 32.567L15.0897 28.567" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.333s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M14.567 39.3384L18.567 32.4102" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.4167s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M23.5 42V34" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.5s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M32.567 39.8384L28.567 32.9102" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.5837s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M39.3385 33.433L32.4103 29.433" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.667s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M42 24.5L34 24.5" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.7497s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M39.8385 15.433L32.9103 19.433" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.833s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+<path d="M33.433 8.66156L29.433 15.5898" opacity="0">
+  <animate
+    attributeName="opacity"
+    dur="1s"
+    begin="-0.9167s"
+    values="1;0.15"
+    calcMode="spline"
+    repeatCount="indefinite"
+    keySplines="0,0,0.2,1"
+  />
+</path>
+</svg>

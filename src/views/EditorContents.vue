@@ -25,7 +25,7 @@ import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
 import TrashIcon32 from '@/assets/icons/trash-32.svg?component';
 import SyncIcon32 from '@/assets/icons/sync-32.svg?component';
 
-import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useEditorState } from '@/stores/editorState';
 import RibbonButton from '@/components/RibbonButton.vue';
 import BaseButton from '@/components/BaseButton.vue';

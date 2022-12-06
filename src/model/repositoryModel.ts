@@ -1,16 +1,13 @@
-import { openNoteszDb } from './db';
-// import { getMockNoteszFileIndex } from './seedData';
-// import mdExample from './mdExample.md?raw';
+import openNoteszDb from './openNoteszDb';
 
 export interface Repository {
   readonly id: string,
-  readonly type: 'repository',
-  // token: string
+  readonly type: 'repository'
 }
 
 async function add(repository: Repository) {
   const mdExample = (await import('./tmpSeed/mdExample.md?raw')).default;
-  const { getMockNoteszFileIndex } = await import('./tmpSeed/getMockNoteszFileIndex');
+  const getMockNoteszFileIndex = (await import('./tmpSeed/getMockNoteszFileIndex')).default;
   const db = await openNoteszDb();
   try {
     const tx = db.transaction(['repositories', 'fileIndexes', 'blobs'], 'readwrite');
@@ -53,7 +50,7 @@ async function list() {
   }
 }
 
-export const repositories = {
+export default {
   add,
   delete: deleteRepo,
   list

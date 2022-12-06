@@ -11,7 +11,7 @@ import { ref } from 'vue';
  * the element. This composable rejects the clicks that would happen after moving your finger while
  * touching the element.
  */
-export function useIosPointerMoveCancelHack(
+export default function useIosPointerMoveCancelHack(
   target: MaybeComputedRef<EventTarget | null | undefined>
 ) {
   const isIphoneOrIpad = /iPhone|iPad/.test(window.navigator.userAgent)
@@ -21,7 +21,7 @@ export function useIosPointerMoveCancelHack(
   let pointerDownClientX = 0;
   let pointerDownClientY = 0;
   const touchMoveJitterAllowed = 10;
-  let eventListenerCleanups: Function[] = [];
+  let eventListenerCleanups: Array<ReturnType<typeof useEventListener>> = [];
 
   if (isIphoneOrIpad) {
     useEventListener(target, 'pointerdown', handlePointerDown);

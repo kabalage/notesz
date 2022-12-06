@@ -4,9 +4,9 @@ require('@rushstack/eslint-patch/modern-module-resolution');
 module.exports = {
   root: true,
   'extends': [
-    'plugin:vue/vue3-essential',
     'eslint:recommended',
-    '@vue/eslint-config-typescript'
+    'plugin:vue/vue3-essential',
+    '@vue/eslint-config-typescript/recommended'
   ],
   rules: {
     semi: ['error', 'always'],
@@ -22,7 +22,10 @@ module.exports = {
       max: 1
     }],
     'eol-last': ['error', 'always'],
-    'vue/no-undef-components': ['error']
+    'vue/no-undef-components': ['error'],
+    '@typescript-eslint/no-non-null-assertion': 'off',
+      // As long TS does not know about inline callbacks, the '!' stays.
+    '@typescript-eslint/no-explicit-any': 'off'
   },
   parserOptions: {
     ecmaVersion: 'latest'

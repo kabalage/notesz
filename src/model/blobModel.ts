@@ -1,4 +1,4 @@
-import { openNoteszDb } from './db';
+import openNoteszDb from './openNoteszDb';
 
 async function get(id: string) {
   const db = await openNoteszDb();
@@ -18,7 +18,7 @@ async function put(id: string, value: string) {
   }
 }
 
-export const blobs = {
+export default {
   get,
   put
 };

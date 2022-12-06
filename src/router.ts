@@ -26,6 +26,25 @@ const router = createRouter({
       path: '/settings',
       component: () => import('@/views/SettingsView.vue'),
       props: true
+    },
+    {
+      path: '/connect',
+      component: () => import('@/views/ConnectRepository.vue'),
+      props: {
+        parentRoute: '/'
+      }
+    },
+    {
+      path: '/settings/connect',
+      component: () => import('@/views/ConnectRepository.vue'),
+      props: {
+        parentRoute: '/settings'
+      }
+    },
+    {
+      path: '/callback/:type',
+      component: () => import('@/views/CallbackHandler.vue'),
+      props: true
     }
   ]
 });

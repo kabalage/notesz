@@ -27,6 +27,7 @@ coverage
 *.sln
 *.sw?
 
-.env
+.env*
 .vercel
+.cert
 stats.html

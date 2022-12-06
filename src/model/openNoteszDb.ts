@@ -1,7 +1,8 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { AppSettings } from './settings';
-import type { Repository } from './repositories';
-import type { FileIndex } from './fileIndexes';
+import type { Settings } from './settingsModel';
+import type { User } from './userModel';
+import type { Repository } from './repositoryModel';
+import type { FileIndex } from './fileIndexModel';
 
 interface NoteszDb extends DBSchema {
   repositories: {
@@ -16,13 +17,13 @@ interface NoteszDb extends DBSchema {
     key: string,
     value: string
   },
-  settings: {
+  app: {
     key: string,
-    value: AppSettings
+    value: Settings | User
   }
 }
 
-export async function openNoteszDb() {
+export default function openNoteszDb() {
   // console.log('DB open');
   if (navigator.storage) {
     navigator.storage.persist();
@@ -39,13 +40,12 @@ export async function openNoteszDb() {
       keyPath: ['repositoryId', 'indexId']
     });
     db.createObjectStore('blobs');
-    const settingsStore = db.createObjectStore('settings', {
+    const settingsStore = db.createObjectStore('app', {
       keyPath: 'type'
     });
     await settingsStore.put({
-      type: 'appSettings',
-      selectedRepositoryId: null,
-      theme: 'system'
+      type: 'settings',
+      selectedRepositoryId: null
     });
   }
 

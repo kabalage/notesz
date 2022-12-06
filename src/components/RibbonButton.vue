@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useBetterPointerActiveState } from '@/composables/useBetterPointerActiveState';
+import useBetterPointerActiveState from '@/composables/useBetterPointerActiveState';
 
 const props = withDefaults(defineProps<{
   toggled?: boolean

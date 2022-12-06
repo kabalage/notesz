@@ -1,4 +1,4 @@
-import { openNoteszDb } from './db';
+import openNoteszDb from './openNoteszDb';
 
 export interface FileIndex {
   readonly repositoryId: string,
@@ -92,7 +92,7 @@ function getTreeForPath(fileIndex: FileIndex, path: string) {
   return parentNode;
 }
 
-export const fileIndexes = {
+export default {
   add,
   get,
   updateLocalFile,

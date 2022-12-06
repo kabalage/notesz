@@ -15,7 +15,7 @@ import type { EditorState } from '@codemirror/state';
 import * as commands from '@codemirror/commands';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
-import { useMediaQuery } from '@vueuse/core';
+import useIsTouchDevice from '@/composables/useIsTouchDevice';
 
 const props = defineProps<{
   note: string
@@ -121,7 +121,7 @@ const extensions = [
 const cmEditorView = shallowRef<EditorView>();
 const modelValue = ref(props.note); // maybe watch prop
 const emittedValue = ref(props.note);
-const isTouchDevice = useMediaQuery('(pointer: coarse)');
+const isTouchDevice = useIsTouchDevice();
 
 function onReady(payload: {
   view: EditorView;

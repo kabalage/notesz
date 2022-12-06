@@ -4,7 +4,7 @@ import EditorContents from './EditorContents.vue';
 import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import { provideEditorState } from '@/stores/editorState';
 import { provideExplorerState } from '@/stores/explorerState';
-import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import useIsTouchDevice from '@/composables/useIsTouchDevice';
 
 const props = defineProps<{
   repo: string,

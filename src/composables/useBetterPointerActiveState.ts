@@ -23,7 +23,7 @@ const defaultOptions: BetterPointerActiveStateOptions = {
  * If not enough time passes between the pointerdown and pointerup events the active state persists
  * until the minimal time elapsed.
  */
-export function useBetterPointerActiveState(
+export default function useBetterPointerActiveState(
   target: MaybeComputedRef<EventTarget | null | undefined>,
   options: Partial<BetterPointerActiveStateOptions> = {}
 ) {
@@ -37,7 +37,7 @@ export function useBetterPointerActiveState(
   const active = ref(false);
   let activeEndTimeout: ReturnType<typeof setTimeout> | undefined;
   let pointerDownTime = 0;
-  let eventListenerCleanups: Function[] = [];
+  let eventListenerCleanups: Array<ReturnType<typeof useEventListener>> = [];
 
   useEventListener(target, 'pointerdown', handlePointerDown);
   tryOnScopeDispose(() => removeEventListeners());

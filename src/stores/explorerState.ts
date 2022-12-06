@@ -2,12 +2,11 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { createInjectionState } from '@/utils/createInjectionState';
 import type { provideEditorState } from '@/stores/editorState';
-import { fileIndexes, type Tree, type File } from '@/model/fileIndexes';
+import { default as fileIndexModel, type Tree, type File } from '@/model/fileIndexModel';
 
 const [provideExplorerState, useExplorerState] = createInjectionState((
   editorState: ReturnType<typeof provideEditorState>
 ) => {
-
   const router = useRouter();
   const path = ref('');
 
@@ -16,7 +15,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     const rootTree = editorState.fileIndex.data.index[''];
     let explorerTree = rootTree;
     try {
-      explorerTree = fileIndexes.getTreeForPath(editorState.fileIndex.data, path.value);
+      explorerTree = fileIndexModel.getTreeForPath(editorState.fileIndex.data, path.value);
     } catch (err: any) {
       console.error(err);
     }

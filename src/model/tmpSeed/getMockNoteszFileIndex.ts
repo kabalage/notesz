@@ -1,4 +1,4 @@
-export function getMockNoteszFileIndex(repositoryId: string, indexId: string) {
+export default function getMockNoteszFileIndex(repositoryId: string, indexId: string) {
   return {
     type: 'fileIndex' as const,
     repositoryId: repositoryId,

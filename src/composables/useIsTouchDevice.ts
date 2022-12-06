@@ -1,3 +1,3 @@
 import { createSharedComposable, useMediaQuery } from '@vueuse/core';
 
-export const useIsTouchDevice = createSharedComposable(() => useMediaQuery('(pointer: coarse)'));
+export default createSharedComposable(() => useMediaQuery('(pointer: coarse)'));

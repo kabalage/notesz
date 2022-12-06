@@ -2,7 +2,6 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 import { visualizer } from 'rollup-plugin-visualizer';
 import svgLoader from 'vite-svg-loader';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -10,7 +9,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    basicSsl(),
+    // basicSsl(),
     VitePWA({
       workbox: {
         globPatterns: [
@@ -53,12 +52,13 @@ export default defineConfig({
       svgo: false,
       defaultImport: 'url'
     }),
-    // visualizer()
+    visualizer()
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      'node-fetch': 'src/utils/nodeFetchReplacement.ts'
+    },
   },
   server: {
     port: 5000

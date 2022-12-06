@@ -2,32 +2,21 @@
 import { watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { deleteDB } from 'idb';
-
 import GitHubIcon from '@/assets/icons/github.svg?component';
-import { useAppSettings } from '@/composables/useAppSettings';
-import { repositories } from '@/model/repositories';
+import SpinnerIcon from '@/assets/icons/spinner.svg?component';
+import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
+import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 
 const router = useRouter();
+const settings = useSettings();
+const { isAuthorizing, authError, connect } = useRepositoryConnectAction();
 
-const appSettings = useAppSettings();
-
-watch(() => appSettings.data, () => {
-  if (appSettings.data && appSettings.data?.selectedRepositoryId) {
-    navigateToEditor(appSettings.data.selectedRepositoryId);
+watch(() => settings.data, () => {
+  if (settings.data && settings.data?.selectedRepositoryId) {
+    navigateToEditor(settings.data.selectedRepositoryId);
   }
 }, { deep: true });
-
-async function addRepository() {
-  if (!appSettings.data) return;
-  const repositoryId = 'kabalage/test';
-  await repositories.add({
-    id: repositoryId,
-    type: 'repository',
-  });
-  appSettings.data.selectedRepositoryId = repositoryId;
-  navigateToEditor(repositoryId);
-}
 
 function navigateToEditor(repositoryId: string) {
   router.replace(`/edit/${repositoryId}/`);
@@ -43,12 +32,10 @@ async function clearStorage() {
 
 <template>
   <div
-    v-if="appSettings.data && !appSettings.data.selectedRepositoryId"
+    v-if="settings.data && !settings.data.selectedRepositoryId"
     class="h-full grid overflow-y-auto"
   >
-    <div
-      class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
-    >
+    <div class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b">
       <h1 class="font-semibold mb-2 text-center">Welcome to</h1>
       <div class="flex justify-center mb-8" @click="clearStorage">
         <img src="@/assets/logo-dark.svg" class="h-12 my-2"/>
@@ -61,12 +48,26 @@ async function clearStorage() {
         repository, nowhere else.
       </p>
       <BasicButton
-        class="mx-auto"
-        @click="addRepository()"
+        class="mx-auto w-[17rem] touch:w-72"
+        :disabled="isAuthorizing"
+        @click="connect(true)"
       >
-        <GitHubIcon class="flex-none h-6 w-6 fill-indigo-400 mr-2" />
-        Connect GitHub repository
+        <template v-if="isAuthorizing">
+          <SpinnerIcon class="mx-auto w-6 h-6 text-indigo-300" />
+        </template>
+        <template v-else>
+          <GitHubIcon class="flex-none h-6 w-6 fill-indigo-400 mr-2" />
+          <div class="flex-1 text-center">
+            Connect GitHub repository
+          </div>
+            </template>
       </BasicButton>
+      <div
+        v-if="authError"
+        class="mt-4 font-medium text-red-400 text-center"
+      >
+        {{ authError.message }}
+      </div>
     </div>
   </div>
 </template>

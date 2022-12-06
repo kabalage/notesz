@@ -1,6 +1,6 @@
-import { useFromDb } from '@/composables/useFromDb';
-import { blobs } from '@/model/blobs';
-import { fileIndexes } from '@/model/fileIndexes';
+import useFromDb from '@/composables/useFromDb';
+import blobModel from '@/model/blobModel';
+import fileIndexModel from '@/model/fileIndexModel';
 import { createInjectionState } from '@/utils/createInjectionState';
 import { computed, reactive, ref, type Ref } from 'vue';
 
@@ -12,7 +12,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
 
   const fileIndex = useFromDb({
     get() {
-      return fileIndexes.get(repositoryId.value, 'local');
+      return fileIndexModel.get(repositoryId.value, 'local');
     }
   });
 
@@ -28,8 +28,8 @@ const [provideEditorState, useEditorState] = createInjectionState((
     const rootTree = fileIndex.data.index[''];
     let tree = rootTree;
     try {
-      tree = fileIndexes.getTreeForPath(fileIndex.data, currentFilePath.value);
-    } catch (err: any) {
+      tree = fileIndexModel.getTreeForPath(fileIndex.data, currentFilePath.value);
+    } catch (err) {
       console.error(err);
     }
     return tree;
@@ -41,11 +41,11 @@ const [provideEditorState, useEditorState] = createInjectionState((
     },
     get(blobId) {
       if (!blobId) return undefined;
-      return blobs.get(blobId);
+      return blobModel.get(blobId);
     },
     async put(data) {
       if (!currentFile.value || data === undefined) return;
-      const blobIdChanged = await fileIndexes.updateLocalFile(
+      const blobIdChanged = await fileIndexModel.updateLocalFile(
         repositoryId.value,
         currentFile.value.path,
         data
