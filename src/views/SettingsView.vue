@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { deleteDB } from 'idb';
 import GitHubIcon from '@/assets/icons/github.svg?component';
 import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
 import PlusIcon from '@/assets/icons/plus.svg?component';
@@ -45,6 +46,12 @@ async function disconnectRepository(id: string) {
 function selectRepository(repoId: string) {
   if (!settings.data) return;
   settings.data.selectedRepositoryId = repoId;
+}
+
+async function clearStorage() {
+  localStorage.clear();
+  await deleteDB('notesz');
+  location.href = '/';
 }
 </script>
 
@@ -128,6 +135,13 @@ function selectRepository(repoId: string) {
             {{ authError.message }}
           </div>
         </div>
+        <BasicButton
+          v-if="false"
+          @click="clearStorage"
+          class="mx-auto mt-16"
+        >
+          Delete all data
+        </BasicButton>
         <!-- <DevSandbox /> -->
       </div>
     </div>

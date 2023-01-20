@@ -16,9 +16,9 @@ const router = createRouter({
       props(route) {
         return {
           repo: `${route.params.repoUser}/${route.params.repoName}`,
-          path: Array.isArray(route.params.path) ?
-            route.params.path.join('/'):
-            route.params.path
+          path: Array.isArray(route.params.path)
+            ? route.params.path.join('/')
+            : route.params.path
         };
       }
     },

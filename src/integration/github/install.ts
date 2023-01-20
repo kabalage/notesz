@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import NoteszError from '@/utils/NoteszError';
 import waitForCallback from './waitForCallback';
+import trial from '@/utils/trial';
 
 const CallbackParamsSchema = z.object({
   installation_id: z.preprocess((arg: any) => Number(arg), z.number().int()),
@@ -20,12 +21,12 @@ export default async function install() {
   if (callback.canceled) {
     return { canceled: true };
   }
-  let callbackParams;
-  try {
-    callbackParams = CallbackParamsSchema.parse(callback.params);
-  } catch (error) {
+  const [callbackParams, callbackParseError] = await trial(() => {
+    return CallbackParamsSchema.parse(callback.params);
+  });
+  if (callbackParseError) {
     throw new NoteszError('Callback parameters do not match the expected format', {
-      cause: error
+      cause: callbackParseError
     });
   }
   return {

@@ -14,11 +14,12 @@ export default function useFromDb<T, WatchParams>({
 }) {
   const data = ref<T | undefined>(undefined);
   const isFetching = ref(false);
-  const error = ref<NoteszError | undefined>(undefined);
+  const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let lastPutTime = 0;
   let putThrottlingTimer: ReturnType<typeof setTimeout> | undefined;
   let throttledPut: (() => any) | undefined;
+  let ongoingPut: Promise<any> | undefined;
 
   if (watchParams) {
     watch(watchParams, _get, {
@@ -39,7 +40,7 @@ export default function useFromDb<T, WatchParams>({
       data.value = await get(params) as UnwrapRef<T>;
     } catch(err) {
       if (err instanceof Error) {
-        error.value = err as NoteszError;
+        error.value = err;
       } else {
         error.value = new NoteszError('Failed to get resource', {
           cause: err
@@ -59,10 +60,13 @@ export default function useFromDb<T, WatchParams>({
     lastPutTime = Date.now();
     error.value = undefined;
     try {
-      await put(toRaw(newValue));
+      ongoingPut = put(toRaw(newValue));
+      await ongoingPut;
     } catch(err: any) {
       console.error('useFromDb put failed', err);
       error.value = err as Error;
+    } finally {
+      ongoingPut = undefined;
     }
   }
 
@@ -80,9 +84,12 @@ export default function useFromDb<T, WatchParams>({
         }
 
         if (elapsed >= putThrottling) {
-          _put(newValue);
+          ongoingPut = _put(newValue);
         } else {
-          throttledPut = () => _put(newValue);
+          throttledPut = () => {
+            throttledPut = undefined;
+            return _put(newValue);
+          };
           putThrottlingTimer = setTimeout(throttledPut, putThrottling - elapsed);
         }
       }
@@ -104,6 +111,8 @@ export default function useFromDb<T, WatchParams>({
       const throttledPutCopy = throttledPut;
       throttledPut = undefined;
       await throttledPutCopy();
+    } else if (ongoingPut) {
+      await ongoingPut;
     }
   }
 

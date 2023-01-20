@@ -1,4 +1,4 @@
-import openNoteszDb from './openNoteszDb';
+import { initTransaction, type NoteszDbTransaction } from './noteszDb';
 
 export interface User {
   readonly type: 'user',
@@ -6,22 +6,18 @@ export interface User {
   token: string
 }
 
-async function get() {
-  const db = await openNoteszDb();
-  try {
-    return (await db.get('app', 'user') as User | undefined);
-  } finally {
-    db.close();
-  }
+async function get(transaction?: NoteszDbTransaction) {
+  return initTransaction(transaction, async (tx) => {
+    const appStore = tx.objectStore('app');
+    return (await appStore.get('user')) as User | undefined;
+  });
 }
 
-async function put(user: User) {
-  const db = await openNoteszDb();
-  try {
-    return await db.put('app', user);
-  } finally {
-    db.close();
-  }
+async function put(user: User, transaction?: NoteszDbTransaction) {
+  return initTransaction(transaction, async (tx) => {
+    const appStore = tx.objectStore('app');
+    return await appStore.put(user);
+  });
 }
 
 export default {

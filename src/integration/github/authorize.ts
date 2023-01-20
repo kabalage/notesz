@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import userModel from '@/model/userModel';
 import waitForCallback from './waitForCallback';
-import { request } from '@octokit/request';
+import { request as octokitRequest } from '@octokit/request';
 import NoteszError from '@/utils/NoteszError';
+import trial from '@/utils/trial';
 
 const AuthCallbackParamsSchema = z.object({
   code: z.string(),
@@ -35,22 +36,21 @@ export default async function authorize() {
       cause: callback.params?.error_description
     });
   }
-  let callbackParams;
-  try {
-    callbackParams = AuthCallbackParamsSchema.parse(callback.params);
-  } catch (error) {
+  const [callbackParams, callbackParseError] = trial(() => {
+    return AuthCallbackParamsSchema.parse(callback.params);
+  });
+  if (callbackParseError) {
     throw new NoteszError('Callback parameters do not match the expected format', {
-      cause: error
+      cause: callbackParseError
     });
   }
   if (authState !== callbackParams.state) {
-    throw new NoteszError('State mismatch');
+    throw new Error('State mismatch');
   }
 
   // Fetch token
-  let tokenResponse;
-  try {
-    tokenResponse = await fetch('/api/github/oauth/token', {
+  const [tokenResponse, tokenFetchError] = await trial(() => {
+    return fetch('/api/github/oauth/token', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -59,17 +59,18 @@ export default async function authorize() {
         code: callbackParams.code
       })
     });
-  } catch (error) {
+  });
+  if (tokenFetchError) {
     throw new NoteszError('Token fetch failed', {
-      cause: error
+      cause: tokenFetchError
     });
   }
-  let tokenResponseObject;
-  try {
-    tokenResponseObject = await tokenResponse.json();
-  } catch (error) {
-    throw new NoteszError('Token parsing failed', {
-      cause: error
+  const [tokenResponseObject, tokenJsonError] = await trial(() => {
+    return tokenResponse.json();
+  });
+  if (tokenJsonError) {
+    throw new NoteszError('Token JSON parsing failed', {
+      cause: tokenJsonError
     });
   }
   if (!tokenResponse.ok) {
@@ -77,29 +78,30 @@ export default async function authorize() {
       cause: tokenResponseObject.message
     });
   }
-  let token: string | undefined;
-  try {
-    ({ token } = TokenResponseSchema.parse(tokenResponseObject));
-  } catch (error) {
-    throw new NoteszError('Token response parameters do not match the expected format', {
-      cause: error
+  const [tokenSchemaCheckResult, tokenSchemaError] = trial(() => {
+    return TokenResponseSchema.parse(tokenResponseObject);
+  });
+  if (tokenSchemaError) {
+    throw new NoteszError('Token response schema do not match the expected format', {
+      cause: tokenSchemaError
     });
   }
+  const token = tokenSchemaCheckResult.token;
 
   // Fetch user's primary email
-  let email: string | undefined;
-  try {
-    const response = await request('GET /user/emails', {
+  const [email, emailError] = await trial(async () => {
+    const response = await octokitRequest('GET /user/emails', {
       headers: {
         authorization: `Bearer ${token}`
       }
     });
-    email = response.data.find((email) => {
+    return response.data.find((email) => {
       return email.primary;
     })?.email;
-  } catch (error) {
+  });
+  if (emailError) {
     throw new NoteszError('Getting primary email failed', {
-      cause: error
+      cause: emailError
     });
   }
   if (!email) {

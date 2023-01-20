@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
-import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
+import ButtonBarDesktop from '@/components/ButtonBarDesktop.vue';
+import ButtonBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
 import CaretLeftIcon from '@/assets/icons/caret-left.svg?component';
 import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import CogIcon from '@/assets/icons/cog.svg?component';
 import NotebookIcon from '@/assets/icons/notebook.svg?component';
-import NotebookNewIcon from '@/assets/icons/notebook-new.svg?component';
+// import NotebookNewIcon from '@/assets/icons/notebook-new.svg?component';
 import NoteIcon from '@/assets/icons/note.svg?component';
 import NoteNewIcon from '@/assets/icons/note-new.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
@@ -24,20 +24,28 @@ const explorerState = useExplorerState()!;
     <div class="flex-none flex justify-center my-4 ml-safe-l">
       <img src="@/assets/logo-dark.svg" class="h-8 my-2"/>
     </div>
-    <BottomBarDesktop class="flex-none mb-4">
-      <BottomBarDesktopButton>
-        <NoteNewIcon class="w-6 h-6" />
-      </BottomBarDesktopButton>
-      <BottomBarDesktopButton>
+    <ButtonBarDesktop class="flex-none mb-4">
+      <ButtonBarDesktopButton @click="editorState.addFile(explorerState.path)">
+        <NoteNewIcon class="w-6 h-6"/>
+      </ButtonBarDesktopButton>
+      <!-- <BottomBarDesktopButton>
         <NotebookNewIcon class="w-6 h-6" />
-      </BottomBarDesktopButton>
-      <BottomBarDesktopButton>
-        <SyncIcon class="w-6 h-6" />
-      </BottomBarDesktopButton>
-      <BottomBarDesktopButton to="/settings">
+      </BottomBarDesktopButton> -->
+      <ButtonBarDesktopButton
+        :disabled="editorState.isSyncing"
+        @click="editorState.startSync"
+      >
+        <SyncIcon
+          class="w-6 h-6"
+          :class="{
+            'animate-spin': editorState.isSyncing
+          }"
+        />
+      </ButtonBarDesktopButton>
+      <ButtonBarDesktopButton to="/settings">
         <CogIcon class="w-6 h-6" />
-      </BottomBarDesktopButton>
-    </BottomBarDesktop>
+      </ButtonBarDesktopButton>
+    </ButtonBarDesktop>
     <div class="flex-1 py-1.5 px-2 overflow-y-auto rounded-t-xl">
       <ul>
         <li
@@ -46,7 +54,7 @@ const explorerState = useExplorerState()!;
           class="my-0.5"
         >
           <BaseButton
-            v-if="item.type === 'parentNotebook'"
+            v-if="item.type === 'parentTree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
@@ -60,7 +68,7 @@ const explorerState = useExplorerState()!;
             </div>
           </BaseButton>
           <BaseButton
-            v-if="item.type === 'notebook'"
+            v-if="item.type === 'tree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
@@ -68,16 +76,16 @@ const explorerState = useExplorerState()!;
               mouse:rounded-lg"
             active-class="bg-indigo-500/20"
           >
-            <NotebookIcon class="w-6 h-6 mr-2 text-indigo-400 ml-safe-l"/>
+            <NotebookIcon class="w-6 h-6 mr-2 text-indigo-400 ml-safe-l flex-none"/>
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>
             <CaretRightIcon class="w-6 h-6" />
           </BaseButton>
           <BaseButton
-            v-if="item.type === 'note'"
+            v-if="item.type === 'file'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="explorerState.openNote(item.path)"
+            @click.prevent="editorState.openFile(item.path)"
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
               text-blue-100 font-medium
               mouse:rounded-lg"
@@ -89,9 +97,11 @@ const explorerState = useExplorerState()!;
             active-class="bg-indigo-500/20"
           >
             <NoteIcon
-              class="w-6 h-6 mr-2 text-indigo-400 ml-safe-l"
+              class="w-6 h-6 mr-2 text-indigo-400 ml-safe-l flex-none"
             />
-            {{ item.name }}
+            <div class="flex-1 mr-2 truncate">
+              {{ item.name }}
+            </div>
           </BaseButton>
         </li>
       </ul>

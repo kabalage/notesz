@@ -1,9 +1,9 @@
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import useFromDb from '@/composables/useFromDb';
 import useSettings from '@/composables/useSettings';
 import userModel from '@/model/userModel';
-import NoteszError from '@/utils/NoteszError';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import trial from '@/utils/trial';
 import authorize from './authorize';
 
 export default function useRepositoryConnectAction() {
@@ -15,30 +15,23 @@ export default function useRepositoryConnectAction() {
     }
   });
   const isAuthorizing = ref(false);
-  const authError = ref<NoteszError | undefined>();
+  const authError = ref<Error | undefined>();
 
   async function connect(fromWelcome = false) {
     if (!settings.data) return;
     const connectRoute = fromWelcome ? '/connect' : '/settings/connect';
     if (!user.data && !user.isFetching) {
-      try {
-        isAuthorizing.value = true;
-        authError.value = undefined;
-        await authorize();
+      isAuthorizing.value = true;
+      authError.value = undefined;
+      const [user, error] = await trial(() => authorize());
+      if (user) {
         router.push(connectRoute);
-      } catch (error) {
-        if (error instanceof NoteszError) {
-          if (error.code !== 'canceled') {
-            authError.value = error;
-          }
-        } else {
-          authError.value = new NoteszError('Authorization failed', {
-            cause: error
-          });
-        }
-      } finally {
-        isAuthorizing.value = false;
+      } else if (error.code === 'canceled') {
+        // do nothing when canceled
+      } else {
+        authError.value = error;
       }
+      isAuthorizing.value = false;
     } else {
       router.push(connectRoute);
     }

@@ -16,11 +16,12 @@ import BasicButton from '@/components/BasicButton.vue';
 import authorize from '@/integration/github/authorize';
 import install from '@/integration/github/install';
 import listAuthorizedRepositories from '@/integration/github/listAuthorizedRepositories';
-import NoteszError from '@/utils/NoteszError';
 import BaseButton from '@/components/BaseButton.vue';
 import { useRouter } from 'vue-router';
 import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import trial from '@/utils/trial';
+// import useSyncAction from '@/integration/github/sync/useSyncAction';
 
 const props = defineProps<{
   parentRoute: string
@@ -31,7 +32,7 @@ const isTouchDevice = useIsTouchDevice();
 const filterText = ref('');
 const debouncedFilterText = refDebounced(filterText, 250);
 const isAuthorizing = ref(false);
-const authError = ref<NoteszError | undefined>();
+const authError = ref<Error | undefined>();
 
 const repositoryList = useFromDb({
   get() {
@@ -43,10 +44,7 @@ const connectedRepositories = computed(() => {
   if (!repositoryList.data) {
     return undefined;
   } else {
-    return repositoryList.data.reduce((result, repo) => {
-      result[repo.id] = true;
-      return result;
-    }, {} as Record<string, true>);
+    return new Set(repositoryList.data.map((repo) => repo.id));
   }
 });
 
@@ -61,7 +59,7 @@ const notConnectedAuthorizedRepositories = computed(() => {
     return undefined;
   }
   return authorizedRepositories.data.filter((repo) => {
-    return !connectedRepositories.value![repo.full_name];
+    return !connectedRepositories.value!.has(repo.full_name);
   });
 });
 
@@ -87,30 +85,27 @@ async function _install() {
 }
 
 async function _authorize() {
-  try {
-    isAuthorizing.value = true;
-    authError.value = undefined;
-    await authorize();
+  isAuthorizing.value = true;
+  authError.value = undefined;
+  const [user, error] = await trial(() => authorize());
+  if (user) {
     authorizedRepositories.refetch();
-  } catch (error) {
-    if (error instanceof Error) {
-      authError.value = error as NoteszError;
-    } else {
-      authError.value = new NoteszError('Authorization failed.', {
-        cause: error
-      });
-    }
-  } finally {
-    isAuthorizing.value = false;
+  } else {
+    authError.value = error;
   }
+  isAuthorizing.value = false;
 }
 
+// const { isSyncing, syncStatus, sync } = useSyncAction();
+
 async function connect(repoId: string) {
-  await repositoryModel.add({ id: repoId, type: 'repository' });
+  await repositoryModel.add(repositoryModel.createRepository({ id: repoId }));
+  // await sync(repoId);
   await settingsModel.update((settings) => {
     settings.selectedRepositoryId = repoId;
     return settings;
   });
+
   router.push(props.parentRoute);
 }
 
@@ -180,7 +175,8 @@ async function connect(repoId: string) {
                     <BaseButton
                       class="w-full mouse:hover:enabled:bg-indigo-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
-                      :disabled="!connectedRepositories || connectedRepositories[repo.full_name]"
+                      :disabled="!connectedRepositories
+                        || connectedRepositories.has(repo.full_name)"
                       active-class="bg-indigo-400/20"
                       @click="connect(repo.full_name)"
                     >

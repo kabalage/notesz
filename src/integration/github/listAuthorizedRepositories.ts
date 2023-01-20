@@ -1,7 +1,8 @@
 // import requestWithAuth from './requestWithAuth';
 import userModel from '@/model/userModel';
 import NoteszError from '@/utils/NoteszError';
-import { request } from '@octokit/request';
+import trial from '@/utils/trial';
+import { request as octokitRequest } from '@octokit/request';
 import { RequestError } from '@octokit/request-error';
 import type { Endpoints } from '@octokit/types';
 
@@ -18,10 +19,9 @@ export default async function listAuthorizedRepositories(update?: {
 
   // Get installations
   const authHeader = `Bearer ${user.token}`;
-  let installationsResponse;
-  try {
+  const [installationsResponse, installationsError] = await trial(() => {
     const bypassCache = !update || update?.setupAction === 'install';
-    installationsResponse = await request('GET /user/installations', {
+    return octokitRequest('GET /user/installations', {
       headers: {
         authorization: authHeader
       },
@@ -29,21 +29,18 @@ export default async function listAuthorizedRepositories(update?: {
         cache: bypassCache ? 'reload' : 'default'
       }
     });
-  } catch (error) {
-    if (error instanceof RequestError) {
-      if (error.status === 401) {
-        throw new NoteszError('Unauthorized user', {
-          code: 'unauthorized',
-          cause: error
-        });
-      }
-      throw new NoteszError('Getting installations failed', {
-        cause: error
+  });
+  if (installationsError) {
+    if (installationsError instanceof RequestError && installationsError.status === 401) {
+      throw new NoteszError('Unauthorized user', {
+        code: 'unauthorized',
+        cause: installationsError
       });
     }
-    throw error;
+    throw new NoteszError('Getting installations failed', {
+      cause: installationsError
+    });
   }
-  // console.log(installationsResponse);
   const installations = installationsResponse.data.installations;
   if (installations.length === 0) {
     return [];
@@ -54,11 +51,10 @@ export default async function listAuthorizedRepositories(update?: {
   const repositories: Endpoints[typeof repositoriesRoute]['response']['data']['repositories'] = [];
   for (const i in installations) {
     const installation = installations[i];
-    let repositoriesResponse;
-    try {
+    const [repositoriesResponse, repositoriesError] = await trial(() => {
       const bypassCache = !update || update?.setupAction === 'update'
         && update?.installationId === installation.id;
-      repositoriesResponse = await request(repositoriesRoute, {
+      return octokitRequest(repositoriesRoute, {
         headers: {
           authorization: authHeader
         },
@@ -67,19 +63,17 @@ export default async function listAuthorizedRepositories(update?: {
         },
         installation_id: installation.id
       });
-    } catch (error) {
-      if (error instanceof RequestError) {
-        if (error.status === 401) {
-          throw new NoteszError('Unauthorized user', {
-            code: 'unauthorized',
-            cause: error
-          });
-        }
-        throw new NoteszError('Getting repositories failed', {
-          cause: error
+    });
+    if (repositoriesError) {
+      if (repositoriesError instanceof RequestError && repositoriesError.status === 401) {
+        throw new NoteszError('Unauthorized user', {
+          code: 'unauthorized',
+          cause: repositoriesError
         });
       }
-      throw error;
+      throw new NoteszError('Getting repositories failed', {
+        cause: repositoriesError
+      });
     }
     repositories.push(...repositoriesResponse.data.repositories);
   }

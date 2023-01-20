@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, defineAsyncComponent } from 'vue';
 
-import BottomBarMobile from '@/components/ButtonBarMobile.vue';
-import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
+import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
+import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import IndentRightIcon from '@/assets/icons/indent-right.svg?component';
 import IndentLeftIcon from '@/assets/icons/indent-left.svg?component';
@@ -22,13 +22,15 @@ import SidebarIcon from '@/assets/icons/sidebar.svg?component';
 import TextSelectIcon from '@/assets/icons/text-select.svg?component';
 import TextSelectActiveIcon from '@/assets/icons/text-select-active.svg?component';
 import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
+import TrashIcon from '@/assets/icons/trash.svg?component';
 import TrashIcon32 from '@/assets/icons/trash-32.svg?component';
 import SyncIcon32 from '@/assets/icons/sync-32.svg?component';
+import CheckIcon from '@/assets/icons/check.svg?component';
 
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useEditorState } from '@/stores/editorState';
 import RibbonButton from '@/components/RibbonButton.vue';
-import BaseButton from '@/components/BaseButton.vue';
+import IconButton from '@/components/IconButton.vue';
 
 const CodemirrorEditor = defineAsyncComponent({
   loader: () => import('./CodemirrorEditor.vue'),
@@ -45,7 +47,7 @@ let editorBlurTimeout: ReturnType<typeof setTimeout> | undefined;
 const codemirrorEditor = ref<InstanceType<typeof CodemirrorEditor> | null>(null);
 
 async function onNoteInput(newValue: string) {
-  console.log('input', editorState.currentFile?.path);
+  // console.log('input', editorState.currentFile?.path);
   editorState.currentFileBlob.data = newValue;
 }
 
@@ -78,19 +80,36 @@ function onEditorBlur() {
     </div>
     <template v-if="editorState.currentFile">
       <div class="px-3 lg:px-11 py-6 flex justify-between items-center">
-        <BaseButton
-          class="hidden sm:block text-indigo-400 mouse:hover:text-indigo-300 p-2
-            transition-transform duration-200 ease-in-out transform motion-reduce:transition-none"
-          active-class="scale-50 mouse:scale-75 motion-reduce:transform-none
-            motion-reduce:opacity-50"
+        <IconButton
+          class="hidden sm:block"
           @click="editorState.sidebarIsOpen = !editorState.sidebarIsOpen"
         >
           <SidebarIcon class="w-6 h-6" />
-        </BaseButton>
-        <h1 class="flex-1 text-center text-lg font-semibold text-cyan-300">
-          {{ editorState.currentFile.path.split('/').slice(-1)[0].slice(0, -3) }}
-        </h1>
-        <div class="hidden sm:block w-10" />
+        </IconButton>
+        <div class="flex-1 flex-col justify-center">
+          <div
+            v-if="editorState.currentFileParentTree?.path"
+            class="flex-1 text-center text-sm font-semibold text-cyan-300/60 leading-tight"
+          >
+            {{ editorState.currentFileParentTree.path }}
+          </div>
+          <h1 class="flex-1 text-center text-lg font-semibold text-cyan-300 leading-tight">
+            {{ editorState.currentFileName }}
+          </h1>
+        </div>
+        <IconButton
+          class="hidden sm:block"
+          @click="editorState.deleteCurrentFile()"
+        >
+          <TrashIcon class="w-6 h-6" />
+        </IconButton>
+        <IconButton
+          v-if="editorState.currentFile.conflicting"
+          class="hidden sm:block"
+          @click="editorState.resolveConflict()"
+        >
+          <CheckIcon class="w-6 h-6" />
+        </IconButton>
       </div>
       <CodemirrorEditor
         v-if="editorState.currentFile"
@@ -106,23 +125,36 @@ function onEditorBlur() {
         enter-active-class="duration-300 ease-out"
         enter-from-class="transform opacity-0 translate-y-full"
       >
-        <BottomBarMobile
-          v-if="!editorFocused"
+        <ButtonBarMobile
+          v-if="!editorFocused || !isTouchDevice"
           class="flex-none sm:hidden"
         >
-          <BottomBarMobileButton
-            :to="`/edit/${editorState.repositoryId}/${
-              editorState.currentFileParentTree?.path || ''}`"
+          <ButtonBarMobileButton
+            @click="editorState.closeFile()"
           >
             <ArrowLeftIcon32 class="w-8 h-8" />
-          </BottomBarMobileButton>
-          <BottomBarMobileButton>
+          </ButtonBarMobileButton>
+          <ButtonBarMobileButton
+            :disabled="editorState.isSyncing"
+            @click="editorState.startSync()"
+          >
+            <SyncIcon32
+              class="w-8 h-8"
+              :class="{
+                'animate-spin': editorState.isSyncing
+              }"
+            />
+          </ButtonBarMobileButton>
+          <ButtonBarMobileButton @click="editorState.deleteCurrentFile">
             <TrashIcon32 class="w-8 h-8" />
-          </BottomBarMobileButton>
-          <BottomBarMobileButton>
-            <SyncIcon32 class="w-8 h-8" />
-          </BottomBarMobileButton>
-        </BottomBarMobile>
+          </ButtonBarMobileButton>
+          <ButtonBarMobileButton
+            v-if="editorState.currentFile.conflicting"
+            @click="editorState.resolveConflict()"
+          >
+            <CheckIcon class="w-8 h-8" />
+          </ButtonBarMobileButton>
+        </ButtonBarMobile>
       </Transition>
       <Transition
         enter-active-class="duration-300 ease-out delay-300"

@@ -1,4 +1,5 @@
-import debounce from 'lodash-es/debounce';
+import debounce from '@/utils/debounce';
+import trial from '@/utils/trial';
 
 export default async function waitForCallback(
   type: string,
@@ -57,17 +58,19 @@ export function getPendingCallbacks() {
   if (!pendingCallbacks) {
     return {};
   }
-  let parsedPendingCallbacks;
-  try {
-    parsedPendingCallbacks = JSON.parse(localStorage.pendingCallbacks);
-  } catch (error) {
-    console.error(error);
+  const [parsedPendingCallbacks, parseError] = trial(() => {
+    return JSON.parse(pendingCallbacks) as unknown;
+  });
+  if (parseError) {
+    console.error(parseError);
     return {};
   }
-  if (typeof parsedPendingCallbacks !== 'object') {
+  if (typeof parsedPendingCallbacks !== 'object'
+    || Array.isArray(parsedPendingCallbacks)
+    || parsedPendingCallbacks === null) {
     return {};
   }
-  return parsedPendingCallbacks;
+  return parsedPendingCallbacks as Record<string, boolean>;
 }
 
 function updatePendingCallbacks(

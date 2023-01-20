@@ -41,11 +41,11 @@ async function clearStorage() {
         <img src="@/assets/logo-dark.svg" class="h-12 my-2"/>
       </div>
       <p class="max-w-sm mx-auto font-semibold text-indigo-200 mb-4">
-        A cross platform, open-source note taking app that stores your notes on GitHub.
+        A cross-platform, open-source note taking app that stores your notes on GitHub.
       </p>
       <p class="max-w-sm mx-auto mb-8">
-        It works offline, and all your data is saved only in your browser and your GitHub
-        repository, nowhere else.
+        It works offline, and all your data is saved only in your browser and in your GitHub
+        repositories, nowhere else.
       </p>
       <BasicButton
         class="mx-auto w-[17rem] touch:w-72"

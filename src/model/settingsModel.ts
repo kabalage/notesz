@@ -1,42 +1,39 @@
-import openNoteszDb from './openNoteszDb';
+import { initTransaction, type NoteszDbTransaction } from './noteszDb';
 
 export interface Settings {
   readonly type: 'settings',
   selectedRepositoryId: string | null
 }
 
-async function get() {
-  const db = await openNoteszDb();
-  try {
-    return (await db.get('app', 'settings') as Settings | undefined);
-  } finally {
-    db.close();
-  }
+async function get(transaction?: NoteszDbTransaction) {
+  return initTransaction(transaction, async (tx) => {
+    const appStore = tx.objectStore('app');
+    return (await appStore.get('settings')) as Settings | undefined;
+  });
 }
 
-async function put(settings: Settings) {
-  const db = await openNoteszDb();
-  try {
-    return await db.put('app', settings);
-  } finally {
-    db.close();
-  }
+async function put(settings: Settings, transaction?: NoteszDbTransaction) {
+  return initTransaction(transaction, async (tx) => {
+    const appStore = tx.objectStore('app');
+    return await appStore.put(settings);
+  });
 }
 
-async function update(updater: (settings: Settings) => Settings | undefined) {
-  const db = await openNoteszDb();
-  try {
-    const tx = db.transaction('app', 'readwrite');
-    const settingsStore = tx.objectStore('app');
-    const settings = (await settingsStore.get('settings')) as Settings;
+async function update(
+  updater: (settings: Settings) => Settings | undefined,
+  transaction?: NoteszDbTransaction
+) {
+  return initTransaction(transaction, async (tx) => {
+    const appStore = tx.objectStore('app');
+    const settings = (await appStore.get('settings')) as Settings | undefined;
+    if (!settings) {
+      throw new Error('Settings not found');
+    }
     const newSettings = updater(settings);
     if (newSettings) {
-      await settingsStore.put(newSettings);
+      await appStore.put(newSettings);
     }
-    await tx.done;
-  } finally {
-    db.close();
-  }
+  });
 }
 
 export default {

@@ -25,7 +25,8 @@ module.exports = {
     'vue/no-undef-components': ['error'],
     '@typescript-eslint/no-non-null-assertion': 'off',
       // As long TS does not know about inline callbacks, the '!' stays.
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-empty-function': 'off'
   },
   parserOptions: {
     ecmaVersion: 'latest'

@@ -1,5 +1,4 @@
 import { computed, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import { createInjectionState } from '@/utils/createInjectionState';
 import type { provideEditorState } from '@/stores/editorState';
 import { default as fileIndexModel, type Tree, type File } from '@/model/fileIndexModel';
@@ -7,43 +6,35 @@ import { default as fileIndexModel, type Tree, type File } from '@/model/fileInd
 const [provideExplorerState, useExplorerState] = createInjectionState((
   editorState: ReturnType<typeof provideEditorState>
 ) => {
-  const router = useRouter();
   const path = ref('');
 
   const items = computed(() => {
     if (!editorState.fileIndex.data) return [];
-    const rootTree = editorState.fileIndex.data.index[''];
+
+    const rootTree = fileIndexModel.getRootTreeNode(editorState.fileIndex.data);
     let explorerTree = rootTree;
     try {
-      explorerTree = fileIndexModel.getTreeForPath(editorState.fileIndex.data, path.value);
+      explorerTree = fileIndexModel.getTreeNodeForPath(editorState.fileIndex.data, path.value);
     } catch (err: any) {
       console.error(err);
     }
-    const items = explorerTree.children.map((childPath) => {
-      return editorState.fileIndex.data!.index[childPath];
+    const items = [...explorerTree.children].map((childPath) => {
+      return editorState.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
       return !!childNode && (childNode.type === 'tree'
-        || childNode.type === 'file' && !!childNode.path.match(/\.md$/));
+        || childNode.type === 'file' && !childNode.ignored);
     }).map((childNode) => {
-      if (childNode.type === 'tree') {
-        return {
-          type: 'notebook',
-          path: childNode.path,
-          name: childNode.path.split('/').at(-1)!
-        };
-      } else {
-        const pathWithoutExtension = childNode.path.slice(0, -3);
-        return {
-          type: 'note',
-          path: pathWithoutExtension, // slice .md extension
-          name: pathWithoutExtension.split('/').at(-1)!
-        };
-      }
+      const childName = childNode.path.split('/').at(-1)!.replace(/\.md$/, '');
+      return {
+        type: childNode.type,
+        path: childNode.path,
+        name: childName
+      };
     }).sort((a, b) => {
       if (a.type === b.type) {
         return a.name > b.name ? 1 : -1;
       }
-      if (a.type === 'notebook' && b.type === 'note') {
+      if (a.type === 'tree' && b.type === 'file') {
         return -1;
       } else {
         return 1;
@@ -52,7 +43,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     if (explorerTree.path !== '') {
       return [
         {
-          type: 'parentNotebook',
+          type: 'parentTree',
           path: explorerTree.path.split('/').slice(0, -1).join('/'),
           name: '..'
         },
@@ -63,22 +54,16 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   });
 
   // Set explorer path to the current file's parent tree when the path in the url changes
-  watch(() => editorState.currentFileParentTree, (currentFileParentTree) => {
-    if (!currentFileParentTree) return;
+  watch(() => editorState.currentFileParentTree, (currentFileParentTree, prevParentTree) => {
+    if (!currentFileParentTree || currentFileParentTree.path === prevParentTree?.path) return;
     path.value = currentFileParentTree.path;
   }, {
     immediate: true
   });
 
-  async function openNote(explorerItemPath: string) {
-    await editorState.currentFileBlob.flushThrottledPut();
-    router.push(`/edit/${editorState.repositoryId}/${explorerItemPath}`);
-  }
-
   return reactive({
     path,
-    items,
-    openNote
+    items
   });
 });
 
