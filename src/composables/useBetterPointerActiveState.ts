@@ -9,12 +9,14 @@ import { ref } from 'vue';
 
 interface BetterPointerActiveStateOptions {
   minActiveTime: MaybeRef<number>,
-  stopPropagation: boolean
+  stopPropagation: boolean,
+  disabled: MaybeRef<boolean>
 }
 
 const defaultOptions: BetterPointerActiveStateOptions = {
   minActiveTime: 200,
-  stopPropagation: true
+  stopPropagation: true,
+  disabled: false
 };
 
 /**
@@ -29,7 +31,8 @@ export default function useBetterPointerActiveState(
 ) {
   const {
     minActiveTime,
-    stopPropagation
+    stopPropagation,
+    disabled
   } = {
     ...defaultOptions,
     ...options
@@ -43,6 +46,9 @@ export default function useBetterPointerActiveState(
   tryOnScopeDispose(() => removeEventListeners());
 
   function handlePointerDown(event: PointerEvent) {
+    if (resolveUnref(disabled)) {
+      return;
+    }
     // console.log('pointerdown', event);
     if (stopPropagation) {
       event.stopPropagation();

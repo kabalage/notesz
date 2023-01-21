@@ -12,7 +12,8 @@ const props = withDefaults(defineProps<{
   tag?: string
 }>(), {
   activeClass: '',
-  minActiveTime: 200
+  minActiveTime: 200,
+  disabled: false
 });
 
 const attrs = useAttrs();
@@ -23,7 +24,8 @@ const iosCanceled = useIosPointerMoveCancelHack(element);
 const active = useBetterPointerActiveState(
   element,
   {
-    minActiveTime: toRef(props, 'minActiveTime')
+    minActiveTime: toRef(props, 'minActiveTime'),
+    disabled: toRef(props, 'disabled')
   }
 );
 

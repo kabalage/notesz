@@ -173,7 +173,7 @@ async function connect(repoId: string) {
                     class="touch:border-b touch:border-indigo-400/30 touch:first:border-t"
                   >
                     <BaseButton
-                      class="w-full mouse:hover:enabled:bg-indigo-400/20
+                      class="w-full mouse:enabled:hover:bg-indigo-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
                       :disabled="!connectedRepositories
                         || connectedRepositories.has(repo.full_name)"

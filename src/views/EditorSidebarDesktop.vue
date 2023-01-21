@@ -28,9 +28,9 @@ const explorerState = useExplorerState()!;
       <ButtonBarDesktopButton @click="editorState.addFile(explorerState.path)">
         <NoteNewIcon class="w-6 h-6"/>
       </ButtonBarDesktopButton>
-      <!-- <BottomBarDesktopButton>
-        <NotebookNewIcon class="w-6 h-6" />
-      </BottomBarDesktopButton> -->
+      <ButtonBarDesktopButton>
+        <NoteNewIcon class="w-6 h-6" />
+      </ButtonBarDesktopButton>
       <ButtonBarDesktopButton
         :disabled="editorState.isSyncing"
         @click="editorState.startSync"

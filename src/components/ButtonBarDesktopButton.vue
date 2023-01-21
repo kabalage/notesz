@@ -10,10 +10,16 @@ const props = defineProps<{
 
 <template>
   <BaseButton
-    class="p-1.5 rounded-xl border-2 border-indigo-500/40 bg-indigo-500/20 text-indigo-300
-      hover:bg-indigo-500/30 hover:text-indigo-200 transition-transform duration-200
-      ease-in-out transform motion-reduce:transition-none"
-    active-class="scale-75 motion-reduce:transform-none motion-reduce:opacity-50"
+    class="p-1.5 rounded-xl border-2 border-indigo-500/40
+      bg-indigo-500/20 text-indigo-300
+      hover:bg-indigo-500/30 hover:text-indigo-200
+      transform transition-transform duration-200 ease-in-out
+      motion-reduce:transition-none motion-reduce:transform-none
+      relative before:absolute before:inset-0
+      before:transition-all before:duration-200 before:ease-in-out
+      motion-reduce:before:transition-none motion-reduce:before:transform-none"
+    active-class="scale-75 motion-reduce:opacity-50
+      before:scale-133 motion-reduce:before:opacity-50"
     :to="props.to"
     :disabled="props.disabled"
     :min-active-time="200"

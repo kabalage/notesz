@@ -63,57 +63,66 @@ async function clearStorage() {
         <div v-if="settings.data && repositoryList.data">
           <h2 class="uppercase text-sm font-semibold mb-4">Repositories</h2>
           <ul class="space-y-4 mb-8" v-auto-animate>
-            <BaseButton
+            <li
               v-for="repo in repositoryList.data"
               :key="repo.id"
-              tag="li"
-              class="border-2 rounded-lg sm:flex divide-y-2 sm:divide-y-0 sm:divide-x-2
-                divide-indigo-500/40 transition-transform duration-200 ease-in-out
-                mouse:cursor-pointer mouse:hover:bg-indigo-500/10"
-              :class="{
-                'border-indigo-400 bg-indigo-500/20':
-                  settings.data.selectedRepositoryId === repo.id,
-                'border-indigo-500/40 bg-transparent':
-                  settings.data.selectedRepositoryId !== repo.id
-              }"
-              active-class="scale-[90%] bg-indigo-500/10"
-              :disabled="settings.data.selectedRepositoryId === repo.id"
-              :min-active-time="200"
-              @click="selectRepository(repo.id)"
-              @keyup.stop.enter="selectRepository(repo.id)"
-              tabindex="0"
+              class="flex"
             >
-              <div
-                class="w-full sm:w-auto sm:flex-1 flex items-center text-left truncate px-4 py-3
-                  mouse:enabled:hover:bg-indigo-500/10 enabled:active:bg-indigo-500/10 "
+              <BaseButton
+                class="flex-1 border-2 rounded-lg sm:flex divide-y-2 sm:divide-y-0 sm:divide-x-2
+                  divide-indigo-500/40
+                  mouse:enabled:cursor-pointer mouse:enabled:hover:bg-indigo-500/10
+                  transform transition-transform duration-200 ease-in-out
+                  motion-reduce:transition-none motion-reduce:transform-none
+                  relative before:absolute before:inset-0 before:pointer-events-none
+                  before:transition-all before:duration-200 before:ease-in-out
+                  motion-reduce:before:transition-none motion-reduce:before:transform-none"
+                :class="{
+                  'border-indigo-400 bg-indigo-500/20':
+                    settings.data.selectedRepositoryId === repo.id,
+                  'border-indigo-500/40 bg-transparent':
+                    settings.data.selectedRepositoryId !== repo.id
+                }"
+                active-class="scale-[0.9] bg-indigo-500/10 motion-reduce:opacity-50
+                  before:scale-[1.11111] motion-reduce:before:opacity-50"
+                :disabled="settings.data.selectedRepositoryId === repo.id"
+                :min-active-time="200"
+                @click="selectRepository(repo.id)"
+                @keyup.stop.enter="selectRepository(repo.id)"
+                tabindex="0"
               >
-                <GitHubIcon class="w-6 h-6 flex-none mr-2 fill-indigo-400" />
-                <div class="flex-1 font-semibold text-indigo-200 truncate">
-                  {{ repo.id }}
+                <div
+                  class="w-full sm:w-auto sm:flex-1 flex items-center text-left truncate px-4 py-3
+                    mouse:enabled:hover:bg-indigo-500/10 enabled:active:bg-indigo-500/10 "
+                >
+                  <GitHubIcon class="w-6 h-6 flex-none mr-2 fill-indigo-400" />
+                  <div class="flex-1 font-semibold text-indigo-200 truncate">
+                    {{ repo.id }}
+                  </div>
                 </div>
-              </div>
-              <div class="flex divide-x-2 divide-indigo-500/40">
-                <BaseButton
-                  class="flex-1 font-semibold text-center text-red-400 px-4 py-3
-                  border-indigo-500/40 mouse:hover:bg-red-500/20"
-                  active-class="bg-red-500/20"
-                  @click.stop="disconnectRepository(repo.id)"
-                >
-                  Disconnect
-                </BaseButton>
-                <BaseButton
-                  class="flex-1 font-semibold flex justify-center items-center px-4 py-3
-                  border-indigo-500/40 mouse:hover:bg-indigo-500/20"
-                  active-class="bg-indigo-500/20"
-                  :href="`https://github.com/${repo.id}`"
-                  target="_blank"
-                  @click.stop
-                >
-                  Open
-                  <ExternalLinkIcon20 class="ml-1 w-5 h-5 flex-none" />
-                </BaseButton>
-              </div>
-            </BaseButton>
+                <div class="flex divide-x-2 divide-indigo-500/40">
+                  <BaseButton
+                    class="flex-1 font-semibold text-center text-red-400 px-4 py-3
+                    border-indigo-500/40 mouse:hover:bg-red-500/20"
+                    active-class="bg-red-500/20"
+                    @click.stop="disconnectRepository(repo.id)"
+                  >
+                    Disconnect
+                  </BaseButton>
+                  <BaseButton
+                    class="flex-1 font-semibold flex justify-center items-center px-4 py-3
+                    border-indigo-500/40 mouse:hover:bg-indigo-500/20"
+                    active-class="bg-indigo-500/20"
+                    :href="`https://github.com/${repo.id}`"
+                    target="_blank"
+                    @click.stop
+                  >
+                    Open
+                    <ExternalLinkIcon20 class="ml-1 w-5 h-5 flex-none" />
+                  </BaseButton>
+                </div>
+              </BaseButton>
+            </li>
           </ul>
 
           <BasicButton
