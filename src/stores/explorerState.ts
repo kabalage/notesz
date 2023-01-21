@@ -22,13 +22,22 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
       return editorState.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
       return !!childNode && (childNode.type === 'tree'
-        || childNode.type === 'file' && !childNode.ignored);
+        || childNode.type === 'file' && !childNode.ignored && !childNode.deleted);
     }).map((childNode) => {
       const childName = childNode.path.split('/').at(-1)!.replace(/\.md$/, '');
       return {
         type: childNode.type,
         path: childNode.path,
-        name: childName
+        name: childName,
+        added: childNode.type === 'file'
+          ? childNode.added
+          : childNode.status === 'added',
+        modified: childNode.type === 'file'
+          ? childNode.modified || childNode.renamed
+          : childNode.status === 'modified',
+        unchanged: childNode.type === 'file'
+          ? !childNode.added && !childNode.modified && !childNode.renamed
+          : childNode.status === 'unchanged',
       };
     }).sort((a, b) => {
       if (a.type === b.type) {
@@ -43,7 +52,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     if (explorerTree.path !== '') {
       return [
         {
-          type: 'parentTree',
+          type: 'parentTree' as const,
           path: explorerTree.path.split('/').slice(0, -1).join('/'),
           name: '..'
         },

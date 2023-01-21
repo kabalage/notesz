@@ -430,7 +430,8 @@ function updateParentTrees(
     parentTree.fileStats.modified += change.modified || 0;
     if (parentTree.fileStats.all === parentTree.fileStats.deleted) {
       parentTree.status = 'deleted';
-    } else if (parentTree.fileStats.all === parentTree.fileStats.added) {
+    } else if (parentTree.fileStats.all === parentTree.fileStats.added
+      || parentTree.fileStats.all === parentTree.fileStats.renamed) {
       parentTree.status = 'added';
     } else if (parentTree.fileStats.deleted > 0 || parentTree.fileStats.added > 0
       || parentTree.fileStats.renamed > 0 || parentTree.fileStats.modified > 0
