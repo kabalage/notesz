@@ -14,14 +14,17 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     const rootTree = fileIndexModel.getRootTreeNode(editorState.fileIndex.data);
     let explorerTree = rootTree;
     try {
-      explorerTree = fileIndexModel.getTreeNodeForPath(editorState.fileIndex.data, path.value);
+      explorerTree = fileIndexModel.getFirstExistingParentTree(
+        editorState.fileIndex.data,
+        path.value
+      );
     } catch (err: any) {
       console.error(err);
     }
     const items = [...explorerTree.children].map((childPath) => {
       return editorState.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
-      return !!childNode && (childNode.type === 'tree'
+      return !!childNode && (childNode.type === 'tree' && childNode.status !== 'deleted'
         || childNode.type === 'file' && !childNode.ignored && !childNode.deleted);
     }).map((childNode) => {
       const childName = childNode.path.split('/').at(-1)!.replace(/\.md$/, '');
@@ -63,9 +66,9 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   });
 
   // Set explorer path to the current file's parent tree when the path in the url changes
-  watch(() => editorState.currentFileParentTree, (currentFileParentTree, prevParentTree) => {
-    if (!currentFileParentTree || currentFileParentTree.path === prevParentTree?.path) return;
-    path.value = currentFileParentTree.path;
+  watch(() => editorState.currentTree, (currentTree, prevParentTree) => {
+    if (!currentTree || currentTree.path === prevParentTree?.path) return;
+    path.value = currentTree.path;
   }, {
     immediate: true
   });

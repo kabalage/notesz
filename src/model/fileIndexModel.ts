@@ -196,7 +196,7 @@ async function addFile(
       });
       putFileInIndex(fileIndex, modifiedFile);
       await blobModel.put(newBlobId, data, tx);
-      await blobModel.decrementRefCount(deletedFile.blobId);
+      await blobModel.decrementRefCount(deletedFile.blobId, tx);
       await blobModel.incrementRefCount(modifiedFile.blobId, tx);
       await blobModel.collectGarbage(tx);
       await fileIndexStore.put(fileIndex);
@@ -244,8 +244,8 @@ async function deleteFile(
       });
       putFileInIndex(fileIndex, deletedFile);
       if (file.blobId !== deletedFile.blobId) {
-        await blobModel.decrementRefCount(file.blobId);
-        await blobModel.incrementRefCount(deletedFile.blobId);
+        await blobModel.decrementRefCount(file.blobId, tx);
+        await blobModel.incrementRefCount(deletedFile.blobId, tx);
       }
       await blobModel.collectGarbage(tx);
       await fileIndexStore.put(fileIndex);
@@ -360,6 +360,15 @@ function getTreeNodeForPath(fileIndex: FileIndex, path: string) {
     throw new Error('Missing parent tree');
   }
   return parentNode;
+}
+
+function getFirstExistingParentTree(fileIndex: FileIndex, path: string): Tree {
+  const node = getTreeNodeForPath(fileIndex, path);
+  if (node.status === 'deleted' && node.path !== '') {
+    const parentNodePath = getParentNodePath(node.path);
+    return getFirstExistingParentTree(fileIndex, parentNodePath);
+  }
+  return node;
 }
 
 function getParentNodePath(path: string) {
@@ -541,7 +550,7 @@ export default {
   updateFile,
   resolveConflict,
   // utilities
-  getTreeNodeForPath,
+  getFirstExistingParentTree,
   getParentNodePath,
   putFileInIndex,
   deleteFileFromIndex,

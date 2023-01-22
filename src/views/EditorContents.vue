@@ -88,10 +88,10 @@ function onEditorBlur() {
         </IconButton>
         <div class="flex-1 flex-col justify-center">
           <div
-            v-if="editorState.currentFileParentTree?.path"
+            v-if="editorState.currentTree?.path"
             class="flex-1 text-center text-sm font-semibold text-cyan-300/60 leading-tight"
           >
-            {{ editorState.currentFileParentTree.path }}
+            {{ editorState.currentTree.path }}
           </div>
           <h1 class="flex-1 text-center text-lg font-semibold text-cyan-300 leading-tight">
             {{ editorState.currentFileName }}

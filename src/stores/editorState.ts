@@ -47,12 +47,15 @@ const [provideEditorState, useEditorState] = createInjectionState((
     return currentFile.value.path.split('/').pop()!.split('.').slice(0, -1).join('.');
   });
 
-  const currentFileParentTree = computed(() => {
+  const currentTree = computed(() => {
     if (!fileIndex.data) return undefined;
     const rootTree = fileIndexModel.getRootTreeNode(fileIndex.data);
     let tree = rootTree;
     try {
-      tree = fileIndexModel.getTreeNodeForPath(fileIndex.data, currentFilePath.value);
+      tree = fileIndexModel.getFirstExistingParentTree(
+        fileIndex.data,
+        currentFilePath.value
+      );
     } catch (err) {
       console.error(err);
     }
@@ -105,10 +108,10 @@ const [provideEditorState, useEditorState] = createInjectionState((
   }
 
   async function closeFile() {
-    if (!currentFileParentTree.value) return;
+    if (!currentTree.value) return;
     await currentFileBlob.flushThrottledPut();
     sidebarIsOpen.value = true;
-    router.push(`/edit/${repositoryId.value}/${currentFileParentTree.value.path}`);
+    router.push(`/edit/${repositoryId.value}/${currentTree.value.path}`);
   }
 
   async function addFile(path: string) {
@@ -168,7 +171,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
     fileIndex,
     currentFile,
     currentFileName,
-    currentFileParentTree,
+    currentTree,
     currentFileBlob,
     isSyncing,
     syncStatus,
