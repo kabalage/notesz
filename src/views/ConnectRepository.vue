@@ -21,10 +21,9 @@ import { useRouter } from 'vue-router';
 import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import trial from '@/utils/trial';
-// import useSyncAction from '@/integration/github/sync/useSyncAction';
 
 const props = defineProps<{
-  parentRoute: string
+  redirect: string
 }>();
 
 const router = useRouter();
@@ -96,17 +95,13 @@ async function _authorize() {
   isAuthorizing.value = false;
 }
 
-// const { isSyncing, syncStatus, sync } = useSyncAction();
-
 async function connect(repoId: string) {
   await repositoryModel.add(repositoryModel.createRepository({ id: repoId }));
-  // await sync(repoId);
   await settingsModel.update((settings) => {
     settings.selectedRepositoryId = repoId;
     return settings;
   });
-
-  router.push(props.parentRoute);
+  router.push(`/sync/${repoId}?redirect=${props.redirect}`);
 }
 
 </script>
@@ -243,7 +238,7 @@ async function connect(repoId: string) {
       v-if="isTouchDevice"
       class="flex-none"
     >
-      <BottomBarMobileButton :to="props.parentRoute">
+      <BottomBarMobileButton :to="props.redirect">
         <ArrowLeftIcon32 class="w-8 h-8" />
       </BottomBarMobileButton>
     </BottomBarMobile>
@@ -251,7 +246,7 @@ async function connect(repoId: string) {
       v-else-if="!isTouchDevice"
       class="flex-none w-full max-w-5xl mx-auto mb-8 mt-4"
     >
-      <BottomBarDesktopButton :to="props.parentRoute">
+      <BottomBarDesktopButton :to="props.redirect">
         <ArrowLeftIcon32 class="w-8 h-8" />
       </BottomBarDesktopButton>
     </BottomBarDesktop>

@@ -8,6 +8,7 @@ import userModel from '@/model/userModel';
 import blobModel from '@/model/blobModel';
 import { filterMap, keyByMap } from '@/utils/mapUtils';
 import trial from '@/utils/trial';
+import type { Progress } from '@/utils/createProgress';
 
 /**
  * Fetches the commit from GitHub and creates the **remote** fileIndex from it.
@@ -19,7 +20,8 @@ export default async function fetchCommit(
     sha: string,
     treeSha: string,
     commitTime: string
-  }
+  },
+  progress: Progress
 ) {
   // Prepare common octokit request params
   const user = await userModel.get();
@@ -67,8 +69,10 @@ export default async function fetchCommit(
       }));
     }
   });
+  progress.set(0.1);
 
   // Download new blobs
+  const filesToDownload: File[] = [];
   for (const node of newFileIndex.index.values()) {
     if (node.type !== 'file' || node.ignored) {
       continue;
@@ -76,6 +80,13 @@ export default async function fetchCommit(
     const file = node;
     const blobExists = await blobModel.exists(file.blobId);
     if (!blobExists) {
+      filesToDownload.push(file);
+    }
+  }
+  await progress.subTask(0.1, 0.8, async (progress) => {
+    for (let i = 0; i < filesToDownload.length; i++) {
+      progress.setMessage(`Downloading file ${i + 1}/${filesToDownload.length}`);
+      const file = filesToDownload[i];
       const [blob, blobFetchError] = await trial(() => {
         return octokitRequest('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
           ...commonParams,
@@ -83,13 +94,14 @@ export default async function fetchCommit(
         });
       });
       if (blobFetchError) {
-        throw new NoteszError(`Could not get the file "${node.path}" in commit "${commit.sha.slice(0,7)}" from GitHub`, {
+        throw new NoteszError(`Could not get the file "${file.path}" in commit "${commit.sha.slice(0,7)}" from GitHub`, {
           cause: blobFetchError
         });
       }
       await blobModel.put(file.blobId, decodeBase64Utf8(blob.data.content));
+      progress.set((i + 1) / filesToDownload.length);
     }
-  }
+  });
 
   // Diff with base
   const baseFileIndex = await fileIndexModel.getFileIndex(repositoryId, 'base');
@@ -97,12 +109,14 @@ export default async function fetchCommit(
     throw new Error(`Missing fileIndex: "${repositoryId}/base"`);
   }
   const diffFileIndex = await diffFileIndexes(newFileIndex, baseFileIndex);
+  progress.set(0.9);
 
   // Save new remote fileIndex
   await initTransaction(async (tx) => {
     await fileIndexModel.deleteFileIndex(repositoryId, 'remote', tx);
     await fileIndexModel.addFileIndex(diffFileIndex, tx);
     await blobModel.collectGarbage(tx);
+    progress.set(1);
   });
 }
 

@@ -85,21 +85,9 @@ const [provideEditorState, useEditorState] = createInjectionState((
     putThrottling: 5000
   });
 
-  const { isSyncing, syncStatus, sync } = useSyncAction();
-
   async function startSync() {
-    if (!fileIndex.data || isSyncing.value) return;
-    try {
-      await currentFileBlob.flushThrottledPut();
-      await sync(repositoryId.value);
-      await repository.refetch();
-      await fileIndex.refetch();
-    } catch (err) {
-      // TODO show error on UI
-      alert(err instanceof Error ? err.message : err);
-      console.error(err);
-      await repository.refetch();
-    }
+    await currentFileBlob.flushThrottledPut();
+    router.push(`/sync/${repositoryId.value}?redirect=${router.currentRoute.value.fullPath}`);
   }
 
   async function openFile(filePath: string) {
@@ -173,8 +161,6 @@ const [provideEditorState, useEditorState] = createInjectionState((
     currentFileName,
     currentTree,
     currentFileBlob,
-    isSyncing,
-    syncStatus,
     startSync,
     openFile,
     closeFile,

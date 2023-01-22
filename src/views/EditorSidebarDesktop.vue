@@ -33,15 +33,9 @@ const explorerState = useExplorerState()!;
       <!-- <ButtonBarDesktopButton>
         <NotebookNewIcon class="w-6 h-6" />
       </ButtonBarDesktopButton> -->
-      <ButtonBarDesktopButton
-        :disabled="editorState.isSyncing"
-        @click="editorState.startSync"
-      >
+      <ButtonBarDesktopButton @click="editorState.startSync">
         <SyncIcon
           class="w-6 h-6"
-          :class="{
-            'animate-spin': editorState.isSyncing
-          }"
         />
       </ButtonBarDesktopButton>
       <ButtonBarDesktopButton to="/settings">

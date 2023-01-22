@@ -50,7 +50,7 @@ async function clearStorage() {
       <BasicButton
         class="mx-auto w-[17rem] touch:w-72"
         :disabled="isAuthorizing"
-        @click="connect(true)"
+        @click="connect({ redirect: '/' })"
       >
         <template v-if="isAuthorizing">
           <SpinnerIcon class="mx-auto w-6 h-6 text-indigo-300" />

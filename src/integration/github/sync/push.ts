@@ -6,6 +6,7 @@ import userModel from '@/model/userModel';
 import NoteszError from '@/utils/NoteszError';
 import type { RequestError } from '@octokit/types';
 import trial from '@/utils/trial';
+import type { Progress } from '@/utils/createProgress';
 
 /**
  * Creates a GitHub commit based on the changes in the **local** fileIndex.
@@ -13,7 +14,7 @@ import trial from '@/utils/trial';
  * The changes are finalized and the base and remote fileIndexes are updated to represent the
  * new commit.
  */
-export default async function push(repositoryId: string) {
+export default async function push(repositoryId: string, progress: Progress) {
   const localIndex = await fileIndexModel.getFileIndex(repositoryId, 'local');
   if (!localIndex) {
     throw new Error(`Missing fileIndex: "${repositoryId}/local"`);
@@ -28,6 +29,7 @@ export default async function push(repositoryId: string) {
   if (!hasLocalChanges) {
     return;
   }
+  progress.setMessage('Pushing local changes to GitHub');
 
   // Prepare common octokit request params
   const user = await userModel.get();

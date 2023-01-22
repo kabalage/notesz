@@ -119,16 +119,8 @@ function locationReload() {
       <!-- <ButtonBarMobileButton>
         <NotebookNewIcon32 class="w-8 h-8" />
       </ButtonBarMobileButton> -->
-      <ButtonBarMobileButton
-        :disabled="editorState.isSyncing"
-        @click="editorState.startSync"
-      >
-        <SyncIcon32
-          class="w-8 h-8"
-          :class="{
-            'animate-spin': editorState.isSyncing
-          }"
-        />
+      <ButtonBarMobileButton @click="editorState.startSync">
+        <SyncIcon32 class="w-8 h-8" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton to="/settings">
         <CogIcon32 class="w-8 h-8" />

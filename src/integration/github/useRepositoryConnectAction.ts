@@ -17,9 +17,9 @@ export default function useRepositoryConnectAction() {
   const isAuthorizing = ref(false);
   const authError = ref<Error | undefined>();
 
-  async function connect(fromWelcome = false) {
+  async function connect(options = { redirect: '/' }) {
     if (!settings.data) return;
-    const connectRoute = fromWelcome ? '/connect' : '/settings/connect';
+    const connectRoute = `/connect?redirect=${options.redirect}`;
     if (!user.data && !user.isFetching) {
       isAuthorizing.value = true;
       authError.value = undefined;

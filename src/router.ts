@@ -23,6 +23,17 @@ const router = createRouter({
       }
     },
     {
+      name: 'sync',
+      path: '/sync/:repoUser/:repoName',
+      component: () => import('@/views/SyncRepository.vue'),
+      props(route) {
+        return {
+          repo: `${route.params.repoUser}/${route.params.repoName}`,
+          redirect: route.query.redirect || '/'
+        };
+      }
+    },
+    {
       path: '/settings',
       component: () => import('@/views/SettingsView.vue'),
       props: true
@@ -30,15 +41,10 @@ const router = createRouter({
     {
       path: '/connect',
       component: () => import('@/views/ConnectRepository.vue'),
-      props: {
-        parentRoute: '/'
-      }
-    },
-    {
-      path: '/settings/connect',
-      component: () => import('@/views/ConnectRepository.vue'),
-      props: {
-        parentRoute: '/settings'
+      props(route) {
+        return {
+          redirect: route.query.redirect || '/'
+        };
       }
     },
     {
