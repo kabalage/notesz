@@ -52,7 +52,8 @@ export default function useSyncAction() {
             progress.set(0.8);
             await rebase(repositoryId);
             progress.set(0.9);
-            await continueRebase(repositoryId); // throws an error if there are conflicts
+            // Throws an error with code `'rebaseConflicts'` if there are conflicts.
+            await continueRebase(repositoryId);
             progress.set(1);
           });
         }

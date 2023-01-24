@@ -38,10 +38,10 @@ import { filterMap, keyByMap } from '@/utils/mapUtils';
 |------|------|--------|--------|-------|-------|----------|----------|-----------|-----------|
 | a    | 1    | a*     | 2      | a     | 1     | a        | 2        | a         | 2         |
 | a    | 1    | a*     | 2      | a-    | 1     | a        | 2        | aC        | 2         | Conflict: The file was deleted locally but it also changed remotely.
-| a    | 1    | a*     | 2      | a*    | 3     | a        | 2        | a*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file's contents conflict.
+| a    | 1    | a*     | 2      | a*    | 3     | a        | 2        | a*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file contents conflict.
 | a    | 1    | a*     | 2      | a~b   | 1     | a        | 2        | a~E(b)C   | 2         | Conflict if: The file was renamed because it's path became occupied.
 | a    | 1    | a*     | 2      | a~b-  | 1     | a        | 2        | a~E(b)C   | 2         | Conflict: The file was deleted locally but it also changed remotely. Conflict if: The file was renamed because it's path became occupied.
-| a    | 1    | a*     | 2      | a~b*  | 3     | a        | 2        | a~E(b)*C  | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file's contents conflict. Also conflict if: The file was renamed because it's path became occupied.
+| a    | 1    | a*     | 2      | a~b*  | 3     | a        | 2        | a~E(b)*C  | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file contents conflict. Also conflict if: The file was renamed because it's path became occupied.
 |------|------|--------|--------|-------|-------|----------|----------|-----------|-----------|
 | a    | 1    | a~b    | 1      | a     | 1     | b        | 1        | b         | 1         |
 | a    | 1    | a~b    | 1      | a-    | 1     | b        | 1        | b-        | 1         |
@@ -55,13 +55,13 @@ import { filterMap, keyByMap } from '@/utils/mapUtils';
 |------|------|--------|--------|-------|-------|----------|----------|-----------|-----------|
 | a    | 1    | a~b*   | 2      | a     | 1     | b        | 2        | b         | 2         |
 | a    | 1    | a~b*   | 2      | a-    | 1     | b        | 2        | bC        | 2         | Conflict: The file was deleted locally but it also changed remotely.
-| a    | 1    | a~b*   | 2      | a*    | 3     | b        | 2        | b*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file's contents conflict.
+| a    | 1    | a~b*   | 2      | a*    | 3     | b        | 2        | b*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file contents conflict.
 | a    | 1    | a~b*   | 2      | a~b   | 1     | b        | 2        | b         | 2         |
 | a    | 1    | a~b*   | 2      | a~b-  | 1     | b        | 2        | bC        | 2         | Conflict: The file was deleted locally but it also changed remotely.
-| a    | 1    | a~b*   | 2      | a~b*  | 3     | b        | 2        | b*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file's contents conflict.
+| a    | 1    | a~b*   | 2      | a~b*  | 3     | b        | 2        | b*C       | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file contents conflict.
 | a    | 1    | a~b*   | 2      | a~c   | 1     | b        | 2        | b~E(c)C   | 2         | Conflict if: The file was renamed because it's path became occupied.
 | a    | 1    | a~b*   | 2      | a~c-  | 1     | b        | 2        | b~E(c)C   | 2         | Conflict: The file was deleted locally but it also changed remotely. Conflict if: The file was renamed because it's path became occupied.
-| a    | 1    | a~b*   | 2      | a~c*  | 3     | b        | 2        | b~E(c)*C  | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file's contents conflict. Also conflict if: The file was renamed because it's path became occupied.
+| a    | 1    | a~b*   | 2      | a~c*  | 3     | b        | 2        | b~E(c)*C  | M(1, 2, 3)| Modified if the contents changed. Conflict if: The file contents conflict. Also conflict if: The file was renamed because it's path became occupied.
 |------|------|--------|--------|-------|-------|----------|----------|-----------|-----------|
 | a    | 1    | a      | 1      | a     | 1     | a        | 1        | a         | 1         |
 | a    | 1    | a      | 1      | a-    | 1     | a        | 1        | a-        | 1         |
@@ -164,7 +164,7 @@ export default async function rebase(repositoryId: string) {
           conflicting: true,
           conflictReason: 'The file was deleted remotely but it also changed locally.'
             + (pathResult.conflicting
-              ? ' The file was renamed because it\'s path became occupied.'
+              ? ' The file was also renamed because it\'s path became occupied.'
               : '')
           // added: true
         });
@@ -208,7 +208,7 @@ export default async function rebase(repositoryId: string) {
           blobIdInBase: remoteFile.blobId,
           conflicting: mergeResult.conflicting,
           conflictReason: mergeResult.conflicting
-            ? 'The file\'s contents conflict.'
+            ? 'Automatic merging failed.'
             : undefined
           // modified: mergeResult.modified
         });
@@ -240,7 +240,7 @@ export default async function rebase(repositoryId: string) {
           conflicting: true,
           conflictReason: 'The file was deleted locally but it also changed remotely.'
             + (pathResult.conflicting
-              ? ' The file was renamed because it\'s path became occupied.'
+              ? ' The file was also renamed because it\'s path became occupied.'
               : '')
           // renamed: true
         });
@@ -264,7 +264,7 @@ export default async function rebase(repositoryId: string) {
             pathResult.conflicting
               && 'The file was renamed because it\'s path became occupied.',
             mergeResult.conflicting
-              && 'The file\'s contents conflict.'
+              && 'Automatic merging failed.'
           ].filter((str) => !!str).join(' ') || undefined
           // modified: mergeResult.blobId !== remoteFile.blobId
         });
@@ -406,7 +406,7 @@ export default async function rebase(repositoryId: string) {
           blobIdInBase: remoteFile.blobId,
           conflicting: mergeResult.conflicting,
           conflictReason: mergeResult.conflicting
-            ? 'The file\'s contents conflict.'
+            ? 'Automatic merging failed.'
             : undefined
           // modified: mergeResult.blobId !== remoteFile.blobId
         });
@@ -458,7 +458,7 @@ export default async function rebase(repositoryId: string) {
             conflicting:true,
             conflictReason: 'The file was deleted locally but it also changed remotely.'
               + (pathResult.conflicting
-                ? ' The file was renamed because it\'s path became occupied.'
+                ? ' The file was also renamed because it\'s path became occupied.'
                 : '')
             // renamed: true
           });
@@ -491,7 +491,7 @@ export default async function rebase(repositoryId: string) {
             pathResult.conflicting
               && 'The file was renamed because it\'s path became occupied.',
             mergeResult.conflicting
-              && 'The file\'s contents conflict.'
+              && 'Automatic merging failed.'
           ].filter((str) => !!str).join(' ') || undefined
           // modified: mergeResult.blobId !== remoteFile.blobId
           // renamed: pathResult.path !== remoteFile.path

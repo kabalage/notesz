@@ -7,6 +7,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   editorState: ReturnType<typeof provideEditorState>
 ) => {
   const path = ref('');
+  const browseAllDuringManualRebase = ref(false);
 
   const items = computed(() => {
     if (!editorState.fileIndex.data) return [];
@@ -65,6 +66,24 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     return items;
   });
 
+  const conflictingFiles = computed(() => {
+    if (!editorState.fileIndex.data) return [];
+    const hasConflicts = fileIndexModel.getRootTreeNode(editorState.fileIndex.data)
+      .fileStats.conflicting > 0;
+    if (!hasConflicts) return [];
+    return [...editorState.fileIndex.data.index.values()].filter((node): node is File => {
+      return node.type === 'file' && node.conflicting;
+    }).sort((a, b) => {
+      return a.path > b.path ? 1 : -1;
+    }).map((file) => {
+      return {
+        path: file.path,
+        name: file.path.split('/').at(-1)!.replace(/\.md$/, ''),
+        parentPath: file.path.split('/').slice(0, -1).join('/')
+      };
+    });
+  });
+
   // Set explorer path to the current file's parent tree when the path in the url changes
   watch(() => editorState.currentTree, (currentTree, prevParentTree) => {
     if (!currentTree || currentTree.path === prevParentTree?.path) return;
@@ -75,7 +94,9 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
 
   return reactive({
     path,
-    items
+    browseAllDuringManualRebase,
+    items,
+    conflictingFiles
   });
 });
 

@@ -4,6 +4,7 @@ import blobModel from '@/model/blobModel';
 import fileIndexModel from '@/model/fileIndexModel';
 import repositoryModel from '@/model/repositoryModel';
 import { createInjectionState } from '@/utils/createInjectionState';
+import { useOnline } from '@vueuse/core';
 import { computed, reactive, ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -85,6 +86,14 @@ const [provideEditorState, useEditorState] = createInjectionState((
     putThrottling: 5000
   });
 
+  const isOnline = useOnline();
+
+  const syncDisabled = computed(() => {
+    if (!isOnline.value || !fileIndex.data) return true;
+    const rootTree = fileIndexModel.getRootTreeNode(fileIndex.data);
+    return rootTree.fileStats.conflicting > 0;
+  });
+
   async function startSync() {
     await currentFileBlob.flushThrottledPut();
     router.push(`/sync/${repositoryId.value}?redirect=${router.currentRoute.value.fullPath}`);
@@ -142,7 +151,6 @@ const [provideEditorState, useEditorState] = createInjectionState((
     if (!currentFile.value || !currentFileIndexId.value) return;
     const currentFilePath = currentFile.value.path;
     await currentFileBlob.flushThrottledPut();
-    await closeFile();
     await fileIndexModel.resolveConflict(
       repositoryId.value,
       currentFileIndexId.value,
@@ -161,6 +169,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
     currentFileName,
     currentTree,
     currentFileBlob,
+    syncDisabled,
     startSync,
     openFile,
     closeFile,

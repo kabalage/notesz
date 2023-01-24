@@ -69,7 +69,7 @@ function onEditorBlur() {
 
 <template>
   <div
-    class="overflow-hidden flex flex-col"
+    class="overflow-hidden flex flex-col pr-safe-r"
   >
     <div
       v-if="!editorState.currentFile"
@@ -80,42 +80,54 @@ function onEditorBlur() {
     </div>
     <template v-if="editorState.currentFile">
       <div class="px-3 lg:px-11 py-6 flex justify-between items-center">
-        <IconButton
-          class="hidden sm:block"
-          @click="editorState.sidebarIsOpen = !editorState.sidebarIsOpen"
-        >
-          <SidebarIcon class="w-6 h-6" />
-        </IconButton>
-        <div class="flex-1 flex-col justify-center">
+        <div class="flex-1 flex items-center">
+          <IconButton
+            class="hidden sm:block"
+            @click="editorState.sidebarIsOpen = !editorState.sidebarIsOpen"
+          >
+            <SidebarIcon class="w-6 h-6" />
+          </IconButton>
+        </div>
+        <div class="flex-2 flex-col justify-center truncate">
           <div
             v-if="editorState.currentTree?.path"
-            class="flex-1 text-center text-sm font-semibold text-cyan-300/60 leading-tight"
+            class="flex-1 text-center text-sm font-semibold text-cyan-300/60 leading-tight truncate"
           >
             {{ editorState.currentTree.path }}
           </div>
-          <h1 class="flex-1 text-center text-lg font-semibold text-cyan-300 leading-tight">
+          <h2 class="flex-1 text-center text-lg font-semibold text-cyan-300 leading-tight truncate">
             {{ editorState.currentFileName }}
-          </h1>
+          </h2>
         </div>
-        <IconButton
-          class="hidden sm:block"
-          @click="editorState.deleteCurrentFile()"
-        >
-          <TrashIcon class="w-6 h-6" />
-        </IconButton>
-        <IconButton
-          v-if="editorState.currentFile.conflicting"
-          class="hidden sm:block"
-          @click="editorState.resolveConflict()"
-        >
-          <CheckIcon class="w-6 h-6" />
-        </IconButton>
+        <div class="flex-1 flex items-center justify-end">
+          <IconButton
+            class="hidden sm:block"
+            @click="editorState.deleteCurrentFile()"
+          >
+            <TrashIcon class="w-6 h-6" />
+          </IconButton>
+          <IconButton
+            v-if="editorState.currentFile.conflicting"
+            class="hidden sm:block"
+            @click="editorState.resolveConflict()"
+          >
+            <CheckIcon class="w-6 h-6" />
+          </IconButton>
+        </div>
+      </div>
+      <div
+        v-if="editorState.currentFile.conflictReason"
+        class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
+      >
+        <p class="px-4 py-2 rounded-lg bg-red-500/30 text-red-300 text-center">
+          {{ editorState.currentFile.conflictReason }}
+        </p>
       </div>
       <CodemirrorEditor
         v-if="editorState.currentFile"
         ref="codemirrorEditor"
         :key="editorState.currentFile.path"
-        class="flex-1 overflow-hidden bg-violet-950 mr-safe-r lg:ml-8"
+        class="flex-1 overflow-hidden bg-violet-950 lg:ml-8"
         :note="editorState.currentFileBlob.data || ''"
         @input="onNoteInput"
         @focus="onEditorFocus"
@@ -134,7 +146,10 @@ function onEditorBlur() {
           >
             <ArrowLeftIcon32 class="w-8 h-8" />
           </ButtonBarMobileButton>
-          <ButtonBarMobileButton @click="editorState.startSync()">
+          <ButtonBarMobileButton
+            :disabled="editorState.syncDisabled"
+            @click="editorState.startSync()"
+          >
             <SyncIcon32 class="w-8 h-8" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton @click="editorState.deleteCurrentFile">
