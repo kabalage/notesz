@@ -9,7 +9,7 @@ import { ref } from 'vue';
 
 interface BetterPointerActiveStateOptions {
   minActiveTime: MaybeRef<number>,
-  stopPropagation: boolean,
+  stopPropagation: MaybeRef<boolean>,
   disabled: MaybeRef<boolean>
 }
 
@@ -50,7 +50,7 @@ export default function useBetterPointerActiveState(
       return;
     }
     // console.log('pointerdown', event);
-    if (stopPropagation) {
+    if (resolveUnref(stopPropagation)) {
       event.stopPropagation();
     }
     if (activeEndTimeout) {

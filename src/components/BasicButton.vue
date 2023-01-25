@@ -22,14 +22,13 @@ const props = defineProps<{
     :class="{
       'mouse:hover:bg-indigo-500/40': !props.disabled,
       'bg-indigo-500/30': !props.ghost,
-      'border border-indigo-500/40': props.ghost,
+      'border-2 border-indigo-500/40': props.ghost,
       'mouse:hover:border-transparent': props.ghost && !props.disabled
     }"
     active-class="bg-indigo-500/40 scale-75 motion-reduce:opacity-50
       before:scale-133 motion-reduce:before:opacity-50"
     :to="props.to"
     :disabled="props.disabled"
-    :min-active-time="200"
   >
     <slot />
   </BaseButton>

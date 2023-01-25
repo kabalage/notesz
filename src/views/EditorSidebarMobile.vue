@@ -136,15 +136,17 @@ function locationReload() {
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
               text-indigo-400 font-semibold mouse:hover:bg-indigo-500/20
               mouse:rounded-lg"
-            :class="{
-              'text-indigo-400': item.unchanged,
-              'text-green-400': item.added,
-              'text-cyan-400': item.modified
-            }"
             active-class="bg-indigo-500/20"
           >
             <NotebookIcon class="w-6 h-6 mr-2 text-indigo-400 flex-none"/>
-            <div class="flex-1 mr-2 truncate">
+            <div
+              class="flex-1 mr-2 truncate"
+              :class="{
+                'text-indigo-400': item.unchanged,
+                'text-green-400': item.added,
+                'text-cyan-300': item.modified
+              }"
+            >
               {{ item.name }}
             </div>
             <CaretRightIcon class="w-6 h-6" />

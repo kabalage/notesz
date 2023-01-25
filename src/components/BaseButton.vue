@@ -9,11 +9,13 @@ const props = withDefaults(defineProps<{
   disabled?: boolean,
   activeClass?: string,
   minActiveTime?: number,
-  tag?: string
+  tag?: string,
+  stopPointerEventPropagation?: boolean
 }>(), {
   activeClass: '',
   minActiveTime: 200,
-  disabled: false
+  disabled: false,
+  stopPointerEventPropagation: true
 });
 
 const attrs = useAttrs();
@@ -25,7 +27,8 @@ const active = useBetterPointerActiveState(
   element,
   {
     minActiveTime: toRef(props, 'minActiveTime'),
-    disabled: toRef(props, 'disabled')
+    disabled: toRef(props, 'disabled'),
+    stopPropagation: toRef(props, 'stopPointerEventPropagation')
   }
 );
 

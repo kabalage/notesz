@@ -1,5 +1,4 @@
 import useFromDb from '@/composables/useFromDb';
-import useSyncAction from '@/integration/github/sync/useSyncAction';
 import blobModel from '@/model/blobModel';
 import fileIndexModel from '@/model/fileIndexModel';
 import repositoryModel from '@/model/repositoryModel';

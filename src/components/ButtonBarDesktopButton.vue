@@ -24,7 +24,6 @@ const props = defineProps<{
       before:scale-133 motion-reduce:before:opacity-50"
     :to="props.to"
     :disabled="props.disabled"
-    :min-active-time="200"
   >
     <slot />
   </BaseButton>

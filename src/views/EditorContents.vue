@@ -26,6 +26,7 @@ import TrashIcon from '@/assets/icons/trash.svg?component';
 import TrashIcon32 from '@/assets/icons/trash-32.svg?component';
 import SyncIcon32 from '@/assets/icons/sync-32.svg?component';
 import CheckIcon from '@/assets/icons/check.svg?component';
+import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?component';
 
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useEditorState } from '@/stores/editorState';
@@ -119,8 +120,14 @@ function onEditorBlur() {
         v-if="editorState.currentFile.conflictReason"
         class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
       >
-        <p class="px-4 py-2 rounded-lg bg-red-500/30 text-red-300 text-center">
-          {{ editorState.currentFile.conflictReason }}
+        <p
+          class="px-4 py-2 text-center font-medium rounded-lg bg-orange-500/20 text-orange-300
+            border-2 border-orange-500"
+        >
+          <ExclamationTriangleIcon class="w-6 h-6 inline-block mr-1" />
+          <span>
+            {{ editorState.currentFile.conflictReason }}
+          </span>
         </p>
       </div>
       <CodemirrorEditor

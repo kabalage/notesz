@@ -71,12 +71,12 @@ async function clearStorage() {
               <BaseButton
                 class="flex-1 border-2 rounded-lg sm:flex divide-y-2 sm:divide-y-0 sm:divide-x-2
                   divide-indigo-500/40
-                  mouse:enabled:cursor-pointer mouse:enabled:hover:bg-indigo-500/10
                   transform transition-transform duration-200 ease-in-out
                   motion-reduce:transition-none motion-reduce:transform-none
                   relative before:absolute before:inset-0 before:pointer-events-none
                   before:transition-all before:duration-200 before:ease-in-out
                   motion-reduce:before:transition-none motion-reduce:before:transform-none"
+                tag="div"
                 :class="{
                   'border-indigo-400 bg-indigo-500/20':
                     settings.data.selectedRepositoryId === repo.id,
@@ -86,20 +86,21 @@ async function clearStorage() {
                 active-class="scale-[0.9] bg-indigo-500/10 motion-reduce:opacity-50
                   before:scale-[1.11111] motion-reduce:before:opacity-50"
                 :disabled="settings.data.selectedRepositoryId === repo.id"
-                :min-active-time="200"
-                @click="selectRepository(repo.id)"
-                @keyup.stop.enter="selectRepository(repo.id)"
-                tabindex="0"
               >
-                <div
+                <BaseButton
                   class="w-full sm:w-auto sm:flex-1 flex items-center text-left truncate px-4 py-3
-                    mouse:enabled:hover:bg-indigo-500/10 enabled:active:bg-indigo-500/10 "
+                    mouse:enabled:hover:bg-indigo-500/10 enabled:active:bg-indigo-500/10
+                    mouse:cursor-pointer"
+                  :disabled="settings.data.selectedRepositoryId === repo.id"
+                  :stop-pointer-event-propagation="false"
+                  @click="selectRepository(repo.id)"
+                  @keyup.enter="selectRepository(repo.id)"
                 >
                   <GitHubIcon class="w-6 h-6 flex-none mr-2 fill-indigo-400" />
                   <div class="flex-1 font-semibold text-indigo-200 truncate">
                     {{ repo.id }}
                   </div>
-                </div>
+                </BaseButton>
                 <div class="flex divide-x-2 divide-indigo-500/40">
                   <BaseButton
                     class="flex-1 font-semibold text-center text-red-400 px-4 py-3

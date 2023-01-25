@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import BasicButton from '@/components/BasicButton.vue';
+import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?component';
 import { useRouter } from 'vue-router';
 
 import useSyncAction from '@/integration/github/sync/useSyncAction';
@@ -79,16 +80,20 @@ function navigateBack() {
           class="mt-4 w-2/3"
         >
           <p
-            class="px-4 py-2 rounded-lg"
+            class="px-4 py-3 rounded-lg border-2 font-medium"
             :class="{
-              'bg-red-500/30 text-red-300': error.code !== 'rebaseConflicts',
-              'bg-orange-500/30 text-orange-300': error.code === 'rebaseConflicts'
+              'bg-red-500/20 text-red-300 border-red-500':
+                error.code !== 'rebaseConflicts',
+              'bg-orange-500/20 text-orange-300 border-orange-500':
+                error.code === 'rebaseConflicts'
             }"
           >
-            <span v-if="error.code === 'rebaseConflicts'">
-              Some local changes conflict with remote changes.
-              Resolve them to be able to continue the synchronization.
-            </span>
+            <ExclamationTriangleIcon class="w-6 h-6 inline-block mr-1" />
+            <span
+              v-if="error.code === 'rebaseConflicts'"
+              v-text="`Some local changes conflict with remote changes.
+                Resolve them to be able to continue the synchronization.`"
+            />
             <span v-else>
               {{ error.message }}
             </span>
