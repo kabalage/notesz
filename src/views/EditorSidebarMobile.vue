@@ -111,6 +111,19 @@ function locationReload() {
         }"
       >
         <li
+          v-if="explorerState.items.length === 0"
+          class="mt-8 text-center"
+        >
+          The repository is empty.
+          <BasicButton
+            v-if="!explorerState.browseAllDuringManualRebase"
+            class="mt-4 mx-auto"
+            @click="editorState.addFile('')"
+          >
+            Create a file
+          </BasicButton>
+        </li>
+        <li
           v-for="item in explorerState.items"
           :key="item.path"
           class="mouse:mx-1 mouse:my-0.5"

@@ -1,12 +1,14 @@
 import { ref } from 'vue';
 import repositoryModel from '@/model/repositoryModel';
 import getNewCommits from './getNewCommits';
+import initializeRepository from './initializeRepository';
 import fetchCommit from './fetchCommit';
 import rebase from './rebase';
 import continueRebase from './continueRebase';
 import push from './push';
 import createProgress from '@/utils/createProgress';
 import clamp from '@/utils/clamp';
+import trial from '@/utils/trial';
 
 export default function useSyncAction() {
   const isSyncing = ref(false);
@@ -26,22 +28,25 @@ export default function useSyncAction() {
 
   async function sync(repositoryId: string, progress = rootProgress) {
     try {
-      progress.set(0.1);
+      progress.set(0);
       isSyncing.value = true;
       const repository = await repositoryModel.get(repositoryId);
       if (!repository) {
         throw new Error(`Missing repository '${repositoryId}'`);
       }
       if (repository.manualRebaseInProgress) {
-        progress.set(0.2);
+        progress.set(0.1);
         progress.setMessage('Rebasing');
         await continueRebase(repositoryId);
       }
-      progress.set(0.3);
+      progress.set(0.2);
+      progress.setMessage('Initializing repository...');
+      await initializeRepository(repositoryId, progress.subProgress(0.2, 0.25));
+      progress.set(0.25);
       progress.setMessage('Fetching new commits...');
       const commitsToFetch = await getNewCommits(repositoryId);
-      progress.set(0.4);
-      await progress.subTask(0.4, 0.9, async (progress) => {
+      progress.set(0.3);
+      await progress.subTask(0.3, 0.9, async (progress) => {
         for (let i = 0; i < commitsToFetch.length; i++) {
           const len = commitsToFetch.length;
           await progress.subTask(i / len, (i + 1) / len, async (progress) => {
@@ -59,16 +64,13 @@ export default function useSyncAction() {
         }
       });
       progress.set(0.9);
-      try {
-        await push(repositoryId, progress.subProgress(0.9, 1));
-        progress.set(1);
-      } catch (err) {
-        if (err instanceof Error && err.code === 'pushRejected') {
-          await sync(repositoryId, progress.subProgress(0.9, 1));
-        } else {
-          throw err;
-        }
+      const [, pushError] = await trial(() => push(repositoryId, progress.subProgress(0.9, 1)));
+      if (pushError?.code === 'pushRejected') {
+        await sync(repositoryId, progress.subProgress(0.9, 1));
+      } else if (pushError) {
+        throw pushError;
       }
+      progress.set(1);
       progress.setMessage('Completed');
       await new Promise((resolve) => setTimeout(resolve, 600));
     } finally {

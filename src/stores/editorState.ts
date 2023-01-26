@@ -90,7 +90,9 @@ const [provideEditorState, useEditorState] = createInjectionState((
   const syncDisabled = computed(() => {
     if (!isOnline.value || !fileIndex.data) return true;
     const rootTree = fileIndexModel.getRootTreeNode(fileIndex.data);
-    return rootTree.fileStats.conflicting > 0;
+    return rootTree.fileStats.conflicting > 0
+      || rootTree.fileStats.all === rootTree.fileStats.deleted;
+    // Don't allow deleting all files, because GitHub throws an error
   });
 
   async function startSync() {
@@ -116,7 +118,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
       `${path}/untitled`
       : 'untitled';
     // TODO show prompt on UI
-    let newFilePath = prompt(`Add file ${repositoryId.value}`, placeholderPath);
+    let newFilePath = prompt('Add file (folders along the path will be created):', placeholderPath);
     if (!newFilePath) return;
     if (!newFilePath.endsWith('.md')) {
       newFilePath += '.md';
@@ -134,7 +136,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
   async function deleteCurrentFile() {
     if (!currentFile.value || !currentFileIndexId.value) return;
     // TODO show confirm on UI
-    const confirmed = confirm(`Delete file ${currentFile.value.path}?`);
+    const confirmed = confirm(`Are you sure you want to delete "${currentFile.value.path}"?`);
     if (!confirmed) return;
     const currentFilePath = currentFile.value.path;
     await closeFile();

@@ -19,9 +19,24 @@ export default async function push(repositoryId: string, progress: Progress) {
   if (!localIndex) {
     throw new Error(`Missing fileIndex: "${repositoryId}/local"`);
   }
+  const localRootTree = fileIndexModel.getRootTreeNode(localIndex);
+  if (localRootTree.fileStats.all === localRootTree.fileStats.deleted) {
+    // Cannot push an empty tree, because GitHub throws an error returning the empty tree...
+    if (localIndex.index.has('.notesz-init')) {
+      // Don't throw an error though during the initial sync, because initalizeRepository may have
+      // initialized the repo with a dummy file and marked it to be deleted in the first commit.
+      return;
+    } else {
+      throw new Error('Cannot push an empty tree');
+    }
+  }
+
   const baseIndex = await fileIndexModel.getFileIndex(repositoryId, 'base');
   if (!baseIndex) {
     throw new Error(`Missing fileIndex: "${repositoryId}/base"`);
+  }
+  if (!baseIndex.commitSha || !baseIndex.rootTreeSha) {
+    throw new Error('Cannot push to an empty repository. Run initializeRepository first');
   }
 
   // If there are no changes, there's nothing to do
@@ -72,8 +87,7 @@ export default async function push(repositoryId: string, progress: Progress) {
       ...commonParams,
       message: commitMessage,
       tree: treeResponse.data.sha,
-      // commitSha may be undefined if the repo doesn't have any commits yet
-      parents: baseIndex.commitSha ? [baseIndex.commitSha] : undefined
+      parents: [baseIndex.commitSha!]
       // author and commiter are the aurthorized user by default
     });
   });

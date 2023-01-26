@@ -83,7 +83,7 @@ const explorerState = useExplorerState()!;
         </ul>
         <BasicButton
           v-if="!explorerState.browseAllDuringManualRebase"
-          class="mt-8 mx-auto !px-4 !py-2"
+          class="mt-8 mx-auto"
           ghost
           @click="explorerState.browseAllDuringManualRebase = true"
         >
@@ -108,6 +108,19 @@ const explorerState = useExplorerState()!;
         v-if="explorerState.conflictingFiles.length === 0
           || explorerState.browseAllDuringManualRebase"
       >
+        <li
+          v-if="explorerState.items.length === 0"
+          class="mt-8 text-center"
+        >
+          The repository is empty.
+          <BasicButton
+            v-if="!explorerState.browseAllDuringManualRebase"
+            class="mt-4 mx-auto"
+            @click="editorState.addFile('')"
+          >
+            Create a file
+          </BasicButton>
+        </li>
         <li
           v-for="item in explorerState.items"
           :key="item.path"

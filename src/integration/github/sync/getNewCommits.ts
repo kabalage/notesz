@@ -87,7 +87,7 @@ export default async function getNewCommits(repositoryId: string) {
       });
     });
     if (commitsError) {
-      throw new NoteszError('Failed to fetch list of commits from GitHub', {
+      throw new NoteszError('Failed to fetch the list of commits from GitHub', {
         cause: commitsError
       });
     }

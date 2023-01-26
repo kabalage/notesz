@@ -32,17 +32,3 @@ export default function trial<T>(
     })];
   }
 }
-// export default async function trial<T>(
-//   fun: () => T | Promise<T>
-// ): Promise<[T, undefined] | [undefined, Error]> {
-//   try {
-//     return [await fun(), undefined];
-//   } catch (error) {
-//     if (error instanceof Error) {
-//       return [undefined, error];
-//     }
-//     return [undefined, new NoteszError(`Non-error thrown: ${error}`, {
-//       cause: error
-//     })];
-//   }
-// }

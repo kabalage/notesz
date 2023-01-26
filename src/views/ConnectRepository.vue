@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { refDebounced } from '@vueuse/core';
+import { useRouter } from 'vue-router';
 import GitHubIcon from '@/assets/icons/github.svg?component';
 import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
 import XmarkIcon from '@/assets/icons/x-mark.svg?component';
@@ -17,10 +18,12 @@ import authorize from '@/integration/github/authorize';
 import install from '@/integration/github/install';
 import listAuthorizedRepositories from '@/integration/github/listAuthorizedRepositories';
 import BaseButton from '@/components/BaseButton.vue';
-import { useRouter } from 'vue-router';
 import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
+import PlusIcon from '@/assets/icons/plus.svg?component';
+import LockClosedIcon from '@/assets/icons/lock-closed.svg?component';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import trial from '@/utils/trial';
+import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
 
 const props = defineProps<{
   redirect: string
@@ -104,6 +107,15 @@ async function connect(repoId: string) {
   router.push(`/sync/${repoId}?redirect=${props.redirect}`);
 }
 
+async function handleCreateRepository() {
+  const childWindow = window.open('https://github.com/new', '_blank', 'popup');
+  if (childWindow === null) {
+    throw new Error('Failed to open child window');
+  }
+  await waitForChildWindowClose(childWindow);
+  authorizedRepositories.refetch();
+}
+
 </script>
 
 <template>
@@ -122,22 +134,35 @@ async function connect(repoId: string) {
             <template v-if="notConnectedAuthorizedRepositories && filteredAuthorizedRepositories">
               <div
                 v-if="notConnectedAuthorizedRepositories.length === 0"
-                class="text-center"
+                class="text-center max-w-sm mx-auto"
               >
-                <span class="text-indigo-200 font-semibold">
-                  {{
-                    repositoryList.data?.length ?? 0 > 0
-                      ? 'No other repositories are accessible.'
-                      : 'No repositories are accessible yet.'
-                  }}
-                </span>
+                {{
+                  repositoryList.data?.length ?? 0 > 0
+                    ? 'No other repositories are accessible.'
+                    : 'No repositories are accessible yet.'
+                }}
                 <br/>
-                Setup which repositories <span class="font-semibold">notesz.app</span> may use.
+                Setup which repositories
+                <span class="font-semibold text-cyan-300">
+                  notesz.app
+                </span>
+                may use.
                 <BasicButton
-                  class="mt-8 mx-auto"
+                  class="mt-4 mx-auto"
                   @click="_install"
                 >
+                  <LockClosedIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
                   Set permissions
+                </BasicButton>
+                <br/>
+                <br/>
+                If you don't already have a repository for your notes, you should create one first.
+                <BasicButton
+                  class="mt-4 mx-auto"
+                  @click="handleCreateRepository"
+                >
+                  <PlusIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
+                  Create new repository
                 </BasicButton>
               </div>
               <template v-else>
@@ -162,6 +187,19 @@ async function connect(repoId: string) {
                   </BaseButton>
                 </div>
                 <ul class="mt-2 touch:-mx-4 touch:sm:mx-0 sm:max-w-screen-sm">
+                  <li class="touch:border-b touch:border-indigo-400/30 touch:first:border-t">
+                    <BaseButton
+                      class="w-full mouse:enabled:hover:bg-indigo-400/20
+                        flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
+                      active-class="bg-indigo-400/20"
+                      @click="handleCreateRepository"
+                    >
+                      <PlusIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
+                      <div class="flex-1 text-left font-semibold text-indigo-200">
+                        Create new repository
+                      </div>
+                    </BaseButton>
+                  </li>
                   <li
                     v-for="repo in filteredAuthorizedRepositories"
                     :key="repo.id"
@@ -170,8 +208,6 @@ async function connect(repoId: string) {
                     <BaseButton
                       class="w-full mouse:enabled:hover:bg-indigo-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
-                      :disabled="!connectedRepositories
-                        || connectedRepositories.has(repo.full_name)"
                       active-class="bg-indigo-400/20"
                       @click="connect(repo.full_name)"
                     >

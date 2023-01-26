@@ -6,7 +6,7 @@ export default async function waitForCallback(
   childWindow: Window
 ): Promise<{ canceled: boolean, params?: any }> {
   return new Promise((resolve) => {
-    console.log('waitForCallback', type);
+    // console.log('waitForCallback', type);
     updatePendingCallbacks((pendingCallbacks) => {
       pendingCallbacks[type] = true;
       return pendingCallbacks;
@@ -16,10 +16,10 @@ export default async function waitForCallback(
     window.addEventListener('focus', debouncedFocusHandler);
 
     function storageHandler(event: StorageEvent) {
-      console.log('storage', event, localStorage.tabMessage);
+      // console.log('storage', event, localStorage.tabMessage);
       if (event.key === 'tabMessage' && event.newValue) {
         const message = JSON.parse(localStorage.tabMessage);
-        console.log('tabMessage', message);
+        // console.log('tabMessage', message);
         if (message?.type === 'callback' && message?.callback === type) {
           cleanUp();
           resolve({
@@ -30,9 +30,8 @@ export default async function waitForCallback(
       }
     }
 
-    function focusHandler(event: FocusEvent) {
-      console.log('focusHandler', event);
-      console.log('childWindow.closed', childWindow.closed);
+    function focusHandler() {
+      // console.log('childWindow.closed', childWindow.closed);
       if (childWindow.closed) {
         cleanUp();
         resolve({

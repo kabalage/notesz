@@ -40,7 +40,11 @@ export default async function fetchCommit(
   };
 
   // Fetch tree and transform it to fileIndex
-  const [tree, treeFetchError] = await trial(() => {
+  const [tree, treeFetchError] = await trial(async () => {
+    // Special case for empty tree, GitHub returns 404
+    if (commit.treeSha === '4b825dc642cb6eb9a060e54bf8d69288fbee4904') {
+      return { data: { sha: commit.treeSha, tree: [], url: '' }};
+    }
     return octokitRequest('GET /repos/{owner}/{repo}/git/trees/{tree_sha}', {
       ...commonParams,
       tree_sha: commit.treeSha,
