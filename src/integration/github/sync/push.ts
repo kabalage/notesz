@@ -244,7 +244,8 @@ function composeCommitMessage(fileIndex: FileIndex): string {
     const file = node;
     if (file.added) {
       addedFiles.push(fileName);
-    } else if (file.deleted) {
+    } else if (file.deleted && file.path !== '.notesz-init') {
+      // Don't report the deletion of the dummy init file
       deletedFiles.push(fileName);
     } else if (file.renamed) {
       const oldFileName = file.pathInBase!.split('/').pop();
