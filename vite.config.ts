@@ -25,11 +25,11 @@ export default defineConfig({
       manifest: {
         'id': '/',
         'start_url': '/?utm_source=pwa-install',
-        'name': 'notesz',
-        'short_name': 'notesz',
+        'name': 'Notesz',
+        'short_name': 'Notesz',
         'display': 'standalone',
-        'background_color': '#190032',
-        'theme_color': '#190032',
+        'background_color': '#000000',
+        'theme_color': '#000000',
         'description': 'Test',
         'icons': [
           {

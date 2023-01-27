@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import ButtonBarDesktop from '@/components/ButtonBarDesktop.vue';
-import ButtonBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
 import CaretLeftIcon from '@/assets/icons/caret-left.svg?component';
 import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import CogIcon from '@/assets/icons/cog.svg?component';
-import NotebookIcon from '@/assets/icons/notebook.svg?component';
-// import NotebookNewIcon from '@/assets/icons/notebook-new.svg?component';
-import NoteIcon from '@/assets/icons/note.svg?component';
-import NoteNewIcon from '@/assets/icons/note-new.svg?component';
+import FolderIcon from '@/assets/icons/folder.svg?component';
+import FileIcon from '@/assets/icons/file.svg?component';
+import FileNewIcon from '@/assets/icons/file-new.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
 import PlusIcon20 from '@/assets/icons/plus-20.svg?component';
 import AsteriskIcon20 from '@/assets/icons/asterisk-20.svg?component';
 import XmarkIcon from '@/assets/icons/x-mark.svg?component';
 
-import { useEditorState } from '@/stores/editorState';
-import { useExplorerState } from '@/stores/explorerState';
+import ButtonBarDesktop from '@/components/ButtonBarDesktop.vue';
+import ButtonBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import IconButton from '@/components/IconButton.vue';
+import NoteszLogo from '@/components/NoteszLogo.vue';
+import { useEditorState } from '@/stores/editorState';
+import { useExplorerState } from '@/stores/explorerState';
 
 const editorState = useEditorState()!;
 const explorerState = useExplorerState()!;
@@ -27,15 +27,17 @@ const explorerState = useExplorerState()!;
 <template>
   <div class="pt-1 flex flex-col">
     <div class="flex-none flex justify-center my-4 ml-safe-l">
-      <img src="@/assets/logo-dark.svg" class="h-8 my-2"/>
+      <NoteszLogo
+        class="h-8 my-2"
+        text-class="text-white"
+        icon-primary-class="text-cyan-300"
+        icon-secondary-class="text-indigo-400/50"
+      />
     </div>
     <ButtonBarDesktop class="flex-none mb-4">
       <ButtonBarDesktopButton @click="editorState.addFile(explorerState.path)">
-        <NoteNewIcon class="w-6 h-6"/>
+        <FileNewIcon class="w-6 h-6"/>
       </ButtonBarDesktopButton>
-      <!-- <ButtonBarDesktopButton>
-        <NotebookNewIcon class="w-6 h-6" />
-      </ButtonBarDesktopButton> -->
       <ButtonBarDesktopButton
         :disabled="editorState.syncDisabled"
         @click="editorState.startSync"
@@ -46,7 +48,6 @@ const explorerState = useExplorerState()!;
         <CogIcon class="w-6 h-6" />
       </ButtonBarDesktopButton>
     </ButtonBarDesktop>
-
     <div class="flex-1 py-1.5 px-2 overflow-y-auto">
       <template v-if="explorerState.conflictingFiles.length > 0">
         <h2 class="text-cyan-300 font-semibold mt-2 pl-2">
@@ -69,7 +70,7 @@ const explorerState = useExplorerState()!;
               }"
               active-class="bg-indigo-500/20"
             >
-              <NoteIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/50" />
+              <FileIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/60" />
               <div class="flex-1">
                 <div class="truncate leading-5">
                   {{ file.name }}
@@ -131,12 +132,11 @@ const explorerState = useExplorerState()!;
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              text-indigo-400 font-semibold mouse:hover:bg-indigo-500/20
-              mouse:rounded-lg"
+              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
             active-class="bg-indigo-500/20"
           >
             <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-indigo-400 ml-safe-l" />
-            <div class="flex-1 mr-2 truncate">
+            <div class="flex-1 mr-2 truncate text-indigo-300">
               {{ item.name }}
             </div>
           </BaseButton>
@@ -145,23 +145,21 @@ const explorerState = useExplorerState()!;
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
             class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              text-indigo-400 font-semibold mouse:hover:bg-indigo-500/20
-              mouse:rounded-lg"
-
+              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
             active-class="bg-indigo-500/20"
           >
-            <NotebookIcon class="w-6 h-6 mr-2 ml-safe-l flex-none"/>
+            <FolderIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-400"/>
             <div
               class="flex-1 mr-2 truncate"
               :class="{
-                'text-indigo-400': item.unchanged,
+                'text-indigo-300': item.unchanged,
                 'text-green-400': item.added,
                 'text-cyan-300': item.modified
               }"
             >
               {{ item.name }}
             </div>
-            <CaretRightIcon class="w-6 h-6" />
+            <CaretRightIcon class="w-6 h-6 text-indigo-400" />
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
@@ -177,7 +175,7 @@ const explorerState = useExplorerState()!;
             }"
             active-class="bg-indigo-500/20"
           >
-            <NoteIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/50" />
+            <FileIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/50" />
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>

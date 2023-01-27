@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { deleteDB } from 'idb';
+
 import GitHubIcon from '@/assets/icons/github.svg?component';
-import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
+import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import PlusIcon from '@/assets/icons/plus.svg?component';
 import ExternalLinkIcon20 from '@/assets/icons/external-link-20.svg?component';
+import SpinnerIcon from '@/assets/icons/spinner.svg?component';
+
 import BottomBarMobile from '@/components/ButtonBarMobile.vue';
 import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
@@ -14,7 +17,6 @@ import repositoryModel from '@/model/repositoryModel';
 import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
-import SpinnerIcon from '@/assets/icons/spinner.svg?component';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 // import DevSandbox from './DevSandbox.vue';
@@ -59,7 +61,9 @@ async function clearStorage() {
   <div class="h-full overflow-hidden flex flex-col">
     <div class="flex-1 overflow-y-auto">
       <div class="p-4 max-w-xl mx-auto">
-        <h1 class="text-xl font-semibold text-cyan-300 my-8 text-center">Settings</h1>
+        <h1 class="text-xl font-semibold text-cyan-300 mt-4 mb-8 text-center">
+          Settings
+        </h1>
         <div v-if="settings.data && repositoryList.data">
           <h2 class="uppercase text-sm font-semibold mb-4">Repositories</h2>
           <ul class="space-y-4 mb-8" v-auto-animate>
@@ -160,7 +164,7 @@ async function clearStorage() {
       class="flex-none"
     >
       <BottomBarMobileButton :to="backNavigationPath">
-        <ArrowLeftIcon32 class="w-8 h-8" />
+        <ArrowLeftIcon class="w-8 h-8" />
       </BottomBarMobileButton>
     </BottomBarMobile>
     <BottomBarDesktop
@@ -168,8 +172,7 @@ async function clearStorage() {
       class="flex-none w-full max-w-5xl mx-auto mb-8 mt-4"
     >
       <BottomBarDesktopButton :to="backNavigationPath">
-        <!-- <ArrowLeftIcon class="w-6 h-6" /> -->
-        <ArrowLeftIcon32 class="w-8 h-8" />
+        <ArrowLeftIcon class="w-8 h-8" />
       </BottomBarDesktopButton>
     </BottomBarDesktop>
   </div>

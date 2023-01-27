@@ -6,6 +6,7 @@ import GitHubIcon from '@/assets/icons/github.svg?component';
 import SpinnerIcon from '@/assets/icons/spinner.svg?component';
 import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
+import NoteszLogo from '@/components/NoteszLogo.vue';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 
 const router = useRouter();
@@ -38,7 +39,12 @@ async function clearStorage() {
     <div class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b">
       <h1 class="font-semibold mb-2 text-center">Welcome to</h1>
       <div class="flex justify-center mb-8" @click="clearStorage">
-        <img src="@/assets/logo-dark.svg" class="h-12 my-2"/>
+        <NoteszLogo
+          class="h-12 my-2"
+          text-class="text-white"
+          icon-primary-class="text-cyan-300"
+          icon-secondary-class="text-indigo-400/50"
+        />
       </div>
       <p class="max-w-sm mx-auto font-semibold text-indigo-200 mb-4">
         A cross-platform, open-source note taking app that stores your notes on GitHub.
@@ -60,7 +66,7 @@ async function clearStorage() {
           <div class="flex-1 text-center">
             Connect GitHub repository
           </div>
-            </template>
+        </template>
       </BasicButton>
       <div
         v-if="authError"

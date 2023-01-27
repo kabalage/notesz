@@ -46,23 +46,24 @@ const EditorSidebarDesktop = defineAsyncComponent({
     />
     <EditorSidebarMobile
       v-if="isTouchDevice && editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-indigo-500/20"
+      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-indigo-400/20 ml-safe-l"
       :class="{
         '<sm:hidden': editorState.currentFile
       }"
     />
     <EditorSidebarDesktop
       v-else-if="editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-indigo-500/20
+      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-indigo-400/30
         bg-indigo-500/10"
       :class="{
         '<sm:hidden': editorState.currentFile
       }"
     />
     <EditorContents
-      class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl"
+      class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl mr-safe-r"
       :class="{
-        '<sm:hidden': !editorState.currentFile
+        '<sm:hidden': !editorState.currentFile,
+        'ml-safe-l': !editorState.sidebarIsOpen
       }"
     />
     <div class="touch:hidden flex-1" />

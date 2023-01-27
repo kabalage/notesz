@@ -2,14 +2,20 @@
 import { ref, computed } from 'vue';
 import { refDebounced } from '@vueuse/core';
 import { useRouter } from 'vue-router';
+
 import GitHubIcon from '@/assets/icons/github.svg?component';
-import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
+import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import XmarkIcon from '@/assets/icons/x-mark.svg?component';
 import SearchIcon from '@/assets/icons/search.svg?component';
+import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
+import PlusIcon from '@/assets/icons/plus.svg?component';
+import LockClosedIcon from '@/assets/icons/lock-closed.svg?component';
+
 import BottomBarMobile from '@/components/ButtonBarMobile.vue';
 import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
 import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
+
 import useFromDb from '@/composables/useFromDb';
 import repositoryModel from '@/model/repositoryModel';
 import settingsModel from '@/model/settingsModel';
@@ -18,9 +24,6 @@ import authorize from '@/integration/github/authorize';
 import install from '@/integration/github/install';
 import listAuthorizedRepositories from '@/integration/github/listAuthorizedRepositories';
 import BaseButton from '@/components/BaseButton.vue';
-import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
-import PlusIcon from '@/assets/icons/plus.svg?component';
-import LockClosedIcon from '@/assets/icons/lock-closed.svg?component';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import trial from '@/utils/trial';
 import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
@@ -122,7 +125,7 @@ async function handleCreateRepository() {
   <div class="h-full overflow-hidden flex flex-col">
     <div class="flex-1 overflow-y-auto">
       <div class="p-4 max-w-xl mx-auto">
-        <h1 class="text-xl font-semibold text-cyan-300 my-8 text-center">
+        <h1 class="text-xl font-semibold text-cyan-300 mt-4 mb-8 text-center">
           Select a repository
         </h1>
         <div>
@@ -144,7 +147,7 @@ async function handleCreateRepository() {
                 <br/>
                 Setup which repositories
                 <span class="font-semibold text-cyan-300">
-                  notesz.app
+                  Notesz
                 </span>
                 may use.
                 <BasicButton
@@ -236,7 +239,7 @@ async function handleCreateRepository() {
                     @click.prevent="_install()"
                   >
                     Update which repositories
-                    <span class="font-semibold">notesz.app</span>
+                    <span class="font-semibold">Notesz</span>
                     may use.
                   </BaseButton>
                 </div>
@@ -275,7 +278,7 @@ async function handleCreateRepository() {
       class="flex-none"
     >
       <BottomBarMobileButton :to="props.redirect">
-        <ArrowLeftIcon32 class="w-8 h-8" />
+        <ArrowLeftIcon class="w-8 h-8" />
       </BottomBarMobileButton>
     </BottomBarMobile>
     <BottomBarDesktop
@@ -283,7 +286,7 @@ async function handleCreateRepository() {
       class="flex-none w-full max-w-5xl mx-auto mb-8 mt-4"
     >
       <BottomBarDesktopButton :to="props.redirect">
-        <ArrowLeftIcon32 class="w-8 h-8" />
+        <ArrowLeftIcon class="w-8 h-8" />
       </BottomBarDesktopButton>
     </BottomBarDesktop>
   </div>

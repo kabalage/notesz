@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { ref, defineAsyncComponent } from 'vue';
 
-import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
-import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
-import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import IndentRightIcon from '@/assets/icons/indent-right.svg?component';
 import IndentLeftIcon from '@/assets/icons/indent-left.svg?component';
 import MoveLinesUpIcon from '@/assets/icons/move-lines-up.svg?component';
@@ -21,13 +18,15 @@ import RedoIcon from '@/assets/icons/redo.svg?component';
 import SidebarIcon from '@/assets/icons/sidebar.svg?component';
 import TextSelectIcon from '@/assets/icons/text-select.svg?component';
 import TextSelectActiveIcon from '@/assets/icons/text-select-active.svg?component';
-import ArrowLeftIcon32 from '@/assets/icons/arrow-left-32.svg?component';
+import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import TrashIcon from '@/assets/icons/trash.svg?component';
-import TrashIcon32 from '@/assets/icons/trash-32.svg?component';
-import SyncIcon32 from '@/assets/icons/sync-32.svg?component';
+import SyncIcon from '@/assets/icons/sync.svg?component';
 import CheckIcon from '@/assets/icons/check.svg?component';
 import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?component';
 
+import EmptyPlaceholder from './EmptyPlaceholder.vue';
+import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
+import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useEditorState } from '@/stores/editorState';
 import RibbonButton from '@/components/RibbonButton.vue';
@@ -70,7 +69,7 @@ function onEditorBlur() {
 
 <template>
   <div
-    class="overflow-hidden flex flex-col pr-safe-r"
+    class="overflow-hidden flex flex-col"
   >
     <div
       v-if="!editorState.currentFile"
@@ -151,16 +150,16 @@ function onEditorBlur() {
           <ButtonBarMobileButton
             @click="editorState.closeFile()"
           >
-            <ArrowLeftIcon32 class="w-8 h-8" />
+            <ArrowLeftIcon class="w-8 h-8" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             :disabled="editorState.syncDisabled"
             @click="editorState.startSync()"
           >
-            <SyncIcon32 class="w-8 h-8" />
+            <SyncIcon class="w-8 h-8" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton @click="editorState.deleteCurrentFile">
-            <TrashIcon32 class="w-8 h-8" />
+            <TrashIcon class="w-8 h-8" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             v-if="editorState.currentFile.conflicting"
