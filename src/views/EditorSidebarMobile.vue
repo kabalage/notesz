@@ -129,7 +129,9 @@ function locationReload() {
         :class="{
           'bg-indigo-500/10 mx-4 rounded-lg overflow-hidden border-0':
             explorerState.browseAllDuringManualRebase,
-          'border-y border-indigo-400/30': !explorerState.browseAllDuringManualRebase
+          'border-y border-indigo-400/30': !explorerState.browseAllDuringManualRebase,
+          'border-b-0': !explorerState.browseAllDuringManualRebase
+            && explorerState.items.length === 0
         }"
       >
         <li
