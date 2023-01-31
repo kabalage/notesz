@@ -45,10 +45,10 @@ function navigateBack() {
 </script>
 
 <template>
-  <div class="h-full overflow-hidden flex flex-col items-center justify-center">
-      <div class="p-4 w-full max-w-xl flex flex-col items-center justify-center">
-        <div class="mb-2 w-2/3  text-lg font-medium flex">
-          <div class="text-cyan-300">
+  <div class="h-full overflow-hidden flex flex-col items-stretch justify-center p-8">
+      <div class="mx-auto w-full sm:max-w-sm flex flex-col items-stretch justify-center">
+        <div class="mb-2 text-lg font-medium flex">
+          <div class="text-accent-300">
             <template v-if="error?.code === 'rebaseConflicts'">
               Conflicts detected
             </template>
@@ -60,9 +60,9 @@ function navigateBack() {
             </template>
           </div>
         </div>
-        <div class="h-1 rounded-full w-2/3 bg-indigo-400/40">
+        <div class="h-1 rounded-full bg-main-400/40">
           <div
-            class="h-1 rounded-full transform bg-cyan-300
+            class="h-1 rounded-full transform bg-accent-300
               transition-transform duration-300 ease-in-out"
             :style="{
               width: `${Math.round(syncProgress * 100)}%`
@@ -71,20 +71,20 @@ function navigateBack() {
         </div>
         <div
           v-if="!error"
-          class="mt-2 w-2/3 h-6 text-right text-sm truncate font-medium"
+          class="mt-2 h-6 text-right text-sm truncate font-medium"
         >
           {{ syncProgressMessage }}
         </div>
         <div
           v-else
-          class="mt-4 w-2/3"
+          class="mt-4"
         >
           <p
             class="px-4 py-3 rounded-lg border-2 font-medium"
             :class="{
               'bg-red-500/20 text-red-300 border-red-500':
                 error.code !== 'rebaseConflicts',
-              'bg-orange-500/20 text-orange-300 border-orange-500':
+              'bg-orange-400/20 text-orange-300 border-orange-400':
                 error.code === 'rebaseConflicts'
             }"
           >

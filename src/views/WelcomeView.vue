@@ -17,7 +17,7 @@ watch(() => settings.data, () => {
   if (settings.data && settings.data?.selectedRepositoryId) {
     navigateToEditor(settings.data.selectedRepositoryId);
   }
-}, { deep: true });
+}, { deep: true, immediate: true });
 
 function navigateToEditor(repositoryId: string) {
   router.replace(`/edit/${repositoryId}/`);
@@ -37,33 +37,33 @@ async function clearStorage() {
     class="h-full grid overflow-y-auto"
   >
     <div class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b">
-      <h1 class="font-semibold mb-2 text-center">Welcome to</h1>
+      <h1 class="font-semibold mb-4 text-center">Welcome to</h1>
       <div class="flex justify-center mb-8" @click="clearStorage">
         <NoteszLogo
-          class="h-12 my-2"
+          class="h-12"
           text-class="text-white"
-          icon-primary-class="text-cyan-300"
-          icon-secondary-class="text-indigo-400/50"
+          icon-class="text-accent-300"
+          icon-shade-class="text-main-400/40"
         />
       </div>
-      <p class="max-w-sm mx-auto font-semibold text-indigo-200 mb-4">
+      <p class="max-w-sm mx-auto font-semibold text-white mb-4 leading-snug">
         A cross-platform, open-source note taking app that stores your notes on GitHub.
       </p>
-      <p class="max-w-sm mx-auto mb-8">
+      <p class="max-w-sm mx-auto mb-8 leading-snug">
         It works offline, and all your data is saved only in your browser and in your GitHub
         repositories, nowhere else.
       </p>
       <BasicButton
-        class="mx-auto w-[17rem] touch:w-72"
+        class="mx-auto w-full max-w-[17rem] touch:max-w-[18rem]"
         :disabled="isAuthorizing"
         @click="connect({ redirect: '/' })"
       >
         <template v-if="isAuthorizing">
-          <SpinnerIcon class="mx-auto w-6 h-6 text-indigo-300" />
+          <SpinnerIcon class="mx-auto w-6 h-6 text-main-300" />
         </template>
         <template v-else>
-          <GitHubIcon class="flex-none h-6 w-6 fill-indigo-400 mr-2" />
-          <div class="flex-1 text-center">
+          <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
+          <div class="flex-1 text-center leading-snug">
             Connect GitHub repository
           </div>
         </template>

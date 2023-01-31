@@ -26,12 +26,12 @@ const explorerState = useExplorerState()!;
 
 <template>
   <div class="pt-1 flex flex-col">
-    <div class="flex-none flex justify-center my-4 ml-safe-l">
+    <div class="flex-none flex justify-center my-4">
       <NoteszLogo
         class="h-8 my-2"
         text-class="text-white"
-        icon-primary-class="text-cyan-300"
-        icon-secondary-class="text-indigo-400/50"
+        icon-class="text-accent-300"
+        icon-shade-class="text-main-400/40"
       />
     </div>
     <ButtonBarDesktop class="flex-none mb-4">
@@ -50,7 +50,7 @@ const explorerState = useExplorerState()!;
     </ButtonBarDesktop>
     <div class="flex-1 py-1.5 px-2 overflow-y-auto">
       <template v-if="explorerState.conflictingFiles.length > 0">
-        <h2 class="text-cyan-300 font-semibold mt-2 pl-2">
+        <h2 class="text-accent-300 font-semibold mt-2 pl-2">
           Conflicting files
         </h2>
         <ul class="mt-2">
@@ -62,15 +62,14 @@ const explorerState = useExplorerState()!;
             <BaseButton
               :href="`/edit/${editorState.repositoryId}/${file.path}`"
               @click.prevent="editorState.openFile(file.path)"
-              class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-                text-indigo-100 font-medium mouse:rounded-lg"
+              class="flex items-center py-1.5 px-2 text-white font-medium rounded-lg"
               :class="{
-                'bg-indigo-500/30': file.path === editorState.currentFilePath,
-                'mouse:hover:bg-indigo-500/20': file.path !== editorState.currentFilePath
+                'bg-main-400/20': file.path === editorState.currentFilePath,
+                'hover:bg-main-400/10': file.path !== editorState.currentFilePath
               }"
-              active-class="bg-indigo-500/20"
+              active-class="!bg-main-400/20"
             >
-              <FileIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/60" />
+              <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400/60" />
               <div class="flex-1">
                 <div class="truncate leading-5">
                   {{ file.name }}
@@ -92,16 +91,16 @@ const explorerState = useExplorerState()!;
         </BasicButton>
         <div
           v-if="explorerState.browseAllDuringManualRebase"
-          class="flex items-center my-4 pt-4 pl-2 border-t-2 border-indigo-500/30"
+          class="flex items-center my-4 pt-4 pl-2 border-t-2 border-main-400/20"
         >
-          <h2 class="flex-1 text-cyan-300 font-semibold">
+          <h2 class="flex-1 text-accent-300 font-semibold">
             All files
           </h2>
           <IconButton
             class="-my-2"
             @click="explorerState.browseAllDuringManualRebase = false"
           >
-            <XmarkIcon class="w-6 h-6 opacity-75" />
+            <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>
         </div>
       </template>
@@ -131,12 +130,11 @@ const explorerState = useExplorerState()!;
             v-if="item.type === 'parentTree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
-            active-class="bg-indigo-500/20"
+            class="flex items-center py-1.5 px-2 font-medium hover:bg-main-400/10 rounded-lg"
+            active-class="!bg-main-400/20"
           >
-            <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-indigo-400 ml-safe-l" />
-            <div class="flex-1 mr-2 truncate text-indigo-300">
+            <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-main-400" />
+            <div class="flex-1 mr-2 truncate text-main-300">
               {{ item.name }}
             </div>
           </BaseButton>
@@ -144,44 +142,42 @@ const explorerState = useExplorerState()!;
             v-if="item.type === 'tree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
-            active-class="bg-indigo-500/20"
+            class="flex items-center py-1.5 px-2 font-medium hover:bg-main-400/10 rounded-lg"
+            active-class="!bg-main-400/20"
           >
-            <FolderIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-400"/>
+            <FolderIcon class="w-6 h-6 mr-2 flex-none text-main-400"/>
             <div
               class="flex-1 mr-2 truncate"
               :class="{
-                'text-indigo-300': item.unchanged,
+                'text-main-200': item.unchanged,
                 'text-green-400': item.added,
-                'text-cyan-300': item.modified
+                'text-accent-300': item.modified
               }"
             >
               {{ item.name }}
             </div>
-            <CaretRightIcon class="w-6 h-6 text-indigo-400" />
+            <CaretRightIcon class="w-6 h-6 text-main-400" />
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="editorState.openFile(item.path)"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              text-indigo-100 font-medium mouse:rounded-lg"
+            class="flex items-center py-1.5 px-2 text-white font-medium rounded-lg"
             :class="{
-              'bg-indigo-500/30': item.path === editorState.currentFilePath,
-              'mouse:hover:bg-indigo-500/20': item.path !== editorState.currentFilePath,
+              'bg-main-400/20': item.path === editorState.currentFilePath,
+              'hover:bg-main-400/10': item.path !== editorState.currentFilePath,
               'text-green-400': item.added,
-              'text-cyan-300': item.modified
+              'text-accent-400': item.modified
             }"
-            active-class="bg-indigo-500/20"
+            active-class="!bg-main-400/20"
           >
-            <FileIcon class="w-6 h-6 mr-2 ml-safe-l flex-none text-indigo-300/50" />
+            <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400/60" />
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>
             <AsteriskIcon20
               v-if="item.modified"
-              class="text-cyan-300 w-5 mr-0.5 text-center"
+              class="text-accent-400 w-5 mr-0.5 text-center"
             />
             <PlusIcon20
               v-if="item.added"

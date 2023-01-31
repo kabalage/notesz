@@ -34,27 +34,27 @@ const EditorSidebarDesktop = defineAsyncComponent({
 
 <template>
   <div
-    class="h-full overflow-hidden sm:flex sm:justify-center bg-violet-950"
+    class="h-full overflow-hidden sm:flex sm:justify-center bg-background"
     v-auto-animate="{ duration: 250, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }"
   >
     <div
       class="touch:hidden flex-1 transition-colors ease-in-out duration-250 delay-[250ms]
         motion-reduce:transition-none"
       :class="{
-        'bg-indigo-500/10': editorState.sidebarIsOpen
+        'bg-main-400/10': editorState.sidebarIsOpen
       }"
     />
     <EditorSidebarMobile
       v-if="isTouchDevice && editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-indigo-400/20 ml-safe-l"
+      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-main-400/20 ml-safe-l"
       :class="{
         '<sm:hidden': editorState.currentFile
       }"
     />
     <EditorSidebarDesktop
       v-else-if="editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-indigo-400/30
-        bg-indigo-500/10"
+      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-main-400/30
+        bg-main-400/10"
       :class="{
         '<sm:hidden': editorState.currentFile
       }"

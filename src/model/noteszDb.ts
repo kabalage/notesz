@@ -5,11 +5,13 @@ import {
   type IDBPTransaction,
   type StoreNames
 } from 'idb';
+import { createSettings } from './settingsModel';
 import type { Settings } from './settingsModel';
 import type { User } from './userModel';
 import type { Repository } from './repositoryModel';
 import type { FileIndex } from './fileIndexModel';
 import type { BlobRefCount } from './blobModel';
+import type { NoteszDbV1 } from './noteszDbOldSchema';
 
 export interface NoteszDb extends DBSchema {
   repositories: {
@@ -49,12 +51,12 @@ async function openNoteszDb() {
     return dbPromise;
   }
   console.log('DB open');
-  dbPromise = openDB<NoteszDb>('notesz', 1, {
-    async upgrade(db, oldVersion) {
+  dbPromise = openDB<NoteszDb>('notesz', 2, {
+    async upgrade(db, oldVersion, newVersion, tx) {
       if (oldVersion === 0) {
         await initDb(db);
-      // } else {
-      //   await upgradeDb(db, oldVersion);
+      } else {
+        await upgradeDb(db, oldVersion, tx);
       }
       if (navigator.storage) {
         navigator.storage.persist();
@@ -65,9 +67,11 @@ async function openNoteszDb() {
   return db;
 }
 
+type VersionChangeTransaction<T> = IDBPTransaction<T, ArrayLike<StoreNames<T>>, 'versionchange'>;
+
 async function initDb(
   db: IDBPDatabase<NoteszDb>,
-  // tx: IDBPTransaction<NoteszDb, ArrayLike<StoreNames>, 'versionchange'>
+  // tx: VersionChangeTransaction<NoteszDb>
 ) {
   db.createObjectStore('repositories', {
     keyPath: 'id'
@@ -83,18 +87,26 @@ async function initDb(
   const settingsStore = db.createObjectStore('app', {
     keyPath: 'type'
   });
-  await settingsStore.put({
-    type: 'settings',
-    selectedRepositoryId: null
-  });
+  await settingsStore.put(createSettings({
+    selectedTheme: 5
+  }));
 }
 
-// async function upgradeDb(
-//   db: IDBPDatabase<NoteszDb>,
-//   oldVersion: number,
-//   // tx: IDBPTransaction<NoteszDb, ArrayLike<StoreNames>, 'versionchange'>
-// ) {
-// }
+async function upgradeDb(
+  db: IDBPDatabase<NoteszDb>,
+  oldVersion: number,
+  tx: VersionChangeTransaction<NoteszDb>
+) {
+  if (oldVersion === 1) {
+    const txV1 = tx as unknown as VersionChangeTransaction<NoteszDbV1>;
+    const appStoreV1 = txV1.objectStore('app');
+    const appStore = tx.objectStore('app');
+    const settingsV1 = await appStoreV1.get('settings');
+    if (settingsV1?.type === 'settings') {
+      await appStore.put(createSettings(settingsV1));
+    }
+  }
+}
 
 function closeNoteszDb() {
   if (closeTimeout) {

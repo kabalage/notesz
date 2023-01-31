@@ -51,14 +51,14 @@
     ::-webkit-scrollbar-thumb,
     ::-webkit-scrollbar-thumb:horizontal,
     ::-webkit-scrollbar-thumb:vertical {
-      @apply bg-indigo-500/40 block rounded-full border-4 border-solid border-transparent;
+      @apply bg-main-400/20 block rounded-full border-4 border-solid border-transparent;
       background-clip: padding-box;
     }
 
     ::-webkit-scrollbar-thumb:hover,
     ::-webkit-scrollbar-thumb:horizontal:hover,
     ::-webkit-scrollbar-thumb:vertical:hover {
-      @apply bg-indigo-500/50;
+      @apply bg-main-400/30;
     }
 
     ::-webkit-scrollbar-corner {

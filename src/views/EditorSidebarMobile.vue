@@ -33,15 +33,13 @@ function locationReload() {
 <template>
   <div class="pt-1 flex flex-col">
     <div class="flex-1 py-4 overflow-y-auto">
-      <div
-        class="flex justify-center mb-3"
-        @click="locationReload()"
-      >
+      <div class="flex justify-center mb-3">
         <NoteszLogo
           class="h-8 my-2"
           text-class="text-white"
-          icon-primary-class="text-cyan-300"
-          icon-secondary-class="text-indigo-400/50"
+          icon-class="text-accent-300"
+          icon-shade-class="text-main-400/40"
+          @click="locationReload()"
         />
       </div>
       <!-- <div class="flex">
@@ -49,46 +47,43 @@ function locationReload() {
           <NoteszLogo
             class="h-8 my-2"
             text-class="text-gray-900"
-            icon-primary-class="text-gray-800"
-            icon-secondary-class="text-white"
+            icon-class="text-gray-800"
+            icon-shade-class="text-white"
           />
         </div>
         <div class="p-8 bg-white">
           <NoteszLogo
             class="h-8 my-2"
             text-class="text-gray-900"
-            icon-primary-class="text-gray-800"
-            icon-secondary-class="text-gray-200"
+            icon-class="text-gray-800"
+            icon-shade-class="text-gray-200"
           />
         </div>
       </div> -->
       <template v-if="explorerState.conflictingFiles.length > 0">
         <h2
-          class="text-cyan-300 font-semibold mt-8 px-4 leading-8"
+          class="text-accent-300 font-semibold mt-8 px-4 leading-8"
         >
           Conflicting files
         </h2>
         <ul
-          class="mx-4 divide-y divide-indigo-500/30 bg-indigo-500/10
+          class="mx-4 divide-y divide-main-400/20 bg-main-400/10
             rounded-lg overflow-hidden"
         >
           <li
             v-for="file in explorerState.conflictingFiles"
             :key="file.path"
-            class="mouse:mx-1 mouse:my-0.5"
           >
             <BaseButton
               :href="`/edit/${editorState.repositoryId}/${file.path}`"
               @click.prevent="editorState.openFile(file.path)"
-              class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-                text-indigo-100 font-medium mouse:rounded-lg"
+              class="flex items-center py-3 px-4 text-white font-medium"
               :class="{
-                'bg-indigo-500/30': file.path === editorState.currentFilePath,
-                'mouse:hover:bg-indigo-500/20': file.path !== editorState.currentFilePath
+                'bg-main-400/20': file.path === editorState.currentFilePath
               }"
-              active-class="bg-indigo-500/20"
+              active-class="bg-main-400/20"
             >
-              <FileIcon class="w-6 h-6 mr-2 text-indigo-300/50 flex-none" />
+              <FileIcon class="w-6 h-6 mr-2 text-main-400/60 flex-none" />
               <div class="flex-1 truncate">
                 <div class="truncate leading-5">
                   {{ file.name }}
@@ -112,24 +107,24 @@ function locationReload() {
           v-if="explorerState.browseAllDuringManualRebase"
           class="flex items-center mt-8 pl-4 pr-2"
         >
-          <h2 class="flex-1 text-cyan-300 font-semibold leading-8">
+          <h2 class="flex-1 text-accent-300 font-semibold leading-8">
             All files
           </h2>
           <IconButton
             @click="explorerState.browseAllDuringManualRebase = false"
           >
-            <XmarkIcon class="w-6 h-6 opacity-75" />
+            <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>
         </div>
       </template>
       <ul
         v-if="explorerState.conflictingFiles.length === 0
           || explorerState.browseAllDuringManualRebase"
-        class="divide-y divide-indigo-400/30"
+        class="divide-y divide-main-400/20"
         :class="{
-          'bg-indigo-500/10 mx-4 rounded-lg overflow-hidden border-0':
+          'bg-main-400/10 mx-4 rounded-lg overflow-hidden border-0':
             explorerState.browseAllDuringManualRebase,
-          'border-y border-indigo-400/30': !explorerState.browseAllDuringManualRebase,
+          'border-y border-main-400/20': !explorerState.browseAllDuringManualRebase,
           'border-b-0': !explorerState.browseAllDuringManualRebase
             && explorerState.items.length === 0
         }"
@@ -150,18 +145,16 @@ function locationReload() {
         <li
           v-for="item in explorerState.items"
           :key="item.path"
-          class="mouse:mx-1 mouse:my-0.5"
         >
           <BaseButton
             v-if="item.type === 'parentTree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
-            active-class="bg-indigo-500/20"
+            class="flex items-center py-3 px-4 font-medium"
+            active-class="bg-main-400/20"
           >
-            <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-indigo-400" />
-            <div class="flex-1 mr-2 truncate text-indigo-300">
+            <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-main-400" />
+            <div class="flex-1 mr-2 truncate text-main-300">
               {{ item.name }}
             </div>
           </BaseButton>
@@ -169,46 +162,43 @@ function locationReload() {
             v-if="item.type === 'tree'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="explorerState.path = item.path"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              font-medium mouse:hover:bg-indigo-500/20 mouse:rounded-lg"
-            active-class="bg-indigo-500/20"
+            class="flex items-center py-3 px-4 font-medium"
+            active-class="bg-main-400/20"
           >
-            <FolderIcon class="w-6 h-6 mr-2 text-indigo-400 flex-none"/>
+            <FolderIcon class="w-6 h-6 mr-2 text-main-400 flex-none"/>
             <div
               class="flex-1 mr-2 truncate"
               :class="{
-                'text-indigo-300': item.unchanged,
+                'text-main-200': item.unchanged,
                 'text-green-400': item.added,
-                'text-cyan-300': item.modified
+                'text-accent-300': item.modified
               }"
             >
               {{ item.name }}
             </div>
-            <CaretRightIcon class="w-6 h-6 text-indigo-400" />
+            <CaretRightIcon class="w-6 h-6 text-main-400" />
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
             :href="`/edit/${editorState.repositoryId}/${item.path}`"
             @click.prevent="editorState.openFile(item.path)"
-            class="flex items-center py-3 px-4 mouse:py-1.5 mouse:px-2
-              text-indigo-100 font-medium mouse:rounded-lg"
+            class="flex items-center py-3 px-4 text-white font-medium"
             :class="{
-              'bg-indigo-500/30': item.path === editorState.currentFilePath,
-              'mouse:hover:bg-indigo-500/20': item.path !== editorState.currentFilePath,
+              'bg-main-400/20': item.path === editorState.currentFilePath,
               'text-green-400': item.added,
-              'text-cyan-400': item.modified
+              'text-accent-400': item.modified
             }"
-            active-class="bg-indigo-500/20"
+            active-class="bg-main-400/20"
           >
             <FileIcon
-              class="w-6 h-6 mr-2 text-indigo-300/60 flex-none"
+              class="w-6 h-6 mr-2 text-main-400/60 flex-none"
             />
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>
             <AsteriskIcon20
               v-if="item.modified"
-              class="text-cyan-300 w-5 mr-0.5 text-center"
+              class="text-accent-400 w-5 mr-0.5 text-center"
             />
             <PlusIcon20
               v-if="item.added"

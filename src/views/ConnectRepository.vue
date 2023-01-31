@@ -125,19 +125,19 @@ async function handleCreateRepository() {
   <div class="h-full overflow-hidden flex flex-col">
     <div class="flex-1 overflow-y-auto">
       <div class="p-4 max-w-xl mx-auto">
-        <h1 class="text-xl font-semibold text-cyan-300 mt-4 mb-8 text-center">
+        <h1 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-center">
           Select a repository
         </h1>
         <div>
           <SpinnerIcon48
             v-if="authorizedRepositories.isFetching || isAuthorizing"
-            class="w-12 h-12 text-indigo-200 mx-auto"
+            class="w-12 h-12 text-main-400 mx-auto"
           />
           <template v-else>
             <template v-if="notConnectedAuthorizedRepositories && filteredAuthorizedRepositories">
               <div
                 v-if="notConnectedAuthorizedRepositories.length === 0"
-                class="text-center max-w-sm mx-auto"
+                class="text-center max-w-sm mx-auto leading-snug"
               >
                 {{
                   repositoryList.data?.length ?? 0 > 0
@@ -146,7 +146,7 @@ async function handleCreateRepository() {
                 }}
                 <br/>
                 Setup which repositories
-                <span class="font-semibold text-cyan-300">
+                <span class="font-semibold text-accent-300">
                   Notesz
                 </span>
                 may use.
@@ -154,7 +154,7 @@ async function handleCreateRepository() {
                   class="mt-4 mx-auto"
                   @click="_install"
                 >
-                  <LockClosedIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
+                  <LockClosedIcon class="w-6 h-6 flex-none mr-2 text-accent-300" />
                   Set permissions
                 </BasicButton>
                 <br/>
@@ -164,20 +164,20 @@ async function handleCreateRepository() {
                   class="mt-4 mx-auto"
                   @click="handleCreateRepository"
                 >
-                  <PlusIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
+                  <PlusIcon class="w-6 h-6 flex-none mr-2 text-accent-300" />
                   Create new repository
                 </BasicButton>
               </div>
               <template v-else>
                 <div
-                  class="max-w-screen-sm bg-indigo-400/20 flex items-center rounded-lg
+                  class="max-w-screen-sm bg-main-400/20 flex items-center rounded-lg
                     border-2 border-transparent touch:-mx-2 touch:sm:mx-0
-                    focus-within:bg-indigo-400/20 focus-within:border-indigo-400 "
+                    focus-within:bg-main-400/20 focus-within:border-main-400 "
                   v-auto-animate
                 >
-                  <SearchIcon class="text-indigo-400 m-2 w-6 h-6" />
+                  <SearchIcon class="text-accent-300 m-2 w-6 h-6" />
                   <input
-                    class="flex-1 bg-transparent focus:outline-none text-indigo-200"
+                    class="flex-1 bg-transparent focus:outline-none text-white"
                     v-model="filterText"
                   />
                   <BaseButton
@@ -186,19 +186,22 @@ async function handleCreateRepository() {
                     active-class="scale-75"
                     @click="filterText = ''"
                   >
-                    <XmarkIcon class="text-indigo-400 w-6 h-6" />
+                    <XmarkIcon class="text-accent-300 w-6 h-6" />
                   </BaseButton>
                 </div>
-                <ul class="mt-2 touch:-mx-4 touch:sm:mx-0 sm:max-w-screen-sm">
-                  <li class="touch:border-b touch:border-indigo-400/30 touch:first:border-t">
+                <ul class="mt-2 touch:mt-4 touch:-mx-4 touch:sm:mx-0 sm:max-w-screen-sm">
+                  <li
+                    v-if="filterText === ''"
+                    class="touch:border-b touch:border-main-400/20 touch:first:border-t"
+                  >
                     <BaseButton
-                      class="w-full mouse:enabled:hover:bg-indigo-400/20
+                      class="w-full mouse:enabled:hover:bg-main-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
-                      active-class="bg-indigo-400/20"
+                      active-class="bg-main-400/20"
                       @click="handleCreateRepository"
                     >
-                      <PlusIcon class="w-6 h-6 flex-none mr-2 text-indigo-400" />
-                      <div class="flex-1 text-left font-semibold text-indigo-200">
+                      <PlusIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
+                      <div class="flex-1 text-left font-semibold text-white">
                         Create new repository
                       </div>
                     </BaseButton>
@@ -206,23 +209,23 @@ async function handleCreateRepository() {
                   <li
                     v-for="repo in filteredAuthorizedRepositories"
                     :key="repo.id"
-                    class="touch:border-b touch:border-indigo-400/30 touch:first:border-t"
+                    class="touch:border-b touch:border-main-400/20 touch:first:border-t"
                   >
                     <BaseButton
-                      class="w-full mouse:enabled:hover:bg-indigo-400/20
+                      class="w-full mouse:enabled:hover:bg-main-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
-                      active-class="bg-indigo-400/20"
+                      active-class="bg-main-400/20"
                       @click="connect(repo.full_name)"
                     >
-                        <GitHubIcon class="w-6 h-6 flex-none mr-2 fill-indigo-400" />
-                        <div class="flex-1 text-left font-semibold text-indigo-200">
+                        <GitHubIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
+                        <div class="flex-1 text-left font-semibold text-white">
                           {{ repo.owner.login }}/<wbr/>{{ repo.name }}
                         </div>
                     </BaseButton>
                   </li>
                   <div
                     v-if="filteredAuthorizedRepositories.length === 0"
-                    class="mt-8 mb-16 text-indigo-200 font-semibold text-center"
+                    class="mt-8 mb-16 text-white font-semibold text-center"
                   >
                     No repositories match the term
                   </div>
@@ -232,7 +235,7 @@ async function handleCreateRepository() {
                   Missing a repository?
                   <br/>
                   <BaseButton
-                    class="text-indigo-400 cursor-pointer mouse:hover:underline"
+                    class="text-accent-300 cursor-pointer mouse:hover:underline"
                     tag="a"
                     href=""
                     active-class="underline"
@@ -247,7 +250,7 @@ async function handleCreateRepository() {
             </template>
             <div
               v-else-if="authorizedRepositories.error?.code === 'unauthorized'"
-              class="text-center text-indigo-200 font-semibold"
+              class="text-center text-main-200 font-semibold"
             >
               {{ authError?.message || 'You need to login again with GitHub.' }}
               <BasicButton
@@ -259,7 +262,7 @@ async function handleCreateRepository() {
             </div>
             <div
               v-else-if="authorizedRepositories.error"
-              class="text-center text-indigo-200 font-semibold"
+              class="text-center text-main-200 font-semibold"
             >
               {{ authorizedRepositories.error?.message }}
               <BasicButton

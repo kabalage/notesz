@@ -38,7 +38,7 @@ function onPointerDown() {
     <div
       class="px-2 py-2 my-1"
       :class="{
-        'bg-indigo-400/20 rounded-lg': props.toggled
+        'bg-main-400/20 rounded-lg': props.toggled
       }"
     >
       <slot :active="active" />
@@ -49,11 +49,11 @@ function onPointerDown() {
     >
       <div
         v-if="active"
-        class="bg-violet-950 text-indigo-100 rounded-lg h-24 absolute z-50  mb-1
+        class="bg-background text-main-100 rounded-lg h-24 absolute z-50  mb-1
           pointer-events-none will-change-transform shadow-lg"
         :style="style"
       >
-        <div class="bg-indigo-400/30 rounded-lg overflow-hidden h-full w-full px-2 pt-3">
+        <div class="bg-main-400/30 rounded-lg overflow-hidden h-full w-full px-2 pt-3">
           <slot :active="active" />
         </div>
       </div>

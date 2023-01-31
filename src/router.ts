@@ -51,6 +51,10 @@ const router = createRouter({
       path: '/callback/:type',
       component: () => import('@/views/CallbackHandler.vue'),
       props: true
+    },
+    {
+      path: '/dev',
+      component: () => import('@/views/DevSandbox.vue'),
     }
   ]
 });

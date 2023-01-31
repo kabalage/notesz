@@ -5,7 +5,7 @@ import VueCodemirror from 'vue-codemirror';
 import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
   from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { EditorView, highlightSpecialChars, keymap }
+import { /*drawSelection,*/ EditorView, highlightSpecialChars, keymap }
   from '@codemirror/view';
 import { darkTheme } from '@/utils/codeMirrorTheme';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
@@ -84,7 +84,8 @@ const extensions = [
     },
     '.cm-content': {
       paddingTop: '1rem',
-      paddingBottom: '1rem'
+      paddingBottom: '1rem',
+      textUnderlineOffset: '0.2rem'
     },
     '.cm-editor': {
       overflow: 'hidden'
@@ -150,9 +151,9 @@ function setupVisualViewportHack(editorView: EditorView) {
   // Resize the documentElement on iOS when the virtual keyboard is visible
   if (window.visualViewport) {
     const isIphone = /iPhone/.test(window.navigator.userAgent);
-      const isIpad = /iPad/.test(window.navigator.userAgent)
-        || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-          && !isIphone;
+    const isIpad = /iPad/.test(window.navigator.userAgent)
+      || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+      && !isIphone;
     const handler = () => {
       // console.log('resize', window.navigator.userAgent);
       if (isIphone || isIpad) {

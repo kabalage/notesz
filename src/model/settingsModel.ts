@@ -1,8 +1,29 @@
 import { initTransaction, type NoteszDbTransaction } from './noteszDb';
+import { defaultThemes, type ColorName } from '@/model/themeData';
+
+export interface Theme {
+  mainColor: ColorName,
+  accentColor: ColorName,
+  backgroundColor: number
+}
 
 export interface Settings {
   readonly type: 'settings',
-  selectedRepositoryId: string | null
+  selectedRepositoryId: string | null,
+  selectedTheme: number,
+  themes: Theme[]
+}
+
+export function createSettings(
+  initialValues: Partial<Settings> = {}
+): Settings {
+  return {
+    type: 'settings',
+    selectedRepositoryId: null,
+    selectedTheme: 0,
+    themes: window.structuredClone(defaultThemes),
+    ...initialValues,
+  };
 }
 
 async function get(transaction?: NoteszDbTransaction) {
@@ -37,6 +58,7 @@ async function update(
 }
 
 export default {
+  createSettings,
   get,
   put,
   update

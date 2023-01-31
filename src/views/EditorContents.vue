@@ -73,7 +73,7 @@ function onEditorBlur() {
   >
     <div
       v-if="!editorState.currentFile"
-      class="self-center mt-16 text-blue-200/40"
+      class="self-center mt-16 text-main-200/60"
     >
       Select a note to edit...
       <!-- <input class="block mt-96 z-10" /> -->
@@ -88,14 +88,17 @@ function onEditorBlur() {
             <SidebarIcon class="w-6 h-6" />
           </IconButton>
         </div>
-        <div class="flex-2 flex-col justify-center truncate">
+        <div class="flex-col justify-center truncate">
           <div
             v-if="editorState.currentTree?.path"
-            class="flex-1 text-center text-sm font-semibold text-cyan-300/60 leading-tight truncate"
+            class="flex-1 text-center text-sm font-semibold text-accent-300/60 leading-tight
+              truncate"
           >
             {{ editorState.currentTree.path }}
           </div>
-          <h2 class="flex-1 text-center text-lg font-semibold text-cyan-300 leading-tight truncate">
+          <h2
+            class="flex-1 text-center text-lg font-semibold text-accent-300 leading-tight truncate"
+          >
             {{ editorState.currentFileName }}
           </h2>
         </div>
@@ -120,8 +123,8 @@ function onEditorBlur() {
         class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
       >
         <p
-          class="px-4 py-2 text-center font-medium rounded-lg bg-orange-500/20 text-orange-300
-            border-2 border-orange-500"
+          class="px-4 py-2 text-center font-medium rounded-lg bg-orange-400/20 text-orange-300
+            border-2 border-orange-400"
         >
           <ExclamationTriangleIcon class="w-6 h-6 inline-block mr-1" />
           <span>
@@ -133,7 +136,7 @@ function onEditorBlur() {
         v-if="editorState.currentFile"
         ref="codemirrorEditor"
         :key="editorState.currentFile.path"
-        class="flex-1 overflow-hidden bg-violet-950 lg:ml-8"
+        class="flex-1 overflow-hidden bg-background lg:ml-8"
         :note="editorState.currentFileBlob.data || ''"
         @input="onNoteInput"
         @focus="onEditorFocus"
@@ -179,8 +182,8 @@ function onEditorBlur() {
         >
           <div
             class="flex-1 px-2 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
-              overscroll-y-none touch-pan-x bg-indigo-400/20
-              text-indigo-300 snap-x rounded-tr-lg mr-0.5"
+              overscroll-y-none touch-pan-x bg-main-400/20
+              text-main-300 snap-x rounded-tr-lg mr-0.5"
             @click.capture="codemirrorEditor?.focus()"
           >
             <RibbonButton
@@ -308,8 +311,8 @@ function onEditorBlur() {
           </div>
           <div
             class="w-44 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
-              overscroll-y-none touch-pan-x bg-indigo-400/20 text-indigo-300 snap-x snap-mandatory
-              rounded-tl-lg border-indigo-950"
+              overscroll-y-none touch-pan-x bg-main-400/20 text-main-300 snap-x snap-mandatory
+              rounded-tl-lg border-background"
             @click.capture="codemirrorEditor?.focus()"
           >
             <div class="w-44 px-2 flex-none flex flex-row snap-center">
