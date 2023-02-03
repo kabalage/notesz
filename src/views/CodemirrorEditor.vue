@@ -5,7 +5,7 @@ import VueCodemirror from 'vue-codemirror';
 import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
   from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { /*drawSelection,*/ EditorView, highlightSpecialChars, keymap }
+import { drawSelection, EditorView, highlightSpecialChars, keymap }
   from '@codemirror/view';
 import { darkTheme } from '@/utils/codeMirrorTheme';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
@@ -35,7 +35,7 @@ if (!app._context.components.VueCodemirror) {
 const extensions = [
   highlightSpecialChars(),
   history(),
-  // drawSelection(),
+  drawSelection(),
   syntaxHighlighting(defaultHighlightStyle, {fallback: true}),
   highlightSelectionMatches(),
   closeBrackets(),
