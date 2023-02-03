@@ -46,10 +46,10 @@ async function clearStorage() {
           icon-shade-class="text-main-400/40"
         />
       </div>
-      <p class="max-w-sm mx-auto font-semibold text-white mb-4 leading-snug">
+      <p class="max-w-sm mx-auto font-semibold text-white mb-4">
         A cross-platform, open-source note taking app that stores your notes on GitHub.
       </p>
-      <p class="max-w-sm mx-auto mb-8 leading-snug">
+      <p class="max-w-sm mx-auto mb-8">
         It works offline, and all your data is saved only in your browser and in your GitHub
         repositories, nowhere else.
       </p>
@@ -63,7 +63,7 @@ async function clearStorage() {
         </template>
         <template v-else>
           <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
-          <div class="flex-1 text-center leading-snug">
+          <div class="flex-1 text-center">
             Connect GitHub repository
           </div>
         </template>

@@ -71,10 +71,10 @@ const explorerState = useExplorerState()!;
             >
               <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400/60" />
               <div class="flex-1">
-                <div class="truncate leading-5">
+                <div class="truncate leading-tight">
                   {{ file.name }}
                 </div>
-                <div class="truncate opacity-50 text-sm leading-4">
+                <div class="truncate opacity-50 text-sm leading-none">
                   {{ file.parentPath }}
                 </div>
               </div>

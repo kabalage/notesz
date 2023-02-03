@@ -137,7 +137,7 @@ async function handleCreateRepository() {
             <template v-if="notConnectedAuthorizedRepositories && filteredAuthorizedRepositories">
               <div
                 v-if="notConnectedAuthorizedRepositories.length === 0"
-                class="text-center max-w-sm mx-auto leading-snug"
+                class="text-center max-w-sm mx-auto"
               >
                 {{
                   repositoryList.data?.length ?? 0 > 0

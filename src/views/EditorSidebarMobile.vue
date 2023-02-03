@@ -61,9 +61,7 @@ function locationReload() {
         </div>
       </div> -->
       <template v-if="explorerState.conflictingFiles.length > 0">
-        <h2
-          class="text-accent-300 font-semibold mt-8 px-4 leading-8"
-        >
+        <h2 class="text-accent-300 font-semibold mt-8 px-4 leading-loose" >
           Conflicting files
         </h2>
         <ul
@@ -85,10 +83,10 @@ function locationReload() {
             >
               <FileIcon class="w-6 h-6 mr-2 text-main-400/60 flex-none" />
               <div class="flex-1 truncate">
-                <div class="truncate leading-5">
+                <div class="truncate leading-tight">
                   {{ file.name }}
                 </div>
-                <div class="flex-1 truncate opacity-50 text-sm leading-4">
+                <div class="flex-1 truncate opacity-50 text-sm leading-none">
                   {{ file.parentPath }}
                 </div>
               </div>
@@ -107,7 +105,7 @@ function locationReload() {
           v-if="explorerState.browseAllDuringManualRebase"
           class="flex items-center mt-8 pl-4 pr-2"
         >
-          <h2 class="flex-1 text-accent-300 font-semibold leading-8">
+          <h2 class="flex-1 text-accent-300 font-semibold leading-loose">
             All files
           </h2>
           <IconButton

@@ -71,7 +71,7 @@ function navigateBack() {
         </div>
         <div
           v-if="!error"
-          class="mt-2 h-6 text-right text-sm truncate font-medium"
+          class="mt-2 h-6 text-right text-sm leading-normal truncate font-medium"
         >
           {{ syncProgressMessage }}
         </div>

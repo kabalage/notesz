@@ -70,7 +70,7 @@ async function clearStorage() {
         <!-- Repositories -->
         <div v-if="settings.data && repositoryList.data">
           <div class="flex items-center mb-8">
-            <h2 class="uppercase text-sm font-semibold">Repositories</h2>
+            <h2 class="uppercase text-sm leading-normal font-semibold">Repositories</h2>
             <div class="ml-4 border-b-2 border-main-400/20 flex-1"></div>
           </div>
           <ul class="space-y-4 mb-8" v-auto-animate>
@@ -157,7 +157,7 @@ async function clearStorage() {
 
         <!-- Appearance -->
         <div class="flex items-center mt-16 mb-8">
-          <h2 class="uppercase text-sm font-semibold">Appearance</h2>
+          <h2 class="uppercase text-sm leading-normal font-semibold">Appearance</h2>
           <div class="ml-4 border-b-2 border-main-400/20 flex-1"></div>
         </div>
         <div class="flex items-center">
