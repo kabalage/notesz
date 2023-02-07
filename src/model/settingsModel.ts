@@ -1,5 +1,6 @@
 import { initTransaction, type NoteszDbTransaction } from './noteszDb';
 import { defaultThemes, type ColorName } from '@/model/themeData';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 export interface Theme {
   mainColor: ColorName,
@@ -34,9 +35,12 @@ async function get(transaction?: NoteszDbTransaction) {
 }
 
 async function put(settings: Settings, transaction?: NoteszDbTransaction) {
+  const bus = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const appStore = tx.objectStore('app');
-    return await appStore.put(settings);
+    const result = await appStore.put(settings);
+    bus.emit('update:settings');
+    return result;
   });
 }
 
@@ -44,6 +48,7 @@ async function update(
   updater: (settings: Settings) => Settings | undefined,
   transaction?: NoteszDbTransaction
 ) {
+  const bus = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const appStore = tx.objectStore('app');
     const settings = (await appStore.get('settings')) as Settings | undefined;
@@ -53,6 +58,7 @@ async function update(
     const newSettings = updater(settings);
     if (newSettings) {
       await appStore.put(newSettings);
+      bus.emit('update:settings');
     }
   });
 }
