@@ -20,7 +20,7 @@ export default function useIosPointerMoveCancelHack(
   const canceled = ref(false);
   let pointerDownClientX = 0;
   let pointerDownClientY = 0;
-  const touchMoveJitterAllowed = 10;
+  const touchMoveJitterAllowed = 20;
   let eventListenerCleanups: Array<ReturnType<typeof useEventListener>> = [];
 
   if (isIphoneOrIpad) {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { defineAsyncComponent, toRef } from 'vue';
+import { toRef } from 'vue';
+import EditorSidebarDesktop from './EditorSidebarDesktop.vue';
+import EditorSidebarMobile from './EditorSidebarMobile.vue';
 import EditorContents from './EditorContents.vue';
-import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import { provideEditorState } from '@/stores/editorState';
 import { provideExplorerState } from '@/stores/explorerState';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 
 const props = defineProps<{
   repo: string,
@@ -18,54 +20,39 @@ const editorState = provideEditorState(
 );
 provideExplorerState(editorState);
 
-const EditorSidebarMobile = defineAsyncComponent({
-  loader: () => import('./EditorSidebarMobile.vue'),
-  loadingComponent: EmptyPlaceholder,
-  delay: 0
-});
-
-const EditorSidebarDesktop = defineAsyncComponent({
-  loader: () => import('./EditorSidebarDesktop.vue'),
-  loadingComponent: EmptyPlaceholder,
-  delay: 0
-});
-
 </script>
 
 <template>
-  <div
-    class="h-full overflow-hidden sm:flex sm:justify-center bg-background"
-    v-auto-animate="{ duration: 250, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }"
-  >
-    <div
-      class="touch:hidden flex-1 transition-colors ease-in-out duration-250 delay-[250ms]
-        motion-reduce:transition-none"
-      :class="{
-        'bg-main-400/10': editorState.sidebarIsOpen
-      }"
-    />
-    <EditorSidebarMobile
-      v-if="isTouchDevice && editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-main-400/20 ml-safe-l"
-      :class="{
-        '<sm:hidden': editorState.currentFile
-      }"
-    />
-    <EditorSidebarDesktop
-      v-else-if="editorState.sidebarIsOpen"
-      class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-main-400/30
-        bg-main-400/10"
-      :class="{
-        '<sm:hidden': editorState.currentFile
-      }"
-    />
-    <EditorContents
-      class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl mr-safe-r"
-      :class="{
-        '<sm:hidden': !editorState.currentFile,
-        'ml-safe-l': !editorState.sidebarIsOpen
-      }"
-    />
-    <div class="touch:hidden flex-1" />
+  <div class="h-full overflow-hidden sm:flex bg-background">
+    <NoteszTransitionGroup>
+      <div class="touch:hidden flex-1" key="bg-left" />
+      <EditorSidebarMobile
+        v-if="isTouchDevice && editorState.sidebarIsOpen"
+        class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-main-400/20 ml-safe-l"
+        :class="{
+          '<sm:hidden': editorState.currentFile
+        }"
+        key="sidebar-mobile"
+      />
+      <EditorSidebarDesktop
+        v-else-if="editorState.sidebarIsOpen"
+        class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r-2 sm:border-main-400/30
+          bg-main-400/10 relative before:absolute before:bg-main-400/10
+          before:right-full before:w-[200%] before:h-full"
+        :class="{
+          '<sm:hidden': editorState.currentFile
+        }"
+        key="sidebar-desktop"
+      />
+      <EditorContents
+        class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl mr-safe-r"
+        :class="{
+          '<sm:hidden': !editorState.currentFile,
+          'ml-safe-l': !editorState.sidebarIsOpen
+        }"
+        key="editor"
+      />
+      <div class="touch:hidden flex-1" key="bg-right" />
+    </NoteszTransitionGroup>
   </div>
 </template>

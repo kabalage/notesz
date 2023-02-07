@@ -15,6 +15,8 @@ import BottomBarMobile from '@/components/ButtonBarMobile.vue';
 import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
 import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
+import IconButton from '@/components/IconButton.vue';
+import NoteszTransition from '@/components/NoteszTransition.vue';
 
 import useFromDb from '@/composables/useFromDb';
 import repositoryModel from '@/model/repositoryModel';
@@ -172,22 +174,25 @@ async function handleCreateRepository() {
                 <div
                   class="max-w-screen-sm bg-main-400/20 flex items-center rounded-lg
                     border-2 border-transparent touch:-mx-2 touch:sm:mx-0
-                    focus-within:bg-main-400/20 focus-within:border-main-400 "
-                  v-auto-animate
+                    focus-within:bg-main-400/20 focus-within:border-main-400 relative"
                 >
                   <SearchIcon class="text-accent-300 m-2 w-6 h-6" />
                   <input
                     class="flex-1 bg-transparent focus:outline-none text-white"
                     v-model="filterText"
                   />
-                  <BaseButton
-                    v-if="filterText.length > 0"
-                    class="ml-2 p-2"
-                    active-class="scale-75"
-                    @click="filterText = ''"
+                  <NoteszTransition
+                    enter-from-class="opacity-0 transform scale-50"
+                    leave-to-class="opacity-0 transform scale-50"
                   >
-                    <XmarkIcon class="text-accent-300 w-6 h-6" />
-                  </BaseButton>
+                    <IconButton
+                      v-if="filterText.length > 0"
+                      class="ml-2 p-2"
+                      @click="filterText = ''"
+                    >
+                      <XmarkIcon class="w-6 h-6" />
+                    </IconButton>
+                  </NoteszTransition>
                 </div>
                 <ul class="mt-2 touch:mt-4 touch:-mx-4 touch:sm:mx-0 sm:max-w-screen-sm">
                   <li

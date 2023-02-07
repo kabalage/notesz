@@ -18,6 +18,7 @@ import repositoryModel from '@/model/repositoryModel';
 import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
+import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useThemeState } from '@/stores/themeState';
@@ -73,7 +74,13 @@ async function clearStorage() {
             <h2 class="uppercase text-sm leading-normal font-semibold">Repositories</h2>
             <div class="ml-4 border-b-2 border-main-400/20 flex-1"></div>
           </div>
-          <ul class="space-y-4 mb-8" v-auto-animate>
+          <NoteszTransitionGroup tag="ul" class="space-y-4">
+            <li
+              v-if="repositoryList.data.length === 0"
+              class="text-center"
+            >
+              No repositories connected yet.
+            </li>
             <li
               v-for="repo in repositoryList.data"
               :key="repo.id"
@@ -135,10 +142,10 @@ async function clearStorage() {
                 </div>
               </BaseButton>
             </li>
-          </ul>
+          </NoteszTransitionGroup>
 
           <BasicButton
-            class="mx-auto w-56 touch:w-64"
+            class="mx-auto mt-8 w-56 touch:w-64"
             :disabled="isAuthorizing"
             @click="connect({ redirect: '/settings' })"
           >

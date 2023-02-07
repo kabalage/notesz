@@ -5,9 +5,9 @@ import CaretLeftIcon from '@/assets/icons/caret-left.svg?component';
 import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
+import NoteszTransition from '@/components/NoteszTransition.vue';
 import { mainPalette, backgroundPalette, type ColorName } from '@/model/themeData';
 import { useEventListener, useThrottleFn, useScroll } from '@vueuse/core';
-
 import { useThemeState } from '@/stores/themeState';
 
 const themeState = useThemeState()!;
@@ -60,9 +60,7 @@ const paletteOrder: (ColorName)[] = [
     class="relative pb-safe-b bg-black border-t-2 border-main-400/60"
   >
     <!-- Scroll indicators -->
-    <Transition
-      enter-active-class="duration-300 ease-out"
-      leave-active-class="duration-300 ease-in"
+    <NoteszTransition
       enter-from-class="opacity-0"
       leave-to-class="opacity-0"
     >
@@ -74,10 +72,8 @@ const paletteOrder: (ColorName)[] = [
       >
         <CaretRightIcon class="w-8 h-8 mr-1 absolute animate-pulse text-white" />
       </div>
-    </Transition>
-    <Transition
-      enter-active-class="duration-300 ease-out"
-      leave-active-class="duration-300 ease-out"
+    </NoteszTransition>
+    <NoteszTransition
       enter-from-class="opacity-0"
       leave-to-class="opacity-0"
     >
@@ -89,7 +85,7 @@ const paletteOrder: (ColorName)[] = [
       >
         <CaretLeftIcon class="w-8 h-8 mr-1 absolute animate-pulse text-white" />
       </div>
-    </Transition>
+    </NoteszTransition>
 
     <!-- Scroll container -->
     <div
@@ -294,6 +290,5 @@ const paletteOrder: (ColorName)[] = [
       </div>
 
     </div>
-
   </div>
 </template>

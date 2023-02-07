@@ -27,10 +27,10 @@ import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?com
 import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
 import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
-import { useEditorState } from '@/stores/editorState';
 import RibbonButton from '@/components/RibbonButton.vue';
 import IconButton from '@/components/IconButton.vue';
+import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import { useEditorState } from '@/stores/editorState';
 
 const CodemirrorEditor = defineAsyncComponent({
   loader: () => import('./CodemirrorEditor.vue'),
@@ -136,7 +136,7 @@ function onEditorBlur() {
         v-if="editorState.currentFile"
         ref="codemirrorEditor"
         :key="editorState.currentFile.path"
-        class="flex-1 overflow-hidden bg-background lg:ml-8"
+        class="flex-1 overflow-hidden lg:ml-8"
         :note="editorState.currentFileBlob.data || ''"
         @input="onNoteInput"
         @focus="onEditorFocus"

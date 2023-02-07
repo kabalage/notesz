@@ -32,11 +32,11 @@ async function clearStorage() {
 </script>
 
 <template>
-  <div
-    v-if="settings.data && !settings.data.selectedRepositoryId"
-    class="h-full grid overflow-y-auto"
-  >
-    <div class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b">
+  <div class="h-full grid overflow-y-auto">
+    <div
+      v-if="settings.data && !settings.data.selectedRepositoryId"
+      class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
+    >
       <h1 class="font-semibold mb-4 text-center">Welcome to</h1>
       <div class="flex justify-center mb-8" @click="clearStorage">
         <NoteszLogo
