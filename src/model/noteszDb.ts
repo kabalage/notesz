@@ -103,7 +103,10 @@ async function upgradeDb(
     const appStore = tx.objectStore('app');
     const settingsV1 = await appStoreV1.get('settings');
     if (settingsV1?.type === 'settings') {
-      await appStore.put(createSettings(settingsV1));
+      await appStore.put(createSettings({
+        ...settingsV1,
+        selectedTheme: 5
+      }));
     }
   }
 }
