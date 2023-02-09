@@ -1,9 +1,19 @@
 import debounce from '@/utils/debounce';
 import trial from '@/utils/trial';
+import type createMessageBus from '@/utils/createMessageBus';
 
-export default async function waitForCallback(
+// TODO needs more constraints
+interface CallbackData {
+  type: string;
+  params: any;
+}
+
+export default async function waitForCallback<T extends {
+  'callback': CallbackData
+}>(
   type: string,
-  childWindow: Window
+  childWindow: Window,
+  messageBus: ReturnType<typeof createMessageBus<T>>
 ): Promise<{ canceled: boolean, params?: any }> {
   return new Promise((resolve) => {
     // console.log('waitForCallback', type);
@@ -12,21 +22,17 @@ export default async function waitForCallback(
       return pendingCallbacks;
     });
     const debouncedFocusHandler = debounce(focusHandler, 500);
-    window.addEventListener('storage', storageHandler);
+    messageBus.on('callback', callbackHandler);
     window.addEventListener('focus', debouncedFocusHandler);
 
-    function storageHandler(event: StorageEvent) {
-      // console.log('storage', event, localStorage.tabMessage);
-      if (event.key === 'tabMessage' && event.newValue) {
-        const message = JSON.parse(localStorage.tabMessage);
-        // console.log('tabMessage', message);
-        if (message?.type === 'callback' && message?.callback === type) {
-          cleanUp();
-          resolve({
-            params: message.params,
-            canceled: false
-          });
-        }
+    function callbackHandler(callbackMsg: CallbackData) {
+      // console.log('callbackHandler', callbackMsg);
+      if (callbackMsg.type === type) {
+        cleanUp();
+        resolve({
+          params: callbackMsg.params,
+          canceled: false
+        });
       }
     }
 
@@ -41,8 +47,9 @@ export default async function waitForCallback(
     }
 
     function cleanUp() {
+      // console.log('cleanUp');
       debouncedFocusHandler.cancel();
-      window.removeEventListener('storage', storageHandler);
+      messageBus.off('callback', callbackHandler);
       window.removeEventListener('focus', debouncedFocusHandler);
       updatePendingCallbacks((pendingCallbacks) => {
         delete pendingCallbacks[type];

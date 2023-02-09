@@ -1,5 +1,6 @@
 import NoteszError from '@/utils/NoteszError';
 import { initTransaction, type NoteszDbTransaction } from './noteszDb';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 export interface BlobRefCount {
   blobId: string,
@@ -14,6 +15,7 @@ async function get(id: string, transaction?: NoteszDbTransaction) {
 }
 
 async function put(id: string, value: string, transaction?: NoteszDbTransaction) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const blobStore = tx.objectStore('blobs');
     const blobRefCountStore = tx.objectStore('blobRefCounts');
@@ -22,6 +24,7 @@ async function put(id: string, value: string, transaction?: NoteszDbTransaction)
       await blobRefCountStore.put({ blobId: id, refCount: 0 });
     }
     await blobStore.put(value, id);
+    messages.emit('change:blob', id);
   });
 }
 
@@ -75,6 +78,7 @@ async function changeRefCount(
 }
 
 async function collectGarbage(transaction?: NoteszDbTransaction) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const blobStore = tx.objectStore('blobs');
     const blobRefCountStore = tx.objectStore('blobRefCounts');
@@ -82,8 +86,10 @@ async function collectGarbage(transaction?: NoteszDbTransaction) {
     const blobRefCountsWithZeroRefs = await byRefCountIndex.getAll(0);
     const garbageBlobIds = blobRefCountsWithZeroRefs.map(blobRefCount => blobRefCount.blobId);
     for (let i = 0; i < garbageBlobIds.length; ++i) {
-      await blobStore.delete(garbageBlobIds[i]);
-      await blobRefCountStore.delete(garbageBlobIds[i]);
+      const blobId = garbageBlobIds[i];
+      await blobStore.delete(blobId);
+      await blobRefCountStore.delete(blobId);
+      messages.emit('change:blob', blobId);
     }
   });
 }

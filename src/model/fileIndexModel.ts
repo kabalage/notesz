@@ -1,6 +1,7 @@
 import { initTransaction, type NoteszDbTransaction } from './noteszDb';
 import blobModel from './blobModel';
 import gitBlobHash from '@/utils/gitBlobHash';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 export interface FileIndex {
   readonly type: 'fileIndex',
@@ -103,6 +104,7 @@ async function addFileIndex(
   fileIndex: FileIndex,
   transaction?: NoteszDbTransaction
 ) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     for (const node of fileIndex.index.values()) {
@@ -114,6 +116,10 @@ async function addFileIndex(
       }
     }
     await fileIndexStore.add(fileIndex);
+    messages.emit('change:fileIndex', {
+      repositoryId: fileIndex.repositoryId,
+      indexId: fileIndex.indexId
+    });
   });
 }
 
@@ -122,6 +128,7 @@ async function deleteFileIndex(
   indexId: FileIndex['indexId'],
   transaction?: NoteszDbTransaction
 ) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     const fileIndex = await fileIndexStore.get([repositoryId, indexId]);
@@ -137,6 +144,7 @@ async function deleteFileIndex(
       }
     }
     await fileIndexStore.delete([repositoryId, indexId]);
+    messages.emit('change:fileIndex', { repositoryId, indexId });
   });
 }
 
@@ -161,7 +169,7 @@ async function addFile(
     throw new Error('Invalid filePath');
   }
   const blobHash = await gitBlobHash(data);
-
+  const messages = useNoteszMessageBus();
   return initTransaction(async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     const fileIndex = await fileIndexStore.get([repositoryId, indexId]);
@@ -201,6 +209,7 @@ async function addFile(
       await blobModel.collectGarbage(tx);
       await fileIndexStore.put(fileIndex);
     }
+    messages.emit('change:fileIndex', { repositoryId, indexId });
     return newBlobId;
   });
 }
@@ -211,6 +220,7 @@ async function deleteFile(
   filePath: string,
   transaction?: NoteszDbTransaction
 ) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     const fileIndex = await fileIndexStore.get([repositoryId, indexId]);
@@ -250,6 +260,7 @@ async function deleteFile(
       await blobModel.collectGarbage(tx);
       await fileIndexStore.put(fileIndex);
     }
+    messages.emit('change:fileIndex', { repositoryId, indexId });
   });
 }
 
@@ -260,6 +271,7 @@ async function updateFile(
   data: string
 ) {
   const newHash = await gitBlobHash(data);
+  const messages = useNoteszMessageBus();
   return initTransaction(async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     const fileIndex = await fileIndexStore.get([repositoryId, indexId]);
@@ -292,6 +304,7 @@ async function updateFile(
       await blobModel.decrementRefCount(file.blobId, tx);
       await blobModel.incrementRefCount(updatedFile.blobId, tx);
       await fileIndexStore.put(fileIndex);
+      messages.emit('change:fileIndex', { repositoryId, indexId });
       return newBlobId;
     } else if (blobWasOriginal && newContentsAreTheOriginal) {
       return undefined;
@@ -306,11 +319,13 @@ async function updateFile(
       await blobModel.incrementRefCount(updatedFile.blobId, tx);
       await blobModel.collectGarbage(tx);
       await fileIndexStore.put(fileIndex);
+      messages.emit('change:fileIndex', { repositoryId, indexId });
       return file.blobId;
     } else if (!blobWasOriginal && !newContentsAreTheOriginal && contentsChanged) {
       await blobModel.put(file.blobId, data, tx);
       file.blobHash = newHash;
       await fileIndexStore.put(fileIndex);
+      messages.emit('change:fileIndex', { repositoryId, indexId });
       return undefined;
     } else if (!blobWasOriginal && !newContentsAreTheOriginal && !contentsChanged) {
       return undefined;
@@ -324,6 +339,7 @@ async function resolveConflict(
   filePath: string,
   transaction?: NoteszDbTransaction
 ) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const fileIndexStore = tx.objectStore('fileIndexes');
     const fileIndex = await fileIndexStore.get([repositoryId, indexId]);
@@ -345,28 +361,16 @@ async function resolveConflict(
     });
     putFileInIndex(fileIndex, updatedFile);
     await fileIndexStore.put(fileIndex);
+    messages.emit('change:fileIndex', { repositoryId, indexId });
   });
 }
 
-function getTreeNodeForPath(fileIndex: FileIndex, path: string) {
-  const node = fileIndex.index.get(path);
-  const pathPointsToTree = !!node && node.type === 'tree';
-  if (pathPointsToTree) {
-    return node;
-  }
-  const parentNodePath = getParentNodePath(path);
-  const parentNode = fileIndex.index.get(parentNodePath);
-  if (!parentNode || parentNode.type !== 'tree') {
-    throw new Error('Missing parent tree');
-  }
-  return parentNode;
-}
-
 function getFirstExistingParentTree(fileIndex: FileIndex, path: string): Tree {
-  const node = getTreeNodeForPath(fileIndex, path);
-  if (node.status === 'deleted' && node.path !== '') {
-    const parentNodePath = getParentNodePath(node.path);
-    return getFirstExistingParentTree(fileIndex, parentNodePath);
+  let nextPath = path;
+  let node = fileIndex.index.get(nextPath);
+  while (!node || node.type !== 'tree' || (node.status === 'deleted' && node.path !== '')) {
+    nextPath = getParentNodePath(nextPath);
+    node = fileIndex.index.get(nextPath);
   }
   return node;
 }

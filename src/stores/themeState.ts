@@ -8,11 +8,17 @@ const [provideThemeState, useThemeState] = createInjectionState(() => {
 
   const themeSettingsOpen = ref(false);
   const settings = useSettings();
+
+  const selectedThemeIndex = ref<number>();
   const selectedThemeCopy = ref<Theme>();
 
   const selectedThemeChanged = computed(() => {
-    if (!settings.data || !selectedThemeCopy.value) return false;
-    const selectedTheme = settings.data.themes[settings.data.selectedTheme];
+    if (!settings.data || !selectedThemeCopy.value
+      || selectedThemeIndex.value === undefined
+    ) {
+      return false;
+    }
+    const selectedTheme = settings.data.themes[selectedThemeIndex.value];
     return (
       selectedTheme.mainColor !== selectedThemeCopy.value.mainColor ||
       selectedTheme.accentColor !== selectedThemeCopy.value.accentColor ||
@@ -20,10 +26,26 @@ const [provideThemeState, useThemeState] = createInjectionState(() => {
     );
   });
 
-  watch(() => settings.data?.selectedTheme, (index) => {
-    if (index === undefined) return;
-    selectTheme(index);
-  });
+  watch(() => {
+    // theme settings can change from another tab
+    return {
+      selectedThemeIndex: settings.data?.selectedTheme,
+      theme: settings.data?.themes[settings.data?.selectedTheme]
+    };
+  }, ({ selectedThemeIndex }) => {
+    if (selectedThemeIndex === undefined) return;
+    initLocalState();
+  }, { immediate: true, deep: true });
+
+  function initLocalState() {
+    if (!settings.data) return;
+    const themes = settings.data.themes;
+    const theme = themes[settings.data.selectedTheme];
+    if (!theme) throw new Error('Invalid theme index');
+    selectedThemeCopy.value = { ...theme };
+    selectedThemeIndex.value = settings.data.selectedTheme;
+    applyTheme(selectedThemeCopy.value);
+  }
 
   function selectTheme(index: number) {
     if (!settings.data) return;
@@ -36,10 +58,11 @@ const [provideThemeState, useThemeState] = createInjectionState(() => {
         saveSelectedTheme();
       }
     }
-    settings.data.selectedTheme = index;
     const theme = themes[index];
     selectedThemeCopy.value = { ...theme };
+    selectedThemeIndex.value = index;
     applyTheme(selectedThemeCopy.value);
+    settings.data.selectedTheme = index;
   }
 
   function applyTheme(theme: Theme) {

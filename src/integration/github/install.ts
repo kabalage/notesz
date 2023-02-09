@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import NoteszError from '@/utils/NoteszError';
-import waitForCallback from './waitForCallback';
+import waitForCallback from '@/utils/waitForCallback';
 import trial from '@/utils/trial';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const CallbackParamsSchema = z.object({
   installation_id: z.preprocess((arg: any) => Number(arg), z.number().int()),
@@ -17,7 +18,12 @@ export default async function install() {
   );
 
   // Handle callback
-  const callback = await waitForCallback('githubPostInstall', childWindow!);
+  const messageBus = useNoteszMessageBus();
+  const callback = await waitForCallback(
+    'githubPostInstall',
+    childWindow!,
+    messageBus
+  );
   if (callback.canceled) {
     return { canceled: true };
   }

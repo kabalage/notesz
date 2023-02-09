@@ -60,6 +60,7 @@ function onEditorFocus() {
 }
 
 function onEditorBlur() {
+  editorState.currentFileBlob.flushThrottledPut();
   editorBlurTimeout = setTimeout(() => {
     editorFocused.value = false;
   }, 200);

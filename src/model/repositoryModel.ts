@@ -1,6 +1,7 @@
 import blobModel from './blobModel';
 import fileIndexModel from './fileIndexModel';
 import { initTransaction, type NoteszDbTransaction } from './noteszDb';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 export interface Repository {
   readonly id: string,
@@ -19,6 +20,7 @@ function createRepository(
 }
 
 async function add(repository: Repository, transaction?: NoteszDbTransaction) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const repositoriesStore = tx.objectStore('repositories');
     await repositoriesStore.add(repository);
@@ -34,10 +36,12 @@ async function add(repository: Repository, transaction?: NoteszDbTransaction) {
       repositoryId: repository.id,
       indexId: 'local'
     }), tx);
+    messages.emit('change:repository', repository.id);
   });
 }
 
 async function deleteRepo(id: string, transaction?: NoteszDbTransaction) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const repositoriesStore = tx.objectStore('repositories');
     await repositoriesStore.delete(id);
@@ -46,6 +50,7 @@ async function deleteRepo(id: string, transaction?: NoteszDbTransaction) {
     await fileIndexModel.deleteFileIndex(id, 'local');
     await fileIndexModel.deleteFileIndex(id, 'rebase');
     await blobModel.collectGarbage();
+    messages.emit('change:repository', id);
   });
 }
 
@@ -68,6 +73,7 @@ async function update(
   updater: (settings: Repository) => Repository | undefined,
   transaction?: NoteszDbTransaction
 ) {
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const repositoriesStore = tx.objectStore('repositories');
     const repository = await repositoriesStore.get(repositoryId);
@@ -77,13 +83,13 @@ async function update(
     const newRepository = updater(repository);
     if (newRepository) {
       await repositoriesStore.put(newRepository);
+      messages.emit('change:repository', newRepository.id);
     }
   });
 }
 
 export default {
   add,
-  // addMockRepository,
   delete: deleteRepo,
   get,
   list,

@@ -13,9 +13,9 @@ const router = useRouter();
 const settings = useSettings();
 const { isAuthorizing, authError, connect } = useRepositoryConnectAction();
 
-watch(() => settings.data, () => {
-  if (settings.data && settings.data?.selectedRepositoryId) {
-    navigateToEditor(settings.data.selectedRepositoryId);
+watch(() => settings.data?.selectedRepositoryId, async (selectedRepositoryId) => {
+  if (selectedRepositoryId) {
+    navigateToEditor(selectedRepositoryId);
   }
 }, { deep: true, immediate: true });
 

@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import userModel from '@/model/userModel';
-import waitForCallback from './waitForCallback';
 import { request as octokitRequest } from '@octokit/request';
+import userModel from '@/model/userModel';
+import waitForCallback from '@/utils/waitForCallback';
 import NoteszError from '@/utils/NoteszError';
 import trial from '@/utils/trial';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const AuthCallbackParamsSchema = z.object({
   code: z.string(),
@@ -25,7 +26,12 @@ export default async function authorize() {
   );
 
   // Handle callback
-  const callback = await waitForCallback('githubAuthorize', childWindow!);
+  const messageBus = useNoteszMessageBus();
+  const callback = await waitForCallback(
+    'githubAuthorize',
+    childWindow!,
+    messageBus
+  );
   if (callback.canceled) {
     throw new NoteszError('GitHub authorization was canceled', {
       code: 'canceled'

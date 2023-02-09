@@ -60,7 +60,7 @@ function locationReload() {
           />
         </div>
       </div> -->
-      <template v-if="explorerState.conflictingFiles.length > 0">
+      <template v-if="!explorerState.loading && explorerState.conflictingFiles.length > 0">
         <h2 class="text-accent-300 font-semibold mt-8 px-4 leading-loose" >
           Conflicting files
         </h2>
@@ -116,8 +116,8 @@ function locationReload() {
         </div>
       </template>
       <ul
-        v-if="explorerState.conflictingFiles.length === 0
-          || explorerState.browseAllDuringManualRebase"
+        v-if="!explorerState.loading && (explorerState.conflictingFiles.length === 0
+          || explorerState.browseAllDuringManualRebase)"
         class="divide-y divide-main-400/20"
         :class="{
           'bg-main-400/10 mx-4 rounded-lg overflow-hidden border-0':

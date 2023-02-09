@@ -8,20 +8,19 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
 ) => {
   const path = ref('');
   const browseAllDuringManualRebase = ref(false);
+  const stringCompare = new Intl.Collator('en').compare;
+
+  const loading = computed(() => {
+    return !editorState.fileIndex.data;
+  });
 
   const items = computed(() => {
     if (!editorState.fileIndex.data) return [];
 
-    const rootTree = fileIndexModel.getRootTreeNode(editorState.fileIndex.data);
-    let explorerTree = rootTree;
-    try {
-      explorerTree = fileIndexModel.getFirstExistingParentTree(
-        editorState.fileIndex.data,
-        path.value
-      );
-    } catch (err: any) {
-      console.error(err);
-    }
+    const explorerTree = fileIndexModel.getFirstExistingParentTree(
+      editorState.fileIndex.data,
+      path.value
+    );
     const items = [...explorerTree.children].map((childPath) => {
       return editorState.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
@@ -45,7 +44,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
       };
     }).sort((a, b) => {
       if (a.type === b.type) {
-        return a.name > b.name ? 1 : -1;
+        return stringCompare(a.name, b.name);
       }
       if (a.type === 'tree' && b.type === 'file') {
         return -1;
@@ -95,6 +94,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   return reactive({
     path,
     browseAllDuringManualRebase,
+    loading,
     items,
     conflictingFiles
   });

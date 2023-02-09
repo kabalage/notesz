@@ -1,15 +1,27 @@
 import createMessageBus from '@/utils/createMessageBus';
 import { createSharedComposable, tryOnScopeDispose } from '@vueuse/shared';
 
-interface NoteszMessageTypes {
-  'update:settings': void;
+export interface NoteszMessageTypes {
+  'change:user': void;
+  'change:settings': void;
+  'change:repository': string;
+  'change:fileIndex': {
+    repositoryId: string;
+    indexId: string;
+  },
+  'change:blob': string;
+  'callback': {
+    // TODO needs more constraints
+    type: string;
+    params: any;
+  };
 }
 
 export default createSharedComposable(() => {
-  const bus = createMessageBus<NoteszMessageTypes>();
+  const messageBus = createMessageBus<NoteszMessageTypes>();
   tryOnScopeDispose(() => {
-    bus.destroy();
+    messageBus.destroy();
   });
-  return bus;
+  return messageBus;
 });
 

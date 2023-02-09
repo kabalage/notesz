@@ -22,15 +22,21 @@ import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useThemeState } from '@/stores/themeState';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const themeState = useThemeState()!;
 const settings = useSettings();
 const isTouchDevice = useIsTouchDevice();
+const messages = useNoteszMessageBus();
 const repositoryList = useFromDb({
   get() {
     return repositoryModel.list();
   }
 });
+messages.on('change:repository', () => {
+  repositoryList.refetch();
+});
+
 const { isAuthorizing, authError, connect } = useRepositoryConnectAction();
 
 const backNavigationPath = computed(() => {
@@ -41,11 +47,13 @@ const backNavigationPath = computed(() => {
 
 async function disconnectRepository(id: string) {
   if (!settings.data) return;
-  await repositoryModel.delete(id);
-  await repositoryList.refetch();
   if (settings.data.selectedRepositoryId === id) {
-    settings.data.selectedRepositoryId = repositoryList.data![0]?.id || null;
+    const idx = repositoryList.data!.findIndex(repo => repo.id === id);
+    settings.data.selectedRepositoryId = repositoryList.data![idx + 1]?.id
+      || repositoryList.data![idx - 1]?.id
+      || null;
   }
+  await repositoryModel.delete(id);
 }
 
 function selectRepository(repoId: string) {

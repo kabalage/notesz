@@ -35,11 +35,11 @@ async function get(transaction?: NoteszDbTransaction) {
 }
 
 async function put(settings: Settings, transaction?: NoteszDbTransaction) {
-  const bus = useNoteszMessageBus();
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const appStore = tx.objectStore('app');
     const result = await appStore.put(settings);
-    bus.emit('update:settings');
+    messages.emit('change:settings');
     return result;
   });
 }
@@ -48,7 +48,7 @@ async function update(
   updater: (settings: Settings) => Settings | undefined,
   transaction?: NoteszDbTransaction
 ) {
-  const bus = useNoteszMessageBus();
+  const messages = useNoteszMessageBus();
   return initTransaction(transaction, async (tx) => {
     const appStore = tx.objectStore('app');
     const settings = (await appStore.get('settings')) as Settings | undefined;
@@ -58,7 +58,7 @@ async function update(
     const newSettings = updater(settings);
     if (newSettings) {
       await appStore.put(newSettings);
-      bus.emit('update:settings');
+      messages.emit('change:settings');
     }
   });
 }

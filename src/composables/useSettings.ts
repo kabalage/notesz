@@ -3,9 +3,8 @@ import settingsModel from '@/model/settingsModel';
 import { createSharedComposable } from '@vueuse/shared';
 import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
-import { tryOnScopeDispose } from '@vueuse/core';
-
 export default createSharedComposable(() => {
+  const messages = useNoteszMessageBus();
   const settings = useFromDb({
     get() {
       return settingsModel.get();
@@ -17,13 +16,11 @@ export default createSharedComposable(() => {
       return settingsModel.put(data);
     }
   });
-  function onSettingsUpdate() {
-    settings.refetch();
-  }
-  const bus = useNoteszMessageBus();
-  bus.on('update:settings', onSettingsUpdate);
-  tryOnScopeDispose(() => {
-    bus.off('update:settings', onSettingsUpdate);
+  messages.on('change:settings', () => {
+    // message emitted by the ongoing put is ignored
+    if (!settings.isPutting) {
+      settings.refetch();
+    }
   });
   return settings;
 });

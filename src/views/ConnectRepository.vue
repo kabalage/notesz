@@ -29,6 +29,7 @@ import BaseButton from '@/components/BaseButton.vue';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import trial from '@/utils/trial';
 import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const props = defineProps<{
   redirect: string
@@ -36,6 +37,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const isTouchDevice = useIsTouchDevice();
+const messages = useNoteszMessageBus();
 const filterText = ref('');
 const debouncedFilterText = refDebounced(filterText, 250);
 const isAuthorizing = ref(false);
@@ -45,6 +47,9 @@ const repositoryList = useFromDb({
   get() {
     return repositoryModel.list();
   }
+});
+messages.on('change:repository', () => {
+  repositoryList.refetch();
 });
 
 const connectedRepositories = computed(() => {

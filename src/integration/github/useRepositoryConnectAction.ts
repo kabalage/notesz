@@ -5,14 +5,19 @@ import useSettings from '@/composables/useSettings';
 import userModel from '@/model/userModel';
 import trial from '@/utils/trial';
 import authorize from './authorize';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 export default function useRepositoryConnectAction() {
+  const messages = useNoteszMessageBus();
   const router = useRouter();
   const settings = useSettings();
   const user = useFromDb({
     get() {
       return userModel.get();
     }
+  });
+  messages.on('change:user', () => {
+    user.refetch();
   });
   const isAuthorizing = ref(false);
   const authError = ref<Error | undefined>();

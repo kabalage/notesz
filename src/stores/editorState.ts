@@ -1,10 +1,11 @@
 import useFromDb from '@/composables/useFromDb';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 import blobModel from '@/model/blobModel';
 import fileIndexModel from '@/model/fileIndexModel';
 import repositoryModel from '@/model/repositoryModel';
 import { createInjectionState } from '@/utils/createInjectionState';
 import { useOnline } from '@vueuse/core';
-import { computed, reactive, ref, type Ref } from 'vue';
+import { computed, reactive, ref, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const [provideEditorState, useEditorState] = createInjectionState((
@@ -14,9 +15,21 @@ const [provideEditorState, useEditorState] = createInjectionState((
   const router = useRouter();
   const sidebarIsOpen = ref(true);
 
+  const messages = useNoteszMessageBus();
+
   const repository = useFromDb({
     get() {
       return repositoryModel.get(repositoryId.value);
+    }
+  });
+  messages.on('change:repository', (id) => {
+    if (id === repositoryId.value) {
+      repository.refetch();
+    }
+  });
+  watch(() => !repository.data && repository.isInitialized, (isDisconnected) => {
+    if (isDisconnected) {
+      router.push('/settings');
     }
   });
 
@@ -34,6 +47,11 @@ const [provideEditorState, useEditorState] = createInjectionState((
       return fileIndexModel.getFileIndex(repositoryId.value, currentFileIndexId.value);
     }
   });
+  messages.on('change:fileIndex', (change) => {
+    if (change.repositoryId === repositoryId.value && change.indexId === currentFileIndexId.value) {
+      fileIndex.refetch();
+    }
+  });
 
   const currentFile = computed(() => {
     if (!fileIndex.data) return undefined;
@@ -49,17 +67,10 @@ const [provideEditorState, useEditorState] = createInjectionState((
 
   const currentTree = computed(() => {
     if (!fileIndex.data) return undefined;
-    const rootTree = fileIndexModel.getRootTreeNode(fileIndex.data);
-    let tree = rootTree;
-    try {
-      tree = fileIndexModel.getFirstExistingParentTree(
-        fileIndex.data,
-        currentFilePath.value
-      );
-    } catch (err) {
-      console.error(err);
-    }
-    return tree;
+    return fileIndexModel.getFirstExistingParentTree(
+      fileIndex.data,
+      currentFilePath.value
+    );
   });
 
   const currentFileBlob = useFromDb({
@@ -72,17 +83,21 @@ const [provideEditorState, useEditorState] = createInjectionState((
     },
     async put(data) {
       if (!currentFile.value || !currentFileIndexId.value || data === undefined) return;
-      const blobIdChanged = await fileIndexModel.updateFile(
+      await fileIndexModel.updateFile(
         repositoryId.value,
         currentFileIndexId.value,
         currentFile.value.path,
         data
       );
-      if (blobIdChanged) {
-        fileIndex.refetch();
-      }
     },
     putThrottling: 5000
+  });
+  messages.on('change:blob', (blobId) => {
+    // message emitted by the ongoing put is ignored
+    if (!currentFileBlob.isPutting && blobId === currentFile.value?.blobId) {
+      console.log('refetching blob', blobId, Date.now());
+      currentFileBlob.refetch(blobId);
+    }
   });
 
   const isOnline = useOnline();
@@ -145,7 +160,6 @@ const [provideEditorState, useEditorState] = createInjectionState((
       currentFileIndexId.value,
       currentFilePath
     );
-    await fileIndex.refetch();
   }
 
   async function resolveConflict() {
@@ -157,7 +171,6 @@ const [provideEditorState, useEditorState] = createInjectionState((
       currentFileIndexId.value,
       currentFilePath
     );
-    await fileIndex.refetch();
   }
 
   return reactive({

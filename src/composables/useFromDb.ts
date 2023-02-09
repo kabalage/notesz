@@ -14,6 +14,8 @@ export default function useFromDb<T, WatchParams>({
 }) {
   const data = ref<T | undefined>(undefined);
   const isFetching = ref(false);
+  const isPutting = ref(false);
+  const isInitialized = ref(false);
   const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let lastPutTime = 0;
@@ -48,6 +50,7 @@ export default function useFromDb<T, WatchParams>({
       }
     } finally {
       isFetching.value = false;
+      isInitialized.value = true;
       if (put && data.value !== undefined) {
         startUpdateWatch();
       }
@@ -59,6 +62,7 @@ export default function useFromDb<T, WatchParams>({
     // console.log('useFromDb _put');
     lastPutTime = Date.now();
     error.value = undefined;
+    isPutting.value = true;
     try {
       ongoingPut = put(toRaw(newValue));
       await ongoingPut;
@@ -66,6 +70,7 @@ export default function useFromDb<T, WatchParams>({
       console.error('useFromDb put failed', err);
       error.value = err as Error;
     } finally {
+      isPutting.value = false;
       ongoingPut = undefined;
     }
   }
@@ -120,6 +125,8 @@ export default function useFromDb<T, WatchParams>({
     data,
     error,
     isFetching,
+    isPutting,
+    isInitialized,
     refetch: _get,
     put: _put,
     flushThrottledPut

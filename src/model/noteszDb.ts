@@ -40,7 +40,9 @@ export interface NoteszDb extends DBSchema {
 }
 
 export type NoteszDbTransaction = IDBPTransaction<
-  NoteszDb, ArrayLike<StoreNames<NoteszDb>>, Exclude<IDBTransactionMode, 'readonly'>>;
+  NoteszDb, ArrayLike<StoreNames<NoteszDb>>, Exclude<IDBTransactionMode, 'readonly'>> & {
+    id?: string
+  };
 
 let db: IDBPDatabase<NoteszDb> | undefined;
 let dbPromise: Promise<IDBPDatabase<NoteszDb>> | undefined;
@@ -153,7 +155,7 @@ export async function initTransaction<T>(
   if (transaction) {
     return callback(transaction, transaction.db);
   }
-  let tx;
+  let tx: NoteszDbTransaction | undefined;
   try {
     const db = await openNoteszDb();
     tx = db.transaction(db.objectStoreNames, 'readwrite');

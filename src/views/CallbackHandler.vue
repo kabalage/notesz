@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { getPendingCallbacks } from '@/integration/github/waitForCallback';
+import { getPendingCallbacks } from '@/utils/waitForCallback';
 import { useRouter } from 'vue-router';
+import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const router = useRouter();
 const props = defineProps<{
   type: string
 }>();
+const noteszMessageBus = useNoteszMessageBus();
 
 handleCallback();
 
@@ -13,10 +15,8 @@ async function handleCallback() {
   const pendingCallbacks = getPendingCallbacks();
   if (pendingCallbacks[props.type]) {
     const params = Object.fromEntries(new URLSearchParams(location.search));
-    localStorage.tabMessage = JSON.stringify({
-      id: Date.now(),
-      type: 'callback',
-      callback: props.type,
+    noteszMessageBus.emit('callback', {
+      type: props.type,
       params
     });
     window.close();
