@@ -1,15 +1,17 @@
 import NoteszError from '@/utils/NoteszError';
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 
-export default function useFromDb<T, WatchParams>({
+type WatchPrimitives = string | number | boolean | null | undefined;
+
+export default function useFromDb<T, WatchParam>({
   get,
   put,
   putThrottling = 1000,
-  watchParams
+  watch: watchParam
 }: {
-  get: (params?: WatchParams) => Promise<T> | T,
+  get: (params?: WatchParam) => Promise<T> | T,
   put?: ((data: UnwrapRef<T>) => any),
-  watchParams?: () => WatchParams,
+  watch?: () => WatchParam,
   putThrottling?: number
 }) {
   const data = ref<T | undefined>(undefined);
@@ -23,22 +25,24 @@ export default function useFromDb<T, WatchParams>({
   let throttledPut: (() => any) | undefined;
   let ongoingPut: Promise<any> | undefined;
 
-  if (watchParams) {
-    watch(watchParams, _get, {
-      deep: true,
+  if (watchParam) {
+    watch(watchParam, _get, {
       immediate: true
     });
   } else {
     _get();
   }
 
-  async function _get(params?: WatchParams) {
+  async function _get(params?: WatchParam) {
+    if (isFetching.value) {
+      return;
+    }
     // console.log('useFromDb _get');
     try {
+      isFetching.value = true;
       await flushThrottledPut();
       stopUpdateWatch();
       error.value = undefined;
-      isFetching.value = true;
       data.value = await get(params) as UnwrapRef<T>;
     } catch(err) {
       if (err instanceof Error) {
@@ -59,6 +63,13 @@ export default function useFromDb<T, WatchParams>({
 
   async function _put(newValue: UnwrapRef<T>) {
     if (!put) return;
+    if (ongoingPut) {
+      try {
+        await ongoingPut;
+      } catch(err) {
+        // do nothing
+      }
+    }
     // console.log('useFromDb _put');
     lastPutTime = Date.now();
     error.value = undefined;
@@ -89,7 +100,7 @@ export default function useFromDb<T, WatchParams>({
         }
 
         if (elapsed >= putThrottling) {
-          ongoingPut = _put(newValue);
+          _put(newValue);
         } else {
           throttledPut = () => {
             throttledPut = undefined;

@@ -1,4 +1,3 @@
-import debounce from '@/utils/debounce';
 import trial from '@/utils/trial';
 import type createMessageBus from '@/utils/createMessageBus';
 import waitForChildWindowClose from '@/utils/waitForChildWindowClose';

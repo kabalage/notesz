@@ -12,7 +12,7 @@ export default async function waitForChildWindowClose(
       abortSignal.addEventListener('abort', onAbort);
     }
 
-    function focusHandler(event: FocusEvent) {
+    function focusHandler() {
       // console.log('focusHandler', event);
       handleWindowClosed();
     }

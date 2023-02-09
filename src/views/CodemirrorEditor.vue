@@ -180,7 +180,7 @@ function setupVisualViewportHack(editorView: EditorView) {
         }
       }
     };
-    const scrollHandler = (event: Event) => {
+    const scrollHandler = () => {
       // console.log('visualViewport scroll', event);
       if (isIphone || isIpad) {
         requestAnimationFrame(() => {

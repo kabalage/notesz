@@ -39,7 +39,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
   });
 
   const fileIndex = useFromDb({
-    watchParams() {
+    watch() {
       return currentFileIndexId.value;
     },
     get() {
@@ -74,7 +74,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
   });
 
   const currentFileBlob = useFromDb({
-    watchParams() {
+    watch() {
       return currentFile.value?.blobId;
     },
     get(blobId) {

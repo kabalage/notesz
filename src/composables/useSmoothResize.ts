@@ -49,7 +49,7 @@ export function useSmoothResize(
     }
   });
 
-  useMutationObserver(mutationTarget, (mutations) => {
+  useMutationObserver(mutationTarget, () => {
     lastMutationTime = Date.now();
   }, {
     childList: true,
