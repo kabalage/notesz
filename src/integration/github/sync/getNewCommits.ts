@@ -83,7 +83,10 @@ export default async function getNewCommits(repositoryId: string) {
         ...commonRequestParams,
         since,
         per_page: pageSize,
-        page
+        page,
+        request: {
+          cache: 'reload' // bypass cache
+        }
       });
     });
     if (commitsError) {
