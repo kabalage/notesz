@@ -1,6 +1,7 @@
 import debounce from '@/utils/debounce';
 import trial from '@/utils/trial';
 import type createMessageBus from '@/utils/createMessageBus';
+import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
 
 // TODO needs more constraints
 interface CallbackData {
@@ -21,11 +22,13 @@ export default async function waitForCallback<T extends {
       pendingCallbacks[type] = true;
       return pendingCallbacks;
     });
-    const debouncedFocusHandler = debounce(focusHandler, 500);
-    messageBus.on('callback', callbackHandler);
-    window.addEventListener('focus', debouncedFocusHandler);
+    const windowCloseWaitAbortController = new AbortController();
+    waitForChildWindowClose(childWindow, windowCloseWaitAbortController.signal)
+      .then(onChildWindowClose);
 
-    function callbackHandler(callbackMsg: CallbackData) {
+    messageBus.on('callback', onCallback);
+
+    function onCallback(callbackMsg: CallbackData) {
       // console.log('callbackHandler', callbackMsg);
       if (callbackMsg.type === type) {
         cleanUp();
@@ -36,21 +39,21 @@ export default async function waitForCallback<T extends {
       }
     }
 
-    function focusHandler() {
-      // console.log('childWindow.closed', childWindow.closed);
-      if (childWindow.closed) {
-        cleanUp();
-        resolve({
-          canceled: true
-        });
+    function onChildWindowClose() {
+      if (windowCloseWaitAbortController.signal.aborted) {
+        return;
       }
+      // console.log('onChildWindowClose');
+      cleanUp();
+      resolve({
+        canceled: true
+      });
     }
 
     function cleanUp() {
       // console.log('cleanUp');
-      debouncedFocusHandler.cancel();
-      messageBus.off('callback', callbackHandler);
-      window.removeEventListener('focus', debouncedFocusHandler);
+      windowCloseWaitAbortController.abort();
+      messageBus.off('callback', onCallback);
       updatePendingCallbacks((pendingCallbacks) => {
         delete pendingCallbacks[type];
         return pendingCallbacks;

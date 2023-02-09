@@ -19,6 +19,7 @@ async function handleCallback() {
       type: props.type,
       params
     });
+    await new Promise(resolve => setTimeout(resolve, 500));
     window.close();
   } else {
     router.push('/');
