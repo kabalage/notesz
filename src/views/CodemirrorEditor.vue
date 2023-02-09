@@ -181,7 +181,7 @@ function setupVisualViewportHack(editorView: EditorView) {
       }
     };
     const scrollHandler = (event: Event) => {
-      console.log('visualViewport scroll', event);
+      // console.log('visualViewport scroll', event);
       if (isIphone || isIpad) {
         requestAnimationFrame(() => {
           // At a specific position 0 does not work, but -1 does
@@ -220,7 +220,6 @@ function insertText(text: string) {
 }
 
 function insertBrackets(bracket: string, pair?: string) {
-  console.log('insertBrackets', bracket);
   if (!cmEditorView.value) return;
   const range = cmEditorView.value.state.selection.ranges[0];
   if (range.from !== range.to) {

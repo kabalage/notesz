@@ -95,7 +95,6 @@ const [provideEditorState, useEditorState] = createInjectionState((
   messages.on('change:blob', (blobId) => {
     // message emitted by the ongoing put is ignored
     if (!currentFileBlob.isPutting && blobId === currentFile.value?.blobId) {
-      console.log('refetching blob', blobId, Date.now());
       currentFileBlob.refetch(blobId);
     }
   });

@@ -64,7 +64,7 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
 
   function storageHandler(event: StorageEvent) {
     if (event.key === 'tabMessage' && event.newValue) {
-      console.log('tabMessage', event.newValue);
+      // console.log('tabMessage', event.newValue);
       const message = JSON.parse(localStorage.tabMessage) as TabMessage<keyof MessageTypes>;
       if (subscribers.has(message.topic)) {
         for (const subscriber of subscribers.get(message.topic)!) {
