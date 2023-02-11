@@ -4,6 +4,7 @@ import App from './App.vue';
 import router from './router';
 import './assets/main.css';
 import { registerSW } from 'virtual:pwa-register';
+import VirtualKeyboardEvents from '@/utils/VirtualKeyboardEvents';
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -15,6 +16,8 @@ const updateSW = registerSW({
     console.log('sw onOfflineReady - App ready to work offline');
   },
 });
+
+VirtualKeyboardEvents.setupDefaultHandler();
 
 const app = createApp(App);
 app.use(router);

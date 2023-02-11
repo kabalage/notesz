@@ -9,7 +9,9 @@ import NoteszTransition from '@/components/NoteszTransition.vue';
 import { mainPalette, backgroundPalette, type ColorName } from '@/model/themeData';
 import { useEventListener, useThrottleFn, useScroll } from '@vueuse/core';
 import { useThemeState } from '@/stores/themeState';
+import useVirtualKeyboard from '@/utils/useVirtualKeyboard';
 
+const virtualKeyboard = useVirtualKeyboard();
 const themeState = useThemeState()!;
 const scrollContainer = ref<HTMLElement | null>(null);
 const { x } = useScroll(scrollContainer, {
@@ -57,7 +59,11 @@ const paletteOrder: (ColorName)[] = [
 <template>
   <div
     v-if="themeState.loaded && themeState.selectedThemeCopy"
-    class="relative pb-safe-b bg-black border-t-2 border-main-400/60"
+    class="relative bg-black border-t-2 border-main-400/60
+      transition-[padding] duration-300 ease-in-out"
+    :class="{
+      'pb-safe-b': !virtualKeyboard.visible.value
+    }"
   >
     <!-- Scroll indicators -->
     <NoteszTransition

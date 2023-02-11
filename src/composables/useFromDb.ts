@@ -1,8 +1,6 @@
 import NoteszError from '@/utils/NoteszError';
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 
-type WatchPrimitives = string | number | boolean | null | undefined;
-
 export default function useFromDb<T, WatchParam>({
   get,
   put,

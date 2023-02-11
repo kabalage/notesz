@@ -4,6 +4,7 @@ import {
   tryOnScopeDispose
 } from '@vueuse/core';
 import { ref } from 'vue';
+import { isIos } from '@/utils/iDeviceDetection';
 
 /**
  * On iOS moving your finger after pressing down on an element does not always emit pointercancel
@@ -14,8 +15,6 @@ import { ref } from 'vue';
 export default function useIosPointerMoveCancelHack(
   target: MaybeComputedRef<EventTarget | null | undefined>
 ) {
-  const isIphoneOrIpad = /iPhone|iPad/.test(window.navigator.userAgent)
-    || (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
   const active = ref(false);
   const canceled = ref(false);
   let pointerDownClientX = 0;
@@ -23,7 +22,7 @@ export default function useIosPointerMoveCancelHack(
   const touchMoveJitterAllowed = 20;
   let eventListenerCleanups: Array<ReturnType<typeof useEventListener>> = [];
 
-  if (isIphoneOrIpad) {
+  if (isIos) {
     useEventListener(target, 'pointerdown', handlePointerDown);
     tryOnScopeDispose(() => removeEventListeners());
   }

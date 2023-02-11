@@ -16,6 +16,11 @@ import * as commands from '@codemirror/commands';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import VirtualKeyboardEvents from '@/utils/VirtualKeyboardEvents';
+import {
+  type VirtualKeyboardChangeEvent,
+  handleShowIos, handleShowNonIos
+} from '@/utils/VirtualKeyboardEvents';
 
 const props = defineProps<{
   note: string
@@ -130,7 +135,26 @@ function onReady(payload: {
   container: HTMLDivElement;
 }) {
   cmEditorView.value = payload.view;
-  setupVisualViewportHack(payload.view);
+
+  VirtualKeyboardEvents.onChange(onVirtualKeyboardChange);
+  onUnmounted(() => {
+    VirtualKeyboardEvents.off(onVirtualKeyboardChange);
+  });
+
+  function onVirtualKeyboardChange(event: VirtualKeyboardChangeEvent) {
+    if (event.visible) {
+      event.preventDefault();
+      handleShowIos(event);
+      handleShowNonIos(event);
+      payload.view.dispatch({
+        effects: EditorView.scrollIntoView(payload.view.state.selection.ranges[0], {
+          y: 'nearest',
+          yMargin: 16
+        })
+      });
+    }
+  }
+
 }
 
 function emitChange() {
@@ -145,57 +169,6 @@ function onChange(newContents: string) {
   modelValue.value = newContents;
   emit('input', newContents);
   // console.log('change', newContents.slice(0, 10));
-}
-
-function setupVisualViewportHack(editorView: EditorView) {
-  // Resize the documentElement on iOS when the virtual keyboard is visible
-  if (window.visualViewport) {
-    const isIphone = /iPhone/.test(window.navigator.userAgent);
-    const isIpad = /iPad/.test(window.navigator.userAgent)
-      || (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-      && !isIphone;
-    const handler = () => {
-      // console.log('resize', window.navigator.userAgent);
-      if (isIphone || isIpad) {
-        const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
-        // console.log(window.visualViewport!.height, document.documentElement.scrollTop,
-        //   editorView.hasFocus, window.visualViewport);
-        if (editorView.hasFocus) {
-          document.documentElement.scrollTop = 0;
-          const resizeToHeight = isInstalled && isIpad
-            ? window.visualViewport!.height - 1 - 24
-              // 1px for a border above the keyboard
-              // 24px magic offset to fix reported standalone safari viewport height on the iPad
-            : window.visualViewport!.height - 1;
-          document.documentElement.style.height = `${resizeToHeight}px`;
-
-          editorView.dispatch({
-            effects: EditorView.scrollIntoView(editorView.state.selection.ranges[0], {
-              y: 'nearest',
-              yMargin: 16
-            })
-          });
-        } else {
-          document.documentElement.style.height = '';
-        }
-      }
-    };
-    const scrollHandler = () => {
-      // console.log('visualViewport scroll', event);
-      if (isIphone || isIpad) {
-        requestAnimationFrame(() => {
-          // At a specific position 0 does not work, but -1 does
-          document.documentElement.scrollTop = -1;
-        });
-      }
-    };
-    window.visualViewport.addEventListener('resize', handler);
-    window.visualViewport.addEventListener('scroll', scrollHandler);
-    onUnmounted(() => {
-      window.visualViewport?.removeEventListener('resize', handler);
-      window.visualViewport?.removeEventListener('scroll', scrollHandler);
-    });
-  }
 }
 
 function insertText(text: string) {

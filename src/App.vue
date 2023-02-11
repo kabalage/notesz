@@ -7,9 +7,9 @@ import { vSmoothResize } from '@/composables/useSmoothResize';
 import NoteszTransition from './components/NoteszTransition.vue';
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
+const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
 
 const themeState = provideThemeState();
-
 </script>
 
 <template>
@@ -17,8 +17,13 @@ const themeState = provideThemeState();
     v-if="themeState.loaded"
     class="w-full h-full flex flex-col bg-main-400/20"
   >
+    <MobileDevConsole
+      v-if="false"
+      ref="consoleDiv"
+      class="h-32"
+    />
     <div
-      class="flex-1 overflow-hidden ease-in-out bg-background"
+      class="flex-1 overflow-hidden bg-background"
       key="main-area"
       v-smooth-resize="{ watchParent: true }"
     >

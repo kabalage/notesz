@@ -70,7 +70,7 @@ async function clearStorage() {
 
 <template>
   <div class="h-full overflow-hidden flex flex-col">
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto overscroll-contain">
       <div class="p-4 pb-8 max-w-xl mx-auto">
         <h1 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-center">
           Settings
