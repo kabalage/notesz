@@ -129,15 +129,16 @@ function onEditorBlur() {
         />
       </div>
       <CodemirrorEditor
-        v-if="editorState.currentFile"
+        v-if="editorState.currentFileBlob.data !== undefined"
         ref="codemirrorEditor"
         :key="editorState.currentFile.path"
-        class="flex-1 overflow-hidden lg:ml-8"
-        :note="editorState.currentFileBlob.data || ''"
+        class="flex-1 overflow-hidden lg:mx-8"
+        :value="editorState.currentFileBlob.data"
         @input="onNoteInput"
         @focus="onEditorFocus"
         @blur="onEditorBlur"
       />
+      <div v-else class="flex-1" />
       <Transition
         enter-active-class="duration-300 ease-out"
         enter-from-class="transform opacity-0 translate-y-full"

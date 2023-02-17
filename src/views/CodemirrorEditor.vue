@@ -16,6 +16,7 @@ import * as commands from '@codemirror/commands';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import { isIos } from '@/utils/iDeviceDetection';
 import VirtualKeyboardEvents from '@/utils/VirtualKeyboardEvents';
 import {
   type VirtualKeyboardChangeEvent,
@@ -23,9 +24,10 @@ import {
 } from '@/utils/VirtualKeyboardEvents';
 
 const props = defineProps<{
-  note: string
+  value: string
 }>();
 const emit = defineEmits(['input', 'change', 'focus', 'blur']);
+const isFocused = ref(false);
 
 // TODO temporary solution until this gets sorted out:
 // https://github.com/surmon-china/vue-codemirror/issues/167
@@ -91,10 +93,15 @@ const extensions = [
       paddingTop: '1rem',
       paddingBottom: '1rem',
       textUnderlineOffset: '0.2rem',
-      boxShadow: 'none',
+      boxShadow: 'none'
     },
     '.cm-editor': {
       overflow: 'hidden'
+    },
+    '.cm-placeholder': {
+      textAlign: 'center',
+      display: 'block',
+      fontSize: '1rem'
     },
     '.cm-scroller': {
       overscrollBehavior: 'contain',
@@ -110,11 +117,13 @@ const extensions = [
   EditorView.domEventHandlers({
     blur() {
       // console.log('Codemirror blur');
+      isFocused.value = false;
       emit('blur');
       emitChange();
     },
     focus() {
       // console.log('Codemirror focus');
+      isFocused.value = true;
       emit('focus');
     }
   }),
@@ -126,8 +135,8 @@ const extensions = [
 ];
 
 const cmEditorView = shallowRef<EditorView>();
-const modelValue = ref(props.note); // maybe watch prop
-const emittedValue = ref(props.note);
+const modelValue = ref(props.value); // maybe watch prop
+const emittedValue = ref(props.value);
 const isTouchDevice = useIsTouchDevice();
 
 function onReady(payload: {
@@ -355,11 +364,20 @@ defineExpose({
 
 <template>
   <Codemirror
-    :model-value="props.note"
+    :model-value="props.value"
     @update:model-value="onChange"
-    class="!block text-sm select-auto"
+    class="!block text-sm select-auto cursor-text"
+    :class="{
+      '[&_.cm-placeholder]:font-sans [&_.cm-placeholder]:text-main-200/60':
+        props.value === '' && !isFocused
+    }"
     :style="{ height: '100%' }"
-    :autofocus="!isTouchDevice"
+    :autofocus="!isTouchDevice || (!isIos && props.value === '')"
+    :placeholder="!isFocused
+      ? isTouchDevice
+        ? 'Tap to start editing...'
+        : 'Click to start editing...'
+      : ''"
     :indent-with-tab="true"
     :tab-size="2"
     :extensions="extensions"
