@@ -4,7 +4,7 @@ import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import CogIcon from '@/assets/icons/cog.svg?component';
 import FolderIcon from '@/assets/icons/folder.svg?component';
 import FileIcon from '@/assets/icons/file.svg?component';
-import FileNewIcon from '@/assets/icons/file-new.svg?component';
+import PlusIcon from '@/assets/icons/plus.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
 import PlusIcon20 from '@/assets/icons/plus-20.svg?component';
 import AsteriskIcon20 from '@/assets/icons/asterisk-20.svg?component';
@@ -36,7 +36,7 @@ const explorerState = useExplorerState()!;
     </div>
     <ButtonBarDesktop class="flex-none mb-4">
       <ButtonBarDesktopButton @click="editorState.addFile(explorerState.path)">
-        <FileNewIcon class="w-6 h-6"/>
+        <PlusIcon class="w-6 h-6"/>
       </ButtonBarDesktopButton>
       <ButtonBarDesktopButton
         :disabled="editorState.syncDisabled"
@@ -69,7 +69,7 @@ const explorerState = useExplorerState()!;
               }"
               active-class="!bg-main-400/20"
             >
-              <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400/60" />
+              <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400" />
               <div class="flex-1">
                 <div class="truncate leading-tight">
                   {{ file.name }}
@@ -171,7 +171,7 @@ const explorerState = useExplorerState()!;
             }"
             active-class="!bg-main-400/20"
           >
-            <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400/60" />
+            <FileIcon class="w-6 h-6 mr-2 flex-none text-main-400" />
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>

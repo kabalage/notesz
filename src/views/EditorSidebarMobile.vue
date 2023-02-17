@@ -4,8 +4,8 @@ import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import CogIcon from '@/assets/icons/cog.svg?component';
 import FolderIcon from '@/assets/icons/folder.svg?component';
 import FileIcon from '@/assets/icons/file.svg?component';
-import FileNewIcon from '@/assets/icons/file-new.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
+import PlusIcon from '@/assets/icons/plus.svg?component';
 import PlusIcon20 from '@/assets/icons/plus-20.svg?component';
 import AsteriskIcon20 from '@/assets/icons/asterisk-20.svg?component';
 import XmarkIcon from '@/assets/icons/x-mark.svg?component';
@@ -81,7 +81,7 @@ function locationReload() {
               }"
               active-class="bg-main-400/20"
             >
-              <FileIcon class="w-6 h-6 mr-2 text-main-400/60 flex-none" />
+              <FileIcon class="w-6 h-6 mr-2 text-main-400 flex-none" />
               <div class="flex-1 truncate">
                 <div class="truncate leading-tight">
                   {{ file.name }}
@@ -189,7 +189,7 @@ function locationReload() {
             active-class="bg-main-400/20"
           >
             <FileIcon
-              class="w-6 h-6 mr-2 text-main-400/60 flex-none"
+              class="w-6 h-6 mr-2 text-main-400 flex-none"
             />
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
@@ -212,7 +212,7 @@ function locationReload() {
         label="New note"
         @click="editorState.addFile(explorerState.path)"
       >
-        <FileNewIcon class="w-6 h-6" />
+        <PlusIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
