@@ -130,8 +130,8 @@ export function handleShowIos(event: VirtualKeyboardChangeEvent) {
 export function handleShowNonIos(event: VirtualKeyboardChangeEvent) {
   if (event.visible && !isIos) {
     // console.log('handleShowNonIos');
-    // weird + 2px is needed on Chrome Android
-    document.documentElement.style.paddingBottom = 'calc(env(keyboard-inset-height, 0) + 2px)';
+    // a weird 2px offset is needed on Chrome Android
+    document.documentElement.style.height = 'calc(100% - env(keyboard-inset-height, 0) - 2px)';
   }
 }
 
@@ -153,7 +153,7 @@ export function handleHideNonIos(event: VirtualKeyboardChangeEvent) {
   if (!event.visible && !isIos) {
     // console.log('handleHideNonIos');
     // make sure the element is unfocused when the keyboard is hidden on Chrome Android
-    document.documentElement.style.paddingBottom = '';
+    document.documentElement.style.height = '';
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
