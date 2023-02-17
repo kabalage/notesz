@@ -207,17 +207,27 @@ function locationReload() {
       </ul>
     </div>
     <ButtonBarMobile class="flex-none">
-      <ButtonBarMobileButton @click="editorState.addFile(explorerState.path)">
-        <FileNewIcon class="w-8 h-8" />
+      <ButtonBarMobileButton
+        class="flex-1"
+        label="New note"
+        @click="editorState.addFile(explorerState.path)"
+      >
+        <FileNewIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
-        @click="editorState.startSync"
+        class="flex-1"
+        label="Sync"
         :disabled="editorState.syncDisabled"
+        @click="editorState.startSync"
       >
-        <SyncIcon class="w-8 h-8" />
+        <SyncIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
-      <ButtonBarMobileButton to="/settings">
-        <CogIcon class="w-8 h-8" />
+      <ButtonBarMobileButton
+        class="flex-1"
+        label="Settings"
+        to="/settings"
+      >
+        <CogIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
     </ButtonBarMobile>
   </div>

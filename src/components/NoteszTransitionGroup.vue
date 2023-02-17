@@ -12,8 +12,15 @@ const parentElement = computed(() => {
     return rootNode.value.$el;
   }
 });
+const props = withDefaults(defineProps<{
+  resizeAnimationDuration?: number,
+}>(), {
+  resizeAnimationDuration: 300
+});
 
-useSmoothResize(parentElement);
+useSmoothResize(parentElement, {
+  animationDuration: props.resizeAnimationDuration
+});
 
 function onBeforeLeave(el: Element) {
   if (!(el instanceof HTMLElement)) {

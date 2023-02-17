@@ -22,9 +22,9 @@ import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import TrashIcon from '@/assets/icons/trash.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
 import CheckIcon from '@/assets/icons/check.svg?component';
-import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?component';
 
 import EmptyPlaceholder from './EmptyPlaceholder.vue';
+import MessageBox from '@/components/MessageBox.vue';
 import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
 import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import RibbonButton from '@/components/RibbonButton.vue';
@@ -123,15 +123,10 @@ function onEditorBlur() {
         v-if="editorState.currentFile.conflictReason"
         class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
       >
-        <p
-          class="px-4 py-2 text-center font-medium rounded-lg bg-orange-400/20 text-orange-300
-            border-2 border-orange-400"
-        >
-          <ExclamationTriangleIcon class="w-6 h-6 inline-block mr-1" />
-          <span>
-            {{ editorState.currentFile.conflictReason }}
-          </span>
-        </p>
+        <MessageBox
+          :message="editorState.currentFile.conflictReason"
+          type="warning"
+        />
       </div>
       <CodemirrorEditor
         v-if="editorState.currentFile"
@@ -152,24 +147,34 @@ function onEditorBlur() {
           class="flex-none sm:hidden"
         >
           <ButtonBarMobileButton
+            class="flex-1"
+            label="Back"
             @click="editorState.closeFile()"
           >
-            <ArrowLeftIcon class="w-8 h-8" />
+            <ArrowLeftIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
+            class="flex-1"
+            label="Sync"
             :disabled="editorState.syncDisabled"
             @click="editorState.startSync()"
           >
-            <SyncIcon class="w-8 h-8" />
+            <SyncIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
-          <ButtonBarMobileButton @click="editorState.deleteCurrentFile">
-            <TrashIcon class="w-8 h-8" />
+          <ButtonBarMobileButton
+            class="flex-1"
+            label="Delete"
+            @click="editorState.deleteCurrentFile"
+          >
+            <TrashIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             v-if="editorState.currentFile.conflicting"
+            class="flex-1"
+            label="Resolve"
             @click="editorState.resolveConflict()"
           >
-            <CheckIcon class="w-8 h-8" />
+            <CheckIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
         </ButtonBarMobile>
       </Transition>

@@ -3,8 +3,11 @@ import { createInjectionState } from '@/utils/createInjectionState';
 import { mainPalette, backgroundPalette, type ColorName } from '@/model/themeData';
 import useSettings from '@/composables/useSettings';
 import type { Theme } from '@/model/settingsModel';
+import type { provideDialogState } from './dialogState';
 
-const [provideThemeState, useThemeState] = createInjectionState(() => {
+const [provideThemeState, useThemeState] = createInjectionState((
+  dialogState: ReturnType<typeof provideDialogState>
+) => {
 
   const themeSettingsOpen = ref(false);
   const settings = useSettings();
@@ -47,13 +50,17 @@ const [provideThemeState, useThemeState] = createInjectionState(() => {
     applyTheme(selectedThemeCopy.value);
   }
 
-  function selectTheme(index: number) {
+  async function selectTheme(index: number) {
     if (!settings.data) return;
     const themes = settings.data.themes;
     if (!themes[index]) throw new Error('Invalid theme index');
     if (selectedThemeChanged.value) {
-      // TODO: Show a dialog instead of a confirm
-      const shouldSave = confirm('Save changes to the theme?');
+      const shouldSave = await dialogState.confirm({
+        title: 'Save changes?',
+        description: 'You have unsaved changes to the theme. Do you want to save them?',
+        confirmButtonLabel: 'Save',
+        rejectButtonLabel: 'Discard'
+      });
       if (shouldSave) {
         saveSelectedTheme();
       }
@@ -127,10 +134,14 @@ const [provideThemeState, useThemeState] = createInjectionState(() => {
     applyTheme(selectedThemeCopy.value);
   }
 
-  function closeThemeSettings() {
+  async function closeThemeSettings() {
     if (selectedThemeChanged.value) {
-      // TODO: Show a dialog instead of a confirm
-      const shouldSave = confirm('Save changes to the theme?');
+      const shouldSave = await dialogState.confirm({
+        title: 'Save changes?',
+        description: 'You have unsaved changes to the theme. Do you want to save them?',
+        confirmButtonLabel: 'Save',
+        rejectButtonLabel: 'Discard'
+      });
       if (shouldSave) {
         saveSelectedTheme();
       }

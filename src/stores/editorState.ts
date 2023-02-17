@@ -7,6 +7,8 @@ import { createInjectionState } from '@/utils/createInjectionState';
 import { useOnline } from '@vueuse/core';
 import { computed, reactive, ref, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDialogState } from '@/stores/dialogState';
+import validatePath from '@/utils/validatePath';
 
 const [provideEditorState, useEditorState] = createInjectionState((
   repositoryId: Ref<string>,
@@ -15,6 +17,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
   const router = useRouter();
   const sidebarIsOpen = ref(true);
 
+  const dialogState = useDialogState()!;
   const messages = useNoteszMessageBus();
 
   const repository = useFromDb({
@@ -129,10 +132,32 @@ const [provideEditorState, useEditorState] = createInjectionState((
   async function addFile(path: string) {
     if (!currentFileIndexId.value) return;
     const placeholderPath = path ?
-      `${path}/untitled`
-      : 'untitled';
-    // TODO show prompt on UI
-    let newFilePath = prompt('Add file (folders along the path will be created):', placeholderPath);
+      `${path}/`
+      : '';
+
+    let newFilePath = await dialogState.prompt({
+      title: 'New file',
+      initialValue: placeholderPath,
+      description: 'Any valid path is allowed.'
+        + ' Folders along the path will be created automatically.'
+        + ' The <em>.md</em> extension is added automatically if'
+        + ' missing.',
+      placeholder: 'path/to/file[.md]',
+      confirmButtonLabel: 'Create',
+      cancelButtonLabel: 'Cancel',
+      validate(path: string) {
+        if (path && !path.endsWith('/') && !path.endsWith('.md')) {
+          path += '.md'; // extension should be included in length validation
+        }
+        const validationError = validatePath(path);
+        if (validationError) {
+          return validationError;
+        }
+        if (fileIndex.data?.index.get(path)) {
+          return 'A file or folder with this path already exists.';
+        }
+      }
+    });
     if (!newFilePath) return;
     if (!newFilePath.endsWith('.md')) {
       newFilePath += '.md';
@@ -149,8 +174,12 @@ const [provideEditorState, useEditorState] = createInjectionState((
 
   async function deleteCurrentFile() {
     if (!currentFile.value || !currentFileIndexId.value) return;
-    // TODO show confirm on UI
-    const confirmed = confirm(`Are you sure you want to delete "${currentFile.value.path}"?`);
+    const confirmed = await dialogState.confirm({
+      title: 'Delete file?',
+      description: `Are you sure you want to delete <em class="break-words">${currentFile.value.path}</em>?`,
+      confirmButtonLabel: 'Delete',
+      rejectButtonLabel: 'Cancel'
+    });
     if (!confirmed) return;
     const currentFilePath = currentFile.value.path;
     await closeFile();

@@ -59,10 +59,9 @@ const paletteOrder: (ColorName)[] = [
 <template>
   <div
     v-if="themeState.loaded && themeState.selectedThemeCopy"
-    class="relative bg-black border-t-2 border-main-400/60
-      transition-[padding] duration-300 ease-in-out"
+    class="relative bg-black border-t-2 border-main-400/60"
     :class="{
-      'pb-safe-b': !virtualKeyboard.visible.value
+      'pb-[calc(env(safe-area-inset-bottom,0.5rem)-0.5rem)]': !virtualKeyboard.visible.value
     }"
   >
     <!-- Scroll indicators -->
@@ -290,11 +289,10 @@ const paletteOrder: (ColorName)[] = [
           class="w-32"
           @click="themeState.closeThemeSettings()"
         >
-          <CheckIcon class="w-6 h-6 text-accent-300 mr-2" />
+          <CheckIcon class="flex-none w-6 h-6 text-accent-300 mr-2" />
           Done
         </BasicButton>
       </div>
-
     </div>
   </div>
 </template>

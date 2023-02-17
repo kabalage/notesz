@@ -15,6 +15,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "6.1.0",
     "@codemirror/lang-markdown": "6.0.2",
+    "@headlessui/vue": "1.7.10",
     "@octokit/oauth-app": "4.1.0",
     "@octokit/request": "6.2.2",
     "@uiw/codemirror-extensions-hyper-link": "4.13.2",

@@ -90,7 +90,8 @@ const extensions = [
     '.cm-content': {
       paddingTop: '1rem',
       paddingBottom: '1rem',
-      textUnderlineOffset: '0.2rem'
+      textUnderlineOffset: '0.2rem',
+      boxShadow: 'none',
     },
     '.cm-editor': {
       overflow: 'hidden'

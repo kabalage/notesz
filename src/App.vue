@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent, Transition } from 'vue';
 import { RouterView } from 'vue-router';
-import { provideThemeState } from './stores/themeState';
+import { provideThemeState } from '@/stores/themeState';
+import { provideDialogState } from '@/stores/dialogState';
 
 import { vSmoothResize } from '@/composables/useSmoothResize';
-import NoteszTransition from './components/NoteszTransition.vue';
+import NoteszTransition from '@/components/NoteszTransition.vue';
+import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import DialogHost from '@/views/DialogHost.vue';
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
 const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
 
-const themeState = provideThemeState();
+const dialogState = provideDialogState();
+const themeState = provideThemeState(dialogState);
+
+const isTouchDevice = useIsTouchDevice();
+
 </script>
 
 <template>
@@ -25,20 +32,21 @@ const themeState = provideThemeState();
     <div
       class="flex-1 overflow-hidden bg-background"
       key="main-area"
-      v-smooth-resize="{ watchParent: true }"
+      v-smooth-resize="{ watchParent: true, animationDuration: 300 }"
     >
       <RouterView class="" v-slot="{ Component }">
-        <Transition
-          enter-active-class="duration-[150ms] transition-all ease-in-out
+        <component
+          :is="isTouchDevice ? 'v-fragment' : Transition"
+          enter-active-class="duration-200 transition-all ease-out
             motion-reduce:transition-none"
-          leave-active-class="duration-[150ms] transition-all ease-in-out
+          leave-active-class="duration-100 transition-all ease-in
             motion-reduce:transition-none"
           enter-from-class="opacity-0 transform scale-[0.95]"
           leave-to-class="opacity-0 transform scale-[0.95]"
           mode="out-in"
         >
-          <Component :is="Component" />
-        </Transition>
+          <component :is="Component" />
+        </component>
       </RouterView>
     </div>
     <NoteszTransition
@@ -51,5 +59,6 @@ const themeState = provideThemeState();
         key="theme-settings"
       />
     </NoteszTransition>
+    <DialogHost />
   </div>
 </template>

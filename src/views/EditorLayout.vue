@@ -23,12 +23,12 @@ provideExplorerState(editorState);
 </script>
 
 <template>
-  <div class="h-full overflow-hidden sm:flex bg-background">
+  <div class="h-full overflow-hidden sm:flex bg-background pl-safe-l pr-safe-r">
     <NoteszTransitionGroup>
       <div class="touch:hidden flex-1" key="bg-left" />
       <EditorSidebarMobile
         v-if="isTouchDevice && editorState.sidebarIsOpen"
-        class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-main-400/20 ml-safe-l"
+        class="flex-none h-full sm:w-64 touch:sm:w-72 sm:border-r sm:border-main-400/20"
         :class="{
           '<sm:hidden': editorState.currentFile
         }"
@@ -45,10 +45,9 @@ provideExplorerState(editorState);
         key="sidebar-desktop"
       />
       <EditorContents
-        class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl mr-safe-r"
+        class="h-full touch:flex-1 mouse:w-full mouse:max-w-5xl"
         :class="{
-          '<sm:hidden': !editorState.currentFile,
-          'ml-safe-l': !editorState.sidebarIsOpen
+          '<sm:hidden': !editorState.currentFile
         }"
         key="editor"
       />

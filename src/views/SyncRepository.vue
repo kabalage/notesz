@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-
-import BasicButton from '@/components/BasicButton.vue';
-import ExclamationTriangleIcon from '@/assets/icons/exclamation-triangle.svg?component';
 import { useRouter } from 'vue-router';
 
+import BasicButton from '@/components/BasicButton.vue';
+import MessageBox from '@/components/MessageBox.vue';
 import useSyncAction from '@/integration/github/sync/useSyncAction';
 
 const props = defineProps<{
@@ -79,25 +78,13 @@ function navigateBack() {
           v-else
           class="mt-4"
         >
-          <p
-            class="px-4 py-3 rounded-lg border-2 font-medium"
-            :class="{
-              'bg-red-500/20 text-red-300 border-red-500':
-                error.code !== 'rebaseConflicts',
-              'bg-orange-400/20 text-orange-300 border-orange-400':
-                error.code === 'rebaseConflicts'
-            }"
-          >
-            <ExclamationTriangleIcon class="w-6 h-6 inline-block mr-1" />
-            <span
-              v-if="error.code === 'rebaseConflicts'"
-              v-text="`Some local changes conflict with remote changes.
-                Resolve them to be able to continue the synchronization.`"
-            />
-            <span v-else>
-              {{ error.message }}
-            </span>
-          </p>
+          <MessageBox
+            :type="error.code === 'rebaseConflicts' ? 'warning' : 'error'"
+            :message="error.code === 'rebaseConflicts'
+              ? `Some local changes conflict with remote changes.
+                Resolve them to be able to continue the synchronization.`
+              : error.message"
+          />
           <div class="mt-4 flex items-center">
             <BasicButton
               v-if="error.code !== 'rebaseConflicts'"

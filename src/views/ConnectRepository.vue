@@ -291,7 +291,7 @@ async function handleCreateRepository() {
       class="flex-none"
     >
       <BottomBarMobileButton :to="props.redirect">
-        <ArrowLeftIcon class="w-8 h-8" />
+        <ArrowLeftIcon class="w-6 h-6" />
       </BottomBarMobileButton>
     </BottomBarMobile>
     <BottomBarDesktop

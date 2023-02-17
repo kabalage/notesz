@@ -3,10 +3,10 @@ import { watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { deleteDB } from 'idb';
 import GitHubIcon from '@/assets/icons/github.svg?component';
-import SpinnerIcon from '@/assets/icons/spinner.svg?component';
 import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
+import MessageBox from '@/components/MessageBox.vue';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 
 const router = useRouter();
@@ -54,26 +54,21 @@ async function clearStorage() {
         repositories, nowhere else.
       </p>
       <BasicButton
-        class="mx-auto w-full max-w-[17rem] touch:max-w-[18rem]"
-        :disabled="isAuthorizing"
+        class="mx-auto"
+        :loading="isAuthorizing"
         @click="connect({ redirect: '/' })"
       >
-        <template v-if="isAuthorizing">
-          <SpinnerIcon class="mx-auto w-6 h-6 text-main-300" />
-        </template>
-        <template v-else>
-          <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
-          <div class="flex-1 text-center">
-            Connect GitHub repository
-          </div>
-        </template>
+        <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
+        <div class="text-center">
+          Connect GitHub repository
+        </div>
       </BasicButton>
-      <div
+      <MessageBox
         v-if="authError"
-        class="mt-4 font-medium text-red-400 text-center"
-      >
-        {{ authError.message }}
-      </div>
+        class="mt-4 justify-center"
+        :message="authError.message"
+        type="error"
+      />
     </div>
   </div>
 </template>

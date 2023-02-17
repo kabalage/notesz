@@ -6,7 +6,6 @@ import GitHubIcon from '@/assets/icons/github.svg?component';
 import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import PlusIcon from '@/assets/icons/plus.svg?component';
 import ExternalLinkIcon20 from '@/assets/icons/external-link-20.svg?component';
-import SpinnerIcon from '@/assets/icons/spinner.svg?component';
 import SparklesIcon from '@/assets/icons/sparkles.svg?component';
 
 import BottomBarMobile from '@/components/ButtonBarMobile.vue';
@@ -22,9 +21,11 @@ import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
 import useIsTouchDevice from '@/composables/useIsTouchDevice';
 import { useThemeState } from '@/stores/themeState';
+import { useDialogState } from '@/stores/dialogState';
 import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
 const themeState = useThemeState()!;
+const dialogState = useDialogState()!;
 const settings = useSettings();
 const isTouchDevice = useIsTouchDevice();
 const messages = useNoteszMessageBus();
@@ -47,6 +48,13 @@ const backNavigationPath = computed(() => {
 
 async function disconnectRepository(id: string) {
   if (!settings.data) return;
+  const confirmed = await dialogState.confirm({
+    title: 'Disconnect repository?',
+    description: `Are you sure you want to disconnect <em class="break-words">${id}</em>?`,
+    confirmButtonLabel: 'Disconnect',
+    rejectButtonLabel: 'Cancel'
+  });
+  if (!confirmed) return;
   if (settings.data.selectedRepositoryId === id) {
     const idx = repositoryList.data!.findIndex(repo => repo.id === id);
     settings.data.selectedRepositoryId = repositoryList.data![idx + 1]?.id
@@ -66,18 +74,22 @@ async function clearStorage() {
   await deleteDB('notesz');
   location.href = '/';
 }
+
 </script>
 
 <template>
   <div class="h-full overflow-hidden flex flex-col">
     <div class="flex-1 overflow-y-auto overscroll-contain">
-      <div class="p-4 pb-8 max-w-xl mx-auto">
+      <div
+        v-if="settings.data && repositoryList.data && repositoryList.isInitialized"
+        class="p-4 pb-8 max-w-xl mx-auto"
+      >
         <h1 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-center">
           Settings
         </h1>
 
         <!-- Repositories -->
-        <div v-if="settings.data && repositoryList.data">
+        <div>
           <div class="flex items-center mb-8">
             <h2 class="uppercase text-sm leading-normal font-semibold">Repositories</h2>
             <div class="ml-4 border-b-2 border-main-400/20 flex-1"></div>
@@ -153,17 +165,12 @@ async function clearStorage() {
           </NoteszTransitionGroup>
 
           <BasicButton
-            class="mx-auto mt-8 w-56 touch:w-64"
-            :disabled="isAuthorizing"
+            class="mx-auto mt-8"
+            :loading="isAuthorizing"
             @click="connect({ redirect: '/settings' })"
           >
-            <template v-if="isAuthorizing">
-              <SpinnerIcon class="mx-auto w-6 h-6 text-main-300" />
-            </template>
-            <template v-else>
-              <PlusIcon class="w-6 h-6 text-accent-300 mr-2" />
-              Connect repository
-            </template>
+            <PlusIcon class="w-6 h-6 text-accent-300 mr-2" />
+            Connect repository
           </BasicButton>
           <div v-if="authError" class="mt-4 font-medium text-red-400 text-center">
             {{ authError.message }}
@@ -177,7 +184,7 @@ async function clearStorage() {
         </div>
         <div class="flex items-center">
           <BasicButton
-            class="mx-auto w-64"
+            class="mx-auto"
             @click="themeState.openThemeSettings()"
           >
             <SparklesIcon class="w-6 h-6 text-accent-300 mr-2" />
@@ -192,6 +199,7 @@ async function clearStorage() {
         >
           Delete all data
         </BasicButton>
+
       </div>
     </div>
 
@@ -200,7 +208,7 @@ async function clearStorage() {
       class="flex-none"
     >
       <BottomBarMobileButton :to="backNavigationPath">
-        <ArrowLeftIcon class="w-8 h-8" />
+        <ArrowLeftIcon class="w-6 h-6" />
       </BottomBarMobileButton>
     </BottomBarMobile>
     <BottomBarDesktop

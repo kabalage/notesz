@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import BasicButton from '@/components/BasicButton.vue';
+import { useDialogState } from '@/stores/dialogState';
 
 const persisted = ref<boolean|null>(null);
 const persistResult = ref<boolean|null>(null);
+const dialogState = useDialogState()!;
 
 onMounted(async () => {
   if (navigator.storage) {
@@ -13,6 +16,14 @@ onMounted(async () => {
 async function persist() {
   persistResult.value = await navigator.storage.persist();
 }
+
+function validName(value: string) {
+  if (value !== 'P') {
+    return 'Invalid value. Must be "P".';
+  }
+  return null;
+}
+
 </script>
 
 <template>
@@ -28,7 +39,7 @@ async function persist() {
         <div><a href="https://vercel.com">External link</a></div>
       </div>
       <div
-        class="grid ggrid-cols-7  gap-2 sm:gap-4 mt-8"
+        class="grid gap-2 sm:gap-4 mt-8"
         style="grid-template-columns: repeat(6, minmax(0, 1fr)) 5.625rem;"
       >
         <!-- <div class="w-6 h-6 rounded bg-indigo-900"></div>
@@ -296,6 +307,38 @@ async function persist() {
         <div class="h-6 bg-indigo-400/20"></div>
 
       </div>
+
+      <BasicButton
+        class="mx-auto mt-16"
+        @click="dialogState.alert({
+          title: 'Test',
+          description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
+            accusantium deleniti veniam.`
+        })"
+      >
+        Alert
+      </BasicButton>
+      <BasicButton
+        class="mx-auto mt-4"
+        @click="dialogState.confirm({
+          title: 'Test?',
+          description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
+            accusantium deleniti veniam.`
+        })"
+      >
+        Confirm
+      </BasicButton>
+      <BasicButton
+        class="mx-auto mt-4 mb-16"
+        @click="dialogState.prompt({
+          title: 'Test?',
+          description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
+            accusantium deleniti veniam.`,
+          validate: validName
+        })"
+      >
+        Prompt
+      </BasicButton>
 
     </div>
   </div>

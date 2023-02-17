@@ -49,7 +49,7 @@ const explorerState = useExplorerState()!;
       </ButtonBarDesktopButton>
     </ButtonBarDesktop>
     <div class="flex-1 py-1.5 px-2 overflow-y-auto">
-      <template v-if="explorerState.conflictingFiles.length > 0">
+      <template v-if="!explorerState.loading && explorerState.conflictingFiles.length > 0">
         <h2 class="text-accent-300 font-semibold mt-2 pl-2">
           Conflicting files
         </h2>
@@ -105,8 +105,8 @@ const explorerState = useExplorerState()!;
         </div>
       </template>
       <ul
-        v-if="explorerState.conflictingFiles.length === 0
-          || explorerState.browseAllDuringManualRebase"
+        v-if="!explorerState.loading && (explorerState.conflictingFiles.length === 0
+          || explorerState.browseAllDuringManualRebase)"
       >
         <li
           v-if="explorerState.items.length === 0"
