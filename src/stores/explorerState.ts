@@ -14,14 +14,26 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     return !editorState.fileIndex.data;
   });
 
-  const items = computed(() => {
-    if (!editorState.fileIndex.data) return [];
+  const explorerTree = computed(() => {
+    if (!editorState.fileIndex.data) return null;
 
-    const explorerTree = fileIndexModel.getFirstExistingParentTree(
+    return fileIndexModel.getFirstExistingParentTree(
       editorState.fileIndex.data,
       path.value
     );
-    const items = [...explorerTree.children].map((childPath) => {
+  });
+
+  const parentTreePath = computed(() => {
+    if (!editorState.fileIndex.data) return '';
+    return fileIndexModel.getParentNodePath(explorerTree.value!.path);
+  });
+
+  const items = computed(() => {
+    if (!editorState.fileIndex.data || !explorerTree.value) {
+      return [];
+    }
+
+    const items = [...explorerTree.value.children].map((childPath) => {
       return editorState.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
       return !!childNode && (childNode.type === 'tree' && childNode.status !== 'deleted'
@@ -52,11 +64,11 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
         return 1;
       }
     });
-    if (explorerTree.path !== '') {
+    if (explorerTree.value.path !== '') {
       return [
         {
           type: 'parentTree' as const,
-          path: explorerTree.path.split('/').slice(0, -1).join('/'),
+          path: parentTreePath.value,
           name: '..'
         },
         ...items
@@ -91,8 +103,14 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     immediate: true
   });
 
+  function navigateBack() {
+    path.value = parentTreePath.value;
+  }
+
   return reactive({
     path,
+    explorerTree,
+    navigateBack,
     browseAllDuringManualRebase,
     loading,
     items,

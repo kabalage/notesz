@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import CaretLeftIcon from '@/assets/icons/caret-left.svg?component';
 import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import CogIcon from '@/assets/icons/cog.svg?component';
@@ -207,6 +208,14 @@ function locationReload() {
       </ul>
     </div>
     <ButtonBarMobile class="flex-none">
+      <ButtonBarMobileButton
+        class="flex-1"
+        label="Back"
+        :disabled="!explorerState.explorerTree?.path"
+        @click="explorerState.navigateBack()"
+      >
+        <ArrowLeftIcon class="w-6 h-6" />
+      </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
         label="New note"
