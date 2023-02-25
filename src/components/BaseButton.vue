@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useAttrs, computed, toRef, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import useBetterPointerActiveState from '@/composables/useBetterPointerActiveState';
-import useIosPointerMoveCancelHack from '@/composables/useIosPointerMoveCancelHack';
+import { useBetterPointerActiveState } from '@/composables/useBetterPointerActiveState';
+import { useIosPointerMoveCancelHack } from '@/composables/useIosPointerMoveCancelHack';
 
 const props = withDefaults(defineProps<{
   to?: string | object,

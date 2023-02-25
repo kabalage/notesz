@@ -1,4 +1,5 @@
-import { tryOnScopeDispose } from '@vueuse/shared';
+import { shallowRef } from 'vue';
+import { tryOnScopeDispose } from '@vueuse/core';
 
 export default function createMessageBus<MessageTypes extends { [topic: string]: any }>() {
   type Callback = (data: MessageTypes[keyof MessageTypes]) => void;
@@ -85,9 +86,8 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
     off,
     emit,
     destroy,
-    subscribers
+    _subscribers: shallowRef(subscribers)
   };
-
 }
 
 // interface NoteszMessageTypes {

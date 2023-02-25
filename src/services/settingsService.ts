@@ -1,10 +1,12 @@
-import useFromDb from './useFromDb';
-import settingsModel from '@/model/settingsModel';
-import { createSharedComposable } from '@vueuse/shared';
-import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
+import { defineService } from '@/utils/injector';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import { useFromDb } from '@/composables/useFromDb';
+import { useSettingsModel } from '@/services/model/settingsModel';
 
-export default createSharedComposable(() => {
+export const useSettings = defineService('SettingsService', () => {
   const messages = useNoteszMessageBus();
+  const settingsModel = useSettingsModel();
+
   const settings = useFromDb({
     get() {
       return settingsModel.get();

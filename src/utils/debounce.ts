@@ -1,6 +1,6 @@
 type ArgumentsType<T> = T extends (...args: infer U) => any ? U : never;
 
-export default function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: any[]) => any>(
   fun: T,
   wait: number
 ) {

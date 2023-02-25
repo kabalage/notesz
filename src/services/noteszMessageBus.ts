@@ -1,5 +1,6 @@
+import { onScopeDispose } from 'vue';
+import { defineService } from '@/utils/injector';
 import createMessageBus from '@/utils/createMessageBus';
-import { createSharedComposable, tryOnScopeDispose } from '@vueuse/shared';
 
 export interface NoteszMessageTypes {
   'change:user': void;
@@ -17,11 +18,10 @@ export interface NoteszMessageTypes {
   };
 }
 
-export default createSharedComposable(() => {
+export const useNoteszMessageBus = defineService('NoteszMessageBus', () => {
   const messageBus = createMessageBus<NoteszMessageTypes>();
-  tryOnScopeDispose(() => {
+  onScopeDispose(() => {
     messageBus.destroy();
   });
   return messageBus;
 });
-

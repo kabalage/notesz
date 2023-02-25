@@ -16,11 +16,11 @@ import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
-import { useEditorState } from '@/stores/editorState';
-import { useExplorerState } from '@/stores/explorerState';
+import { useEditorService } from '@/services/editorService';
+import { useExplorerService } from '@/services/explorerService';
 
-const editorState = useEditorState()!;
-const explorerState = useExplorerState()!;
+const editorService = useEditorService();
+const explorerService = useExplorerService();
 
 </script>
 
@@ -35,12 +35,12 @@ const explorerState = useExplorerState()!;
       />
     </div>
     <ButtonBarDesktop class="flex-none mb-4">
-      <ButtonBarDesktopButton @click="editorState.addFile(explorerState.path)">
+      <ButtonBarDesktopButton @click="editorService.addFile(explorerService.path)">
         <PlusIcon class="w-6 h-6"/>
       </ButtonBarDesktopButton>
       <ButtonBarDesktopButton
-        :disabled="editorState.syncDisabled"
-        @click="editorState.startSync"
+        :disabled="editorService.syncDisabled"
+        @click="editorService.startSync"
       >
         <SyncIcon class="w-6 h-6"/>
       </ButtonBarDesktopButton>
@@ -49,23 +49,23 @@ const explorerState = useExplorerState()!;
       </ButtonBarDesktopButton>
     </ButtonBarDesktop>
     <div class="flex-1 py-1.5 px-2 overflow-y-auto">
-      <template v-if="!explorerState.loading && explorerState.conflictingFiles.length > 0">
+      <template v-if="!explorerService.loading && explorerService.conflictingFiles.length > 0">
         <h2 class="text-accent-300 font-semibold mt-2 pl-2">
           Conflicting files
         </h2>
         <ul class="mt-2">
           <li
-            v-for="file in explorerState.conflictingFiles"
+            v-for="file in explorerService.conflictingFiles"
             :key="file.path"
             class="my-0.5"
           >
             <BaseButton
-              :href="`/edit/${editorState.repositoryId}/${file.path}`"
-              @click.prevent="editorState.openFile(file.path)"
+              :href="`/edit/${editorService.repositoryId}/${file.path}`"
+              @click.prevent="editorService.openFile(file.path)"
               class="flex items-center py-1.5 px-2 text-white font-medium rounded-lg"
               :class="{
-                'bg-main-400/20': file.path === editorState.currentFilePath,
-                'hover:bg-main-400/10': file.path !== editorState.currentFilePath
+                'bg-main-400/20': file.path === editorService.currentFilePath,
+                'hover:bg-main-400/10': file.path !== editorService.currentFilePath
               }"
               active-class="!bg-main-400/20"
             >
@@ -82,15 +82,15 @@ const explorerState = useExplorerState()!;
           </li>
         </ul>
         <BasicButton
-          v-if="!explorerState.browseAllDuringManualRebase"
+          v-if="!explorerService.browseAllDuringManualRebase"
           class="mt-8 mx-auto"
           ghost
-          @click="explorerState.browseAllDuringManualRebase = true"
+          @click="explorerService.browseAllDuringManualRebase = true"
         >
           Browse all files
         </BasicButton>
         <div
-          v-if="explorerState.browseAllDuringManualRebase"
+          v-if="explorerService.browseAllDuringManualRebase"
           class="flex items-center my-4 pt-4 pl-2 border-t-2 border-main-400/20"
         >
           <h2 class="flex-1 text-accent-300 font-semibold">
@@ -98,38 +98,38 @@ const explorerState = useExplorerState()!;
           </h2>
           <IconButton
             class="-my-2"
-            @click="explorerState.browseAllDuringManualRebase = false"
+            @click="explorerService.browseAllDuringManualRebase = false"
           >
             <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>
         </div>
       </template>
       <ul
-        v-if="!explorerState.loading && (explorerState.conflictingFiles.length === 0
-          || explorerState.browseAllDuringManualRebase)"
+        v-if="!explorerService.loading && (explorerService.conflictingFiles.length === 0
+          || explorerService.browseAllDuringManualRebase)"
       >
         <li
-          v-if="explorerState.items.length === 0"
+          v-if="explorerService.items.length === 0"
           class="mt-8 text-center"
         >
           The repository is empty.
           <BasicButton
-            v-if="!explorerState.browseAllDuringManualRebase"
+            v-if="!explorerService.browseAllDuringManualRebase"
             class="mt-4 mx-auto"
-            @click="editorState.addFile('')"
+            @click="editorService.addFile('')"
           >
             Create a file
           </BasicButton>
         </li>
         <li
-          v-for="item in explorerState.items"
+          v-for="item in explorerService.items"
           :key="item.path"
           class="my-0.5"
         >
           <BaseButton
             v-if="item.type === 'parentTree'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="explorerState.path = item.path"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="explorerService.path = item.path"
             class="flex items-center py-1.5 px-2 font-medium hover:bg-main-400/10 rounded-lg"
             active-class="!bg-main-400/20"
           >
@@ -140,8 +140,8 @@ const explorerState = useExplorerState()!;
           </BaseButton>
           <BaseButton
             v-if="item.type === 'tree'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="explorerState.path = item.path"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="explorerService.path = item.path"
             class="flex items-center py-1.5 px-2 font-medium hover:bg-main-400/10 rounded-lg"
             active-class="!bg-main-400/20"
           >
@@ -160,14 +160,15 @@ const explorerState = useExplorerState()!;
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="editorState.openFile(item.path)"
-            class="flex items-center py-1.5 px-2 text-white font-medium rounded-lg"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="editorService.openFile(item.path)"
+            class="flex items-center py-1.5 px-2 font-medium rounded-lg"
             :class="{
-              'bg-main-400/20': item.path === editorState.currentFilePath,
-              'hover:bg-main-400/10': item.path !== editorState.currentFilePath,
+              'bg-main-400/20': item.path === editorService.currentFilePath,
+              'hover:bg-main-400/10': item.path !== editorService.currentFilePath,
               'text-green-400': item.added,
-              'text-accent-400': item.modified
+              'text-accent-400': item.modified,
+              'text-white': item.unchanged
             }"
             active-class="!bg-main-400/20"
           >

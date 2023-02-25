@@ -17,11 +17,11 @@ import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
-import { useEditorState } from '@/stores/editorState';
-import { useExplorerState } from '@/stores/explorerState';
+import { useEditorService } from '@/services/editorService';
+import { useExplorerService } from '@/services/explorerService';
 
-const editorState = useEditorState()!;
-const explorerState = useExplorerState()!;
+const editorService = useEditorService();
+const explorerService = useExplorerService();
 
 function locationReload() {
   if (import.meta.env.DEV) {
@@ -61,7 +61,7 @@ function locationReload() {
           />
         </div>
       </div> -->
-      <template v-if="!explorerState.loading && explorerState.conflictingFiles.length > 0">
+      <template v-if="!explorerService.loading && explorerService.conflictingFiles.length > 0">
         <h2 class="text-accent-300 font-semibold mt-8 px-4 leading-loose" >
           Conflicting files
         </h2>
@@ -70,15 +70,15 @@ function locationReload() {
             rounded-lg overflow-hidden"
         >
           <li
-            v-for="file in explorerState.conflictingFiles"
+            v-for="file in explorerService.conflictingFiles"
             :key="file.path"
           >
             <BaseButton
-              :href="`/edit/${editorState.repositoryId}/${file.path}`"
-              @click.prevent="editorState.openFile(file.path)"
+              :href="`/edit/${editorService.repositoryId}/${file.path}`"
+              @click.prevent="editorService.openFile(file.path)"
               class="flex items-center py-3 px-4 text-white font-medium"
               :class="{
-                'bg-main-400/20': file.path === editorState.currentFilePath
+                'bg-main-400/20': file.path === editorService.currentFilePath
               }"
               active-class="bg-main-400/20"
             >
@@ -95,60 +95,60 @@ function locationReload() {
           </li>
         </ul>
         <BasicButton
-          v-if="!explorerState.browseAllDuringManualRebase"
+          v-if="!explorerService.browseAllDuringManualRebase"
           class="mt-8 mx-auto"
           ghost
-          @click="explorerState.browseAllDuringManualRebase = true"
+          @click="explorerService.browseAllDuringManualRebase = true"
         >
           Browse all files
         </BasicButton>
         <div
-          v-if="explorerState.browseAllDuringManualRebase"
+          v-if="explorerService.browseAllDuringManualRebase"
           class="flex items-center mt-8 pl-4 pr-2"
         >
           <h2 class="flex-1 text-accent-300 font-semibold leading-loose">
             All files
           </h2>
           <IconButton
-            @click="explorerState.browseAllDuringManualRebase = false"
+            @click="explorerService.browseAllDuringManualRebase = false"
           >
             <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>
         </div>
       </template>
       <ul
-        v-if="!explorerState.loading && (explorerState.conflictingFiles.length === 0
-          || explorerState.browseAllDuringManualRebase)"
+        v-if="!explorerService.loading && (explorerService.conflictingFiles.length === 0
+          || explorerService.browseAllDuringManualRebase)"
         class="divide-y divide-main-400/20"
         :class="{
           'bg-main-400/10 mx-4 rounded-lg overflow-hidden border-0':
-            explorerState.browseAllDuringManualRebase,
-          'border-y border-main-400/20': !explorerState.browseAllDuringManualRebase,
-          'border-b-0': !explorerState.browseAllDuringManualRebase
-            && explorerState.items.length === 0
+            explorerService.browseAllDuringManualRebase,
+          'border-y border-main-400/20': !explorerService.browseAllDuringManualRebase,
+          'border-b-0': !explorerService.browseAllDuringManualRebase
+            && explorerService.items.length === 0
         }"
       >
         <li
-          v-if="explorerState.items.length === 0"
+          v-if="explorerService.items.length === 0"
           class="mt-8 text-center"
         >
           The repository is empty.
           <BasicButton
-            v-if="!explorerState.browseAllDuringManualRebase"
+            v-if="!explorerService.browseAllDuringManualRebase"
             class="mt-4 mx-auto"
-            @click="editorState.addFile('')"
+            @click="editorService.addFile('')"
           >
             Create a file
           </BasicButton>
         </li>
         <li
-          v-for="item in explorerState.items"
+          v-for="item in explorerService.items"
           :key="item.path"
         >
           <BaseButton
             v-if="item.type === 'parentTree'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="explorerState.path = item.path"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="explorerService.path = item.path"
             class="flex items-center py-3 px-4 font-medium"
             active-class="bg-main-400/20"
           >
@@ -159,8 +159,8 @@ function locationReload() {
           </BaseButton>
           <BaseButton
             v-if="item.type === 'tree'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="explorerState.path = item.path"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="explorerService.path = item.path"
             class="flex items-center py-3 px-4 font-medium"
             active-class="bg-main-400/20"
           >
@@ -179,13 +179,14 @@ function locationReload() {
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
-            :href="`/edit/${editorState.repositoryId}/${item.path}`"
-            @click.prevent="editorState.openFile(item.path)"
-            class="flex items-center py-3 px-4 text-white font-medium"
+            :href="`/edit/${editorService.repositoryId}/${item.path}`"
+            @click.prevent="editorService.openFile(item.path)"
+            class="flex items-center py-3 px-4 font-medium"
             :class="{
-              'bg-main-400/20': item.path === editorState.currentFilePath,
+              'bg-main-400/20': item.path === editorService.currentFilePath,
               'text-green-400': item.added,
-              'text-accent-400': item.modified
+              'text-accent-400': item.modified,
+              'text-white': item.unchanged
             }"
             active-class="bg-main-400/20"
           >
@@ -211,23 +212,23 @@ function locationReload() {
       <ButtonBarMobileButton
         class="flex-1"
         label="Back"
-        :disabled="!explorerState.explorerTree?.path"
-        @click="explorerState.navigateBack()"
+        :disabled="!explorerService.explorerTree?.path"
+        @click="explorerService.navigateBack()"
       >
         <ArrowLeftIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
         label="New note"
-        @click="editorState.addFile(explorerState.path)"
+        @click="editorService.addFile(explorerService.path)"
       >
         <PlusIcon class="w-6 h-6" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
         label="Sync"
-        :disabled="editorState.syncDisabled"
-        @click="editorState.startSync"
+        :disabled="editorService.syncDisabled"
+        @click="editorService.startSync"
       >
         <SyncIcon class="w-6 h-6" />
       </ButtonBarMobileButton>

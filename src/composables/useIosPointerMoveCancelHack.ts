@@ -12,7 +12,7 @@ import { isIos } from '@/utils/iDeviceDetection';
  * the element. This composable rejects the clicks that would happen after moving your finger while
  * touching the element.
  */
-export default function useIosPointerMoveCancelHack(
+export function useIosPointerMoveCancelHack(
   target: MaybeComputedRef<EventTarget | null | undefined>
 ) {
   const active = ref(false);

@@ -15,12 +15,13 @@ import type { EditorState } from '@codemirror/state';
 import * as commands from '@codemirror/commands';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
+import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { isIos } from '@/utils/iDeviceDetection';
-import VirtualKeyboardEvents from '@/utils/VirtualKeyboardEvents';
 import {
+  VirtualKeyboardEvents,
+  handleShowIos,
+  handleShowNonIos,
   type VirtualKeyboardChangeEvent,
-  handleShowIos, handleShowNonIos
 } from '@/utils/VirtualKeyboardEvents';
 
 const props = defineProps<{

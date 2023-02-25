@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useThemeState } from '@/stores/themeState';
-import useVirtualKeyboard from '@/utils/useVirtualKeyboard';
+import { useThemeService } from '@/services/themeService';
+import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
 
-const themeState = useThemeState()!;
+const themeService = useThemeService();
 const virtualKeyboard = useVirtualKeyboard();
 </script>
 
@@ -13,7 +13,7 @@ const virtualKeyboard = useVirtualKeyboard();
         transition-[padding] duration-300 ease-in-out"
       :class="{
         'pb-[max(env(safe-area-inset-bottom),0.125rem)]':
-          !themeState.themeSettingsOpen && !virtualKeyboard.visible.value
+          !themeService.themeSettingsOpen && !virtualKeyboard.visible.value
       }"
     >
       <slot />

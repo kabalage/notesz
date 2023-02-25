@@ -1,7 +1,7 @@
 /**
  * Validates a path for use in a git repository.
  */
-export default function validatePath(path: string) {
+export function validatePath(path: string) {
   if (!path) return 'Path cannot be empty.';
   if (path.endsWith('/')) return 'Path must not end with a slash';
   if (path.startsWith('/')) return 'Path must not start with a slash';

@@ -6,13 +6,14 @@ import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
 import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import NoteszTransition from '@/components/NoteszTransition.vue';
-import { mainPalette, backgroundPalette, type ColorName } from '@/model/themeData';
+import { mainPalette, backgroundPalette, type ColorName }
+  from '@/services/model/settingsModel/themeData';
 import { useEventListener, useThrottleFn, useScroll } from '@vueuse/core';
-import { useThemeState } from '@/stores/themeState';
-import useVirtualKeyboard from '@/utils/useVirtualKeyboard';
+import { useThemeService } from '@/services/themeService';
+import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
 
 const virtualKeyboard = useVirtualKeyboard();
-const themeState = useThemeState()!;
+const themeService = useThemeService();
 const scrollContainer = ref<HTMLElement | null>(null);
 const { x } = useScroll(scrollContainer, {
   throttle: 200
@@ -58,7 +59,7 @@ const paletteOrder: (ColorName)[] = [
 
 <template>
   <div
-    v-if="themeState.loaded && themeState.selectedThemeCopy"
+    v-if="themeService.loaded && themeService.selectedThemeCopy"
     class="relative bg-black border-t-2 border-main-400/60"
     :class="{
       'pb-[calc(env(safe-area-inset-bottom,0.5rem)-0.5rem)]': !virtualKeyboard.visible.value
@@ -105,7 +106,7 @@ const paletteOrder: (ColorName)[] = [
         </div>
         <div class="flex-1 grid grid-cols-5 gap-2">
           <BaseButton
-            v-for="(theme, index) in themeState.themes"
+            v-for="(theme, index) in themeService.themes"
             :key="index"
             class="rounded-lg w-12 h-12 mouse:w-8 mouse:h-8 text-white/80 font-bold
               transform transition-transform duration-200 ease-in-out
@@ -117,29 +118,29 @@ const paletteOrder: (ColorName)[] = [
             active-class="scale-50 motion-reduce:opacity-50
               before:scale-200 motion-reduce:before:opacity-50"
             :style="{
-              background: themeState.selectedTheme === index
-                ? `rgb(${backgroundPalette[themeState.selectedThemeCopy.backgroundColor]})`
+              background: themeService.selectedTheme === index
+                ? `rgb(${backgroundPalette[themeService.selectedThemeCopy.backgroundColor]})`
                 : `rgb(${backgroundPalette[theme.backgroundColor]})`
             }"
             :class="{
               'ring-2 ring-offset-2 ring-offset-black ring-white':
-                themeState.selectedTheme === index
+                themeService.selectedTheme === index
             }"
-            @click="themeState.selectTheme(index)"
+            @click="themeService.selectTheme(index)"
           >
             <span
               class="block w-6 h-6 mouse:w-4 mouse:h-4 rounded-tl-lg"
               :style="{
-                background: themeState.selectedTheme === index
-                  ? `rgb(${mainPalette[themeState.selectedThemeCopy.mainColor]['500']})`
+                background: themeService.selectedTheme === index
+                  ? `rgb(${mainPalette[themeService.selectedThemeCopy.mainColor]['500']})`
                   : `rgb(${mainPalette[theme.mainColor]['500']})`
               }"
             />
             <span
               class="block w-6 h-6 mouse:w-4 mouse:h-4 rounded-tr-lg"
               :style="{
-                background: themeState.selectedTheme === index
-                  ? `rgb(${mainPalette[themeState.selectedThemeCopy.mainColor]['500']} / 0.4)`
+                background: themeService.selectedTheme === index
+                  ? `rgb(${mainPalette[themeService.selectedThemeCopy.mainColor]['500']} / 0.4)`
                   : `rgb(${mainPalette[theme.mainColor]['500']} / 0.4)`
               }"
             />
@@ -153,8 +154,8 @@ const paletteOrder: (ColorName)[] = [
               <span
                 class="block rounded-full w-6 h-1.5 mouse:w-4 mouse:h-1"
                 :style="{
-                  background: themeState.selectedTheme === index
-                    ? `rgb(${mainPalette[themeState.selectedThemeCopy.accentColor]['400']})`
+                  background: themeService.selectedTheme === index
+                    ? `rgb(${mainPalette[themeService.selectedThemeCopy.accentColor]['400']})`
                     : `rgb(${mainPalette[theme.accentColor]['400']})`
                 }"
               />
@@ -186,10 +187,10 @@ const paletteOrder: (ColorName)[] = [
             }"
             :class="{
               'ring-2 ring-offset-2 ring-offset-black ring-white':
-                colorName === themeState.selectedThemeCopy.mainColor,
+                colorName === themeService.selectedThemeCopy.mainColor,
               'col-span-2': index === 13
             }"
-            @click="themeState.setMainColor(colorName)"
+            @click="themeService.setMainColor(colorName)"
           >
             ·
           </BaseButton>
@@ -222,13 +223,13 @@ const paletteOrder: (ColorName)[] = [
                 'after:bg-white/10': index !== 12,
                 'after:bg-white/5': index === 12,
                 'ring-2 ring-offset-2 ring-offset-black ring-white':
-                  index === themeState.selectedThemeCopy.backgroundColor,
+                  index === themeService.selectedThemeCopy.backgroundColor,
                 'col-span-2 justify-self-end': index === 15
               }"
               :style="{
                 background: `rgb(${color})`
               }"
-              @click="themeState.setBackgroundColor(index)"
+              @click="themeService.setBackgroundColor(index)"
             >·
             </BaseButton>
             <div v-else />
@@ -258,10 +259,10 @@ const paletteOrder: (ColorName)[] = [
             }"
             :class="{
               'ring-2 ring-offset-2 ring-offset-black ring-white':
-                colorName === themeState.selectedThemeCopy.accentColor,
+                colorName === themeService.selectedThemeCopy.accentColor,
               'col-span-2': index === 13
             }"
-            @click="themeState.setAccentColor(colorName)"
+            @click="themeService.setAccentColor(colorName)"
           >
             ·
           </BaseButton>
@@ -270,16 +271,16 @@ const paletteOrder: (ColorName)[] = [
 
       <!-- Buttons -->
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0 flex flex-col items-center justify-center">
-        <template v-if="themeState.selectedThemeChanged">
+        <template v-if="themeService.selectedThemeChanged">
           <BasicButton
             class="w-32 mb-2"
-            @click="themeState.saveSelectedTheme"
+            @click="themeService.saveSelectedTheme"
           >
             Save
           </BasicButton>
           <BasicButton
             class="w-32"
-            @click="themeState.resetSelectedTheme"
+            @click="themeService.resetSelectedTheme"
           >
             Reset
           </BasicButton>
@@ -287,7 +288,7 @@ const paletteOrder: (ColorName)[] = [
         <BasicButton
           v-else
           class="w-32"
-          @click="themeState.closeThemeSettings()"
+          @click="themeService.closeThemeSettings()"
         >
           <CheckIcon class="flex-none w-6 h-6 text-accent-300 mr-2" />
           Done

@@ -1,10 +1,10 @@
-import NoteszError from './NoteszError';
+import { NoteszError } from './NoteszError';
 
-export default function trial<T>(
+export function trial<T>(
   fun: () => Promise<T>
 ): Promise<[T, undefined] | [undefined, Error]>;
-export default function trial<T>(fun: () => T): [T, undefined] | [undefined, Error];
-export default function trial<T>(
+export function trial<T>(fun: () => T): [T, undefined] | [undefined, Error];
+export function trial<T>(
   fun: (() => T) | (() => Promise<T>)
 ): [T, undefined] | [undefined, Error] | Promise<[T, undefined] | [undefined, Error]> {
   try {

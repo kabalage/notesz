@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { deleteDB } from 'idb';
 
 import GitHubIcon from '@/assets/icons/github.svg?component';
@@ -12,23 +13,31 @@ import BottomBarMobile from '@/components/ButtonBarMobile.vue';
 import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
 import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
-import useFromDb from '@/composables/useFromDb';
-import repositoryModel from '@/model/repositoryModel';
-import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
-import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
-import { useThemeState } from '@/stores/themeState';
-import { useDialogState } from '@/stores/dialogState';
-import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
 
-const themeState = useThemeState()!;
-const dialogState = useDialogState()!;
+import { trial } from '@/utils/trial';
+import { useFromDb } from '@/composables/useFromDb';
+import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import { useThemeService } from '@/services/themeService';
+import { useDialogService } from '@/services/dialogService';
+import { useSettings } from '@/services/settingsService';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import { useGitHubIntegration } from '@/services/integration/githubIntegration';
+import { useUserModel } from '@/services/model/userModel';
+import { useRepositoryModel } from '@/services/model/repositoryModel';
+
+const router = useRouter();
+const themeService = useThemeService();
+const dialogService = useDialogService();
 const settings = useSettings();
 const isTouchDevice = useIsTouchDevice();
 const messages = useNoteszMessageBus();
+const repositoryModel = useRepositoryModel();
+const githubIntegration = useGitHubIntegration();
+const userModel = useUserModel();
+
 const repositoryList = useFromDb({
   get() {
     return repositoryModel.list();
@@ -38,7 +47,27 @@ messages.on('change:repository', () => {
   repositoryList.refetch();
 });
 
-const { isAuthorizing, authError, connect } = useRepositoryConnectAction();
+const authError = ref<Error | undefined>(undefined);
+const isAuthorizing = ref(false);
+
+async function authorizeThenRedirect() {
+  isAuthorizing.value = true;
+  const connectRoute = '/connect?redirect=/settings';
+  const user = await userModel.get();
+  if (!user) {
+    const [user, error] = await trial(() => githubIntegration.authorize());
+    if (user) {
+      router.push(connectRoute);
+    } else {
+      if (error.code !== 'canceled') {
+        authError.value = error;
+      }
+      isAuthorizing.value = false;
+    }
+  } else {
+    router.push(connectRoute);
+  }
+}
 
 const backNavigationPath = computed(() => {
   return settings.data?.selectedRepositoryId
@@ -48,7 +77,7 @@ const backNavigationPath = computed(() => {
 
 async function disconnectRepository(id: string) {
   if (!settings.data) return;
-  const confirmed = await dialogState.confirm({
+  const confirmed = await dialogService.confirm({
     title: 'Disconnect repository?',
     description: `Are you sure you want to disconnect <em class="break-words">${id}</em>?`,
     confirmButtonLabel: 'Disconnect',
@@ -167,10 +196,10 @@ async function clearStorage() {
           <BasicButton
             class="mx-auto mt-8"
             :loading="isAuthorizing"
-            @click="connect({ redirect: '/settings' })"
+            @click="authorizeThenRedirect()"
           >
             <PlusIcon class="w-6 h-6 text-accent-300 mr-2" />
-            Connect repository
+            <span>Connect repository</span>
           </BasicButton>
           <div v-if="authError" class="mt-4 font-medium text-red-400 text-center">
             {{ authError.message }}
@@ -185,7 +214,7 @@ async function clearStorage() {
         <div class="flex items-center">
           <BasicButton
             class="mx-auto"
-            @click="themeState.openThemeSettings()"
+            @click="themeService.openThemeSettings()"
           >
             <SparklesIcon class="w-6 h-6 text-accent-300 mr-2" />
             Configure theme

@@ -1,7 +1,7 @@
-import NoteszError from '@/utils/NoteszError';
+import { NoteszError } from '@/utils/NoteszError';
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 
-export default function useFromDb<T, WatchParam>({
+export function useFromDb<T, WatchParam>({
   get,
   put,
   putThrottling = 1000,

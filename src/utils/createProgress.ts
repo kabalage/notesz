@@ -1,4 +1,4 @@
-import clamp from './clamp';
+import { clamp } from './clamp';
 
 export type Progress = {
   set(progress: number): void;
@@ -8,7 +8,7 @@ export type Progress = {
     cb: (progress: Progress) => void): Promise<void>;
 };
 
-export default function createProgress({ from, to, setProgress, setMessage }: {
+export function createProgress({ from, to, setProgress, setMessage }: {
   from: number;
   to: number;
   setProgress: (value: number) => void;

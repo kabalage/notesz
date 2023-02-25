@@ -1,11 +1,5 @@
-import {
-  ref,
-  computed,
-  markRaw,
-  reactive,
-  type Component
-} from 'vue';
-import { createInjectionState } from '@/utils/createInjectionState';
+import { ref, computed, reactive, markRaw, type Component } from 'vue';
+import { defineService } from '@/utils/injector';
 import type { PropsType, EventType, ComponentWithEvent } from '@/utils/vueTsUtils';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
@@ -16,8 +10,8 @@ interface Dialog<T extends Component> {
   props: PropsType<T>;
 }
 
-const [provideDialogState, useDialogState] = createInjectionState(() => {
-   const dialogs = ref<Dialog<Component>[]>([]);
+export const useDialogService = defineService('DialogService', () => {
+  const dialogs = ref<Dialog<Component>[]>([]);
   const currentDialog = computed(() => dialogs.value.at(-1));
 
   function showDialog<C extends Component>(
@@ -62,5 +56,3 @@ const [provideDialogState, useDialogState] = createInjectionState(() => {
     prompt
   });
 });
-
-export { provideDialogState, useDialogState };

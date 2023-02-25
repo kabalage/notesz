@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getPendingCallbacks } from '@/utils/waitForCallback';
 import { useRouter } from 'vue-router';
-import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 
 const router = useRouter();
 const props = defineProps<{

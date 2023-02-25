@@ -1,40 +1,41 @@
-import { computed, reactive, ref, watch } from 'vue';
-import { createInjectionState } from '@/utils/createInjectionState';
-import type { provideEditorState } from '@/stores/editorState';
-import { default as fileIndexModel, type Tree, type File } from '@/model/fileIndexModel';
+import { computed, ref, watch, reactive } from 'vue';
+import { defineService } from '@/utils/injector';
+import { useEditorService } from '@/services/editorService';
+import { useFileIndexModel, type File, type Tree } from '@/services/model/fileIndexModel';
 
-const [provideExplorerState, useExplorerState] = createInjectionState((
-  editorState: ReturnType<typeof provideEditorState>
-) => {
+export const useExplorerService = defineService('ExplorerService', () => {
+  const editorService = useEditorService();
+  const fileIndexModel = useFileIndexModel();
+
   const path = ref('');
   const browseAllDuringManualRebase = ref(false);
   const stringCompare = new Intl.Collator('en').compare;
 
   const loading = computed(() => {
-    return !editorState.fileIndex.data;
+    return !editorService.fileIndex.data;
   });
 
   const explorerTree = computed(() => {
-    if (!editorState.fileIndex.data) return null;
+    if (!editorService.fileIndex.data) return null;
 
     return fileIndexModel.getFirstExistingParentTree(
-      editorState.fileIndex.data,
+      editorService.fileIndex.data,
       path.value
     );
   });
 
   const parentTreePath = computed(() => {
-    if (!editorState.fileIndex.data) return '';
+    if (!editorService.fileIndex.data) return '';
     return fileIndexModel.getParentNodePath(explorerTree.value!.path);
   });
 
   const items = computed(() => {
-    if (!editorState.fileIndex.data || !explorerTree.value) {
+    if (!editorService.fileIndex.data || !explorerTree.value) {
       return [];
     }
 
     const items = [...explorerTree.value.children].map((childPath) => {
-      return editorState.fileIndex.data!.index.get(childPath);
+      return editorService.fileIndex.data!.index.get(childPath);
     }).filter((childNode): childNode is File | Tree => {
       return !!childNode && (childNode.type === 'tree' && childNode.status !== 'deleted'
         || childNode.type === 'file' && !childNode.ignored && !childNode.deleted);
@@ -78,11 +79,11 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   });
 
   const conflictingFiles = computed(() => {
-    if (!editorState.fileIndex.data) return [];
-    const hasConflicts = fileIndexModel.getRootTreeNode(editorState.fileIndex.data)
+    if (!editorService.fileIndex.data) return [];
+    const hasConflicts = fileIndexModel.getRootTreeNode(editorService.fileIndex.data)
       .fileStats.conflicting > 0;
     if (!hasConflicts) return [];
-    return [...editorState.fileIndex.data.index.values()].filter((node): node is File => {
+    return [...editorService.fileIndex.data.index.values()].filter((node): node is File => {
       return node.type === 'file' && node.conflicting;
     }).sort((a, b) => {
       return a.path > b.path ? 1 : -1;
@@ -96,7 +97,7 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
   });
 
   // Set explorer path to the current file's parent tree when the path in the url changes
-  watch(() => editorState.currentTree, (currentTree, prevParentTree) => {
+  watch(() => editorService.currentTree, (currentTree, prevParentTree) => {
     if (!currentTree || currentTree.path === prevParentTree?.path) return;
     path.value = currentTree.path;
   }, {
@@ -117,5 +118,3 @@ const [provideExplorerState, useExplorerState] = createInjectionState((
     conflictingFiles
   });
 });
-
-export { provideExplorerState, useExplorerState };

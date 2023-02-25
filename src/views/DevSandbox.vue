@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import BasicButton from '@/components/BasicButton.vue';
-import { useDialogState } from '@/stores/dialogState';
+import { useDialogService } from '@/services/dialogService';
 
 const persisted = ref<boolean|null>(null);
 const persistResult = ref<boolean|null>(null);
-const dialogState = useDialogState()!;
+const dialogService = useDialogService();
 
 onMounted(async () => {
   if (navigator.storage) {
@@ -310,7 +310,7 @@ function validName(value: string) {
 
       <BasicButton
         class="mx-auto mt-16"
-        @click="dialogState.alert({
+        @click="dialogService.alert({
           title: 'Test',
           description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
             accusantium deleniti veniam.`
@@ -320,7 +320,7 @@ function validName(value: string) {
       </BasicButton>
       <BasicButton
         class="mx-auto mt-4"
-        @click="dialogState.confirm({
+        @click="dialogService.confirm({
           title: 'Test?',
           description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
             accusantium deleniti veniam.`
@@ -330,7 +330,7 @@ function validName(value: string) {
       </BasicButton>
       <BasicButton
         class="mx-auto mt-4 mb-16"
-        @click="dialogState.prompt({
+        @click="dialogService.prompt({
           title: 'Test?',
           description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae vitae
             accusantium deleniti veniam.`,

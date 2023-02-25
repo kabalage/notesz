@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useDialogState } from '@/stores/dialogState';
+import { useDialogService } from '@/services/dialogService';
 
-const dialogState = useDialogState()!;
+const dialogService = useDialogService();
 
 </script>
 
 <template>
-  <template v-if="dialogState.currentDialog">
+  <template v-if="dialogService.currentDialog">
     <component
-      :is="dialogState.currentDialog.component"
-      v-bind="dialogState.currentDialog.props"
+      :is="dialogService.currentDialog.component"
+      v-bind="dialogService.currentDialog.props"
     />
   </template>
 </template>

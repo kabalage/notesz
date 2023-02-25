@@ -1,4 +1,4 @@
-export default class NoteszError extends Error {
+export class NoteszError extends Error {
   cause?: any;
   code?: string;
 

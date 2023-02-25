@@ -17,19 +17,17 @@ import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
 import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import NoteszTransition from '@/components/NoteszTransition.vue';
-
-import useFromDb from '@/composables/useFromDb';
-import repositoryModel from '@/model/repositoryModel';
-import settingsModel from '@/model/settingsModel';
 import BasicButton from '@/components/BasicButton.vue';
-import authorize from '@/integration/github/authorize';
-import install from '@/integration/github/install';
-import listAuthorizedRepositories from '@/integration/github/listAuthorizedRepositories';
 import BaseButton from '@/components/BaseButton.vue';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
-import trial from '@/utils/trial';
-import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
-import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
+
+import { useFromDb } from '@/composables/useFromDb';
+import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import { trial } from '@/utils/trial';
+import { waitForChildWindowClose } from '@/utils/waitForChildWindowClose';
+import { useRepositoryModel } from '@/services/model/repositoryModel';
+import { useSettingsModel } from '@/services/model/settingsModel';
+import { useGitHubIntegration } from '@/services/integration/githubIntegration';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 
 const props = defineProps<{
   redirect: string
@@ -38,6 +36,10 @@ const props = defineProps<{
 const router = useRouter();
 const isTouchDevice = useIsTouchDevice();
 const messages = useNoteszMessageBus();
+const repositoryModel = useRepositoryModel();
+const settingsModel = useSettingsModel();
+const githubIntegration = useGitHubIntegration();
+
 const filterText = ref('');
 const debouncedFilterText = refDebounced(filterText, 250);
 const isAuthorizing = ref(false);
@@ -62,7 +64,7 @@ const connectedRepositories = computed(() => {
 
 const authorizedRepositories = useFromDb({
   get(update?: { installationId: number, setupAction: 'update' | 'install'}) {
-    return listAuthorizedRepositories(update);
+    return githubIntegration.listAuthorizedRepositories(update);
   }
 });
 
@@ -90,7 +92,7 @@ const filteredAuthorizedRepositories = computed(() => {
 });
 
 async function _install() {
-  const { canceled, update } = await install();
+  const { canceled, update } = await githubIntegration.install();
   if (!canceled) {
     authorizedRepositories.refetch(update);
   }
@@ -99,7 +101,7 @@ async function _install() {
 async function _authorize() {
   isAuthorizing.value = true;
   authError.value = undefined;
-  const [user, error] = await trial(() => authorize());
+  const [user, error] = await trial(() => githubIntegration.authorize());
   if (user) {
     authorizedRepositories.refetch();
   } else {

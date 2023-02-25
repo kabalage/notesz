@@ -1,9 +1,9 @@
-import fileIndexModel, { type File } from '@/model/fileIndexModel';
-import blobModel from '@/model/blobModel';
 import threeWayMerge from 'three-way-merge';
-import gitBlobHash from '@/utils/gitBlobHash';
-import repositoryModel from '@/model/repositoryModel';
 import { filterMap, keyByMap } from '@/utils/mapUtils';
+import { gitBlobHash } from '@/utils/gitBlobHash';
+import { useFileIndexModel, type File } from '@/services/model/fileIndexModel';
+import { useBlobModel } from '@/services/model/blobModel';
+import { useRepositoryModel } from '@/services/model/repositoryModel';
 
 /* eslint-disable max-len */
 
@@ -84,336 +84,101 @@ import { filterMap, keyByMap } from '@/utils/mapUtils';
 
 /* eslint-enable max-len */
 
-/**
- * Rebases the **local** changes on top of the **remote** fileIndex.
- * Creates a **rebase** fileIndex.
- */
-export default async function rebase(repositoryId: string) {
-  const remoteIndex = await fileIndexModel.getFileIndex(repositoryId, 'remote');
-  if (!remoteIndex) {
-    throw new Error(`Missing fileIndex: "${repositoryId}/remote"`);
-  }
-  const localIndex = await fileIndexModel.getFileIndex(repositoryId, 'local');
-  if (!localIndex) {
-    throw new Error(`Missing fileIndex: "${repositoryId}/local"`);
-  }
-  const existingRebaseIndex = await fileIndexModel.getFileIndex(repositoryId, 'rebase');
-  if (existingRebaseIndex) {
-    throw new Error(`Rebase fileIndex should not exist for repository "${repositoryId}"`);
-  }
+export function useRebase() {
+  const fileIndexModel = useFileIndexModel();
+  const blobModel = useBlobModel();
+  const repositoryModel = useRepositoryModel();
 
-  const remoteFiles = filterMap(remoteIndex.index, (node): node is File => {
-    return node.type === 'file';
-  });
-  const localChangedFiles = filterMap(localIndex.index, (node): node is File => {
-    return node.type === 'file' && (node.deleted || node.modified || node.renamed);
-  });
-  const localChangedFilesByPathInBase = keyByMap(localChangedFiles.values(), (file) => {
-    return file.pathInBase;
-  });
-  const rebasedFiles: Map<string, File> = new Map();
+  /**
+   * Rebases the **local** changes on top of the **remote** fileIndex.
+   * Creates a **rebase** fileIndex.
+   */
+  return async function rebase(repositoryId: string) {
+    const remoteIndex = await fileIndexModel.getFileIndex(repositoryId, 'remote');
+    if (!remoteIndex) {
+      throw new Error(`Missing fileIndex: "${repositoryId}/remote"`);
+    }
+    const localIndex = await fileIndexModel.getFileIndex(repositoryId, 'local');
+    if (!localIndex) {
+      throw new Error(`Missing fileIndex: "${repositoryId}/local"`);
+    }
+    const existingRebaseIndex = await fileIndexModel.getFileIndex(repositoryId, 'rebase');
+    if (existingRebaseIndex) {
+      throw new Error(`Rebase fileIndex should not exist for repository "${repositoryId}"`);
+    }
 
-  // Merge files except for local additions
-  for (const remoteFile of remoteFiles.values()) {
-    const localChangedFile = remoteFile.pathInBase
-      ? localChangedFilesByPathInBase.get(remoteFile.pathInBase)
-      : undefined;
-    let rebasedFile: File | undefined;
+    const remoteFiles = filterMap(remoteIndex.index, (node): node is File => {
+      return node.type === 'file';
+    });
+    const localChangedFiles = filterMap(localIndex.index, (node): node is File => {
+      return node.type === 'file' && (node.deleted || node.modified || node.renamed);
+    });
+    const localChangedFilesByPathInBase = keyByMap(localChangedFiles.values(), (file) => {
+      return file.pathInBase;
+    });
+    const rebasedFiles: Map<string, File> = new Map();
 
-     if (remoteFile.added || remoteFile.ignored) {
-      //
-      // ======== REMOTE ADDED/IGNORED ========
-      //
-      rebasedFile = fileIndexModel.createFile({
-        path: remoteFile.path,
-        pathInBase: remoteFile.path,
-        blobId: remoteFile.blobId,
-        blobHash: remoteFile.blobHash,
-        blobIdInBase: remoteFile.blobId,
-        ignored: remoteFile.ignored
-      });
-    } else if (remoteFile.deleted) {
-      //
-      // ======== REMOTE DELETED ========
-      //
-      if (!localChangedFile || localChangedFile.deleted
-        || (localChangedFile.renamed && !localChangedFile.modified)
-      ) {
-        rebasedFile = undefined;
-      } else if (!localChangedFile.renamed && localChangedFile.modified) {
-        // Restore remotely deleted file because it changed locally.
-        rebasedFile = fileIndexModel.createFile({
-          path: localChangedFile.path,
-          pathInBase: undefined,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: undefined,
-          conflicting: true,
-          conflictReason: 'The file was deleted remotely but it also changed locally.'
-          // added: true
-        });
-      } else if (localChangedFile.renamed && localChangedFile.modified) {
-        // Restore remotely deleted file because it changed locally.
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: undefined,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: undefined,
-          conflicting: true,
-          conflictReason: 'The file was deleted remotely but it also changed locally.'
-            + (pathResult.conflicting
-              ? ' The file was also renamed because it\'s path became occupied.'
-              : '')
-          // added: true
-        });
-      }
-    } else if (!remoteFile.renamed && remoteFile.modified) {
-      //
-      // ======== REMOTE MODIFIED ========
-      //
-      if (!localChangedFile) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.deleted) {
-        // Restore locally deleted file, because it changed remotely.
+    // Merge files except for local additions
+    for (const remoteFile of remoteFiles.values()) {
+      const localChangedFile = remoteFile.pathInBase
+        ? localChangedFilesByPathInBase.get(remoteFile.pathInBase)
+        : undefined;
+      let rebasedFile: File | undefined;
+
+      if (remoteFile.added || remoteFile.ignored) {
+        //
+        // ======== REMOTE ADDED/IGNORED ========
+        //
         rebasedFile = fileIndexModel.createFile({
           path: remoteFile.path,
           pathInBase: remoteFile.path,
           blobId: remoteFile.blobId,
           blobHash: remoteFile.blobHash,
           blobIdInBase: remoteFile.blobId,
-          conflicting: true,
-          conflictReason: 'The file was deleted locally but it also changed remotely.'
+          ignored: remoteFile.ignored
         });
-      } else if (!localChangedFile.renamed && localChangedFile.modified) {
-        const mergeResult = await mergeBlobs(
-          // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist.
-          remoteFile.blobIdInBase!,
-          remoteFile.blobId,
-          localChangedFile.blobId,
-          remoteIndex.commitSha!
-        );
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: mergeResult.blobId,
-          blobHash: mergeResult.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: mergeResult.conflicting,
-          conflictReason: mergeResult.conflicting
-            ? 'Automatic merging failed.'
-            : undefined
-          // modified: mergeResult.modified
-        });
-      } else if (localChangedFile.renamed && !localChangedFile.modified
-        && !localChangedFile.deleted
-      ) {
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting,
-          conflictReason: pathResult.conflicting
-            ? 'The file was renamed because it\'s path became occupied.'
-            : undefined
-          // renamed: true
-        });
-      } else if (localChangedFile.renamed && localChangedFile.deleted) {
-        // Restore locally deleted file, because it changed remotely.
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: true,
-          conflictReason: 'The file was deleted locally but it also changed remotely.'
-            + (pathResult.conflicting
-              ? ' The file was also renamed because it\'s path became occupied.'
-              : '')
-          // renamed: true
-        });
-      } else if (localChangedFile.renamed && localChangedFile.modified) {
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        const mergeResult = await mergeBlobs(
-          // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist
-          remoteFile.blobIdInBase!,
-          remoteFile.blobId,
-          localChangedFile.blobId,
-          remoteIndex.commitSha!
-        );
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: mergeResult.blobId,
-          blobHash: mergeResult.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting || mergeResult.conflicting,
-          conflictReason: [
-            pathResult.conflicting
-              && 'The file was renamed because it\'s path became occupied.',
-            mergeResult.conflicting
-              && 'Automatic merging failed.'
-          ].filter((str) => !!str).join(' ') || undefined
-          // modified: mergeResult.blobId !== remoteFile.blobId
-        });
-      }
-    } else if (remoteFile.renamed && !remoteFile.modified) {
-      //
-      // ======== REMOTE RENAMED ========
-      //
-      if (!localChangedFile) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.deleted) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          deleted: true
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.modified) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-          // modified: true
-        });
-      } else if (localChangedFile.renamed && !localChangedFile.modified
-        && !localChangedFile.deleted
-      ) {
-        let pathResult;
-        if (remoteFile.path === localChangedFile.path) {
-          pathResult = {
-            path: remoteFile.path,
-            conflicting: false
-          };
-        } else {
-          pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+      } else if (remoteFile.deleted) {
+        //
+        // ======== REMOTE DELETED ========
+        //
+        if (!localChangedFile || localChangedFile.deleted
+          || (localChangedFile.renamed && !localChangedFile.modified)
+        ) {
+          rebasedFile = undefined;
+        } else if (!localChangedFile.renamed && localChangedFile.modified) {
+          // Restore remotely deleted file because it changed locally.
+          rebasedFile = fileIndexModel.createFile({
+            path: localChangedFile.path,
+            pathInBase: undefined,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: undefined,
+            conflicting: true,
+            conflictReason: 'The file was deleted remotely but it also changed locally.'
+            // added: true
+          });
+        } else if (localChangedFile.renamed && localChangedFile.modified) {
+          // Restore remotely deleted file because it changed locally.
+          const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: undefined,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: undefined,
+            conflicting: true,
+            conflictReason: 'The file was deleted remotely but it also changed locally.'
+              + (pathResult.conflicting
+                ? ' The file was also renamed because it\'s path became occupied.'
+                : '')
+            // added: true
+          });
         }
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting,
-          conflictReason: pathResult.conflicting
-            ? 'The file was renamed because it\'s path became occupied.'
-            : undefined
-          // renamed: true
-        });
-      } else if (localChangedFile.renamed && localChangedFile.deleted) {
-        let pathResult;
-        if (remoteFile.path === localChangedFile.path) {
-          pathResult = {
-            path: remoteFile.path,
-            conflicting: false
-          };
-        } else {
-          pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        }
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          deleted: true
-          // renamed: true
-          // conflict does not matter, because we're deleting and contents did not change
-        });
-      } else if (localChangedFile.renamed && localChangedFile.modified) {
-        let pathResult;
-        if (remoteFile.path === localChangedFile.path) {
-          pathResult = {
-            path: remoteFile.path,
-            conflicting: false
-          };
-        } else {
-          pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        }
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting,
-          conflictReason: pathResult.conflicting
-            ? 'The file was renamed because it\'s path became occupied.'
-            : undefined
-          // modified: true
-          // renamed: pathResult.path !== remoteFile.path
-        });
-      }
-    } else if (remoteFile.renamed && remoteFile.modified) {
-      //
-      // ======== REMOTE RENAMED & MODIFIED ========
-      //
-      if (!localChangedFile) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.deleted) {
-        // Restore locally deleted file, because it changed remotely.
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: true,
-          conflictReason: 'The file was deleted locally but it also changed remotely.'
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.modified) {
-        const mergeResult = await mergeBlobs(
-          // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist.
-          remoteFile.blobIdInBase!,
-          remoteFile.blobId,
-          localChangedFile.blobId,
-          remoteIndex.commitSha!
-        );
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: mergeResult.blobId,
-          blobHash: mergeResult.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: mergeResult.conflicting,
-          conflictReason: mergeResult.conflicting
-            ? 'Automatic merging failed.'
-            : undefined
-          // modified: mergeResult.blobId !== remoteFile.blobId
-        });
-      } else if (localChangedFile.renamed && !localChangedFile.modified
-        && !localChangedFile.deleted
-      ) {
-        if (remoteFile.path === localChangedFile.path) {
+      } else if (!remoteFile.renamed && remoteFile.modified) {
+        //
+        // ======== REMOTE MODIFIED ========
+        //
+        if (!localChangedFile) {
           rebasedFile = fileIndexModel.createFile({
             path: remoteFile.path,
             pathInBase: remoteFile.path,
@@ -421,7 +186,40 @@ export default async function rebase(repositoryId: string) {
             blobHash: remoteFile.blobHash,
             blobIdInBase: remoteFile.blobId
           });
-        } else {
+        } else if (!localChangedFile.renamed && localChangedFile.deleted) {
+          // Restore locally deleted file, because it changed remotely.
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: true,
+            conflictReason: 'The file was deleted locally but it also changed remotely.'
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.modified) {
+          const mergeResult = await mergeBlobs(
+            // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist.
+            remoteFile.blobIdInBase!,
+            remoteFile.blobId,
+            localChangedFile.blobId,
+            remoteIndex.commitSha!
+          );
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: mergeResult.blobId,
+            blobHash: mergeResult.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: mergeResult.conflicting,
+            conflictReason: mergeResult.conflicting
+              ? 'Automatic merging failed.'
+              : undefined
+            // modified: mergeResult.modified
+          });
+        } else if (localChangedFile.renamed && !localChangedFile.modified
+          && !localChangedFile.deleted
+        ) {
           const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
           rebasedFile = fileIndexModel.createFile({
             path: pathResult.path,
@@ -435,9 +233,159 @@ export default async function rebase(repositoryId: string) {
               : undefined
             // renamed: true
           });
+        } else if (localChangedFile.renamed && localChangedFile.deleted) {
+          // Restore locally deleted file, because it changed remotely.
+          const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: true,
+            conflictReason: 'The file was deleted locally but it also changed remotely.'
+              + (pathResult.conflicting
+                ? ' The file was also renamed because it\'s path became occupied.'
+                : '')
+            // renamed: true
+          });
+        } else if (localChangedFile.renamed && localChangedFile.modified) {
+          const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          const mergeResult = await mergeBlobs(
+            // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist
+            remoteFile.blobIdInBase!,
+            remoteFile.blobId,
+            localChangedFile.blobId,
+            remoteIndex.commitSha!
+          );
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: mergeResult.blobId,
+            blobHash: mergeResult.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: pathResult.conflicting || mergeResult.conflicting,
+            conflictReason: [
+              pathResult.conflicting
+                && 'The file was renamed because it\'s path became occupied.',
+              mergeResult.conflicting
+                && 'Automatic merging failed.'
+            ].filter((str) => !!str).join(' ') || undefined
+            // modified: mergeResult.blobId !== remoteFile.blobId
+          });
         }
-      } else if (localChangedFile.renamed && localChangedFile.deleted) {
-        if (remoteFile.path === localChangedFile.path) {
+      } else if (remoteFile.renamed && !remoteFile.modified) {
+        //
+        // ======== REMOTE RENAMED ========
+        //
+        if (!localChangedFile) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.deleted) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            deleted: true
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.modified) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: remoteFile.blobId
+            // modified: true
+          });
+        } else if (localChangedFile.renamed && !localChangedFile.modified
+          && !localChangedFile.deleted
+        ) {
+          let pathResult;
+          if (remoteFile.path === localChangedFile.path) {
+            pathResult = {
+              path: remoteFile.path,
+              conflicting: false
+            };
+          } else {
+            pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          }
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: pathResult.conflicting,
+            conflictReason: pathResult.conflicting
+              ? 'The file was renamed because it\'s path became occupied.'
+              : undefined
+            // renamed: true
+          });
+        } else if (localChangedFile.renamed && localChangedFile.deleted) {
+          let pathResult;
+          if (remoteFile.path === localChangedFile.path) {
+            pathResult = {
+              path: remoteFile.path,
+              conflicting: false
+            };
+          } else {
+            pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          }
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            deleted: true
+            // renamed: true
+            // conflict does not matter, because we're deleting and contents did not change
+          });
+        } else if (localChangedFile.renamed && localChangedFile.modified) {
+          let pathResult;
+          if (remoteFile.path === localChangedFile.path) {
+            pathResult = {
+              path: remoteFile.path,
+              conflicting: false
+            };
+          } else {
+            pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          }
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: pathResult.conflicting,
+            conflictReason: pathResult.conflicting
+              ? 'The file was renamed because it\'s path became occupied.'
+              : undefined
+            // modified: true
+            // renamed: pathResult.path !== remoteFile.path
+          });
+        }
+      } else if (remoteFile.renamed && remoteFile.modified) {
+        //
+        // ======== REMOTE RENAMED & MODIFIED ========
+        //
+        if (!localChangedFile) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.deleted) {
+          // Restore locally deleted file, because it changed remotely.
           rebasedFile = fileIndexModel.createFile({
             path: remoteFile.path,
             pathInBase: remoteFile.path,
@@ -447,7 +395,148 @@ export default async function rebase(repositoryId: string) {
             conflicting: true,
             conflictReason: 'The file was deleted locally but it also changed remotely.'
           });
-        } else {
+        } else if (!localChangedFile.renamed && localChangedFile.modified) {
+          const mergeResult = await mergeBlobs(
+            // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist.
+            remoteFile.blobIdInBase!,
+            remoteFile.blobId,
+            localChangedFile.blobId,
+            remoteIndex.commitSha!
+          );
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: mergeResult.blobId,
+            blobHash: mergeResult.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: mergeResult.conflicting,
+            conflictReason: mergeResult.conflicting
+              ? 'Automatic merging failed.'
+              : undefined
+            // modified: mergeResult.blobId !== remoteFile.blobId
+          });
+        } else if (localChangedFile.renamed && !localChangedFile.modified
+          && !localChangedFile.deleted
+        ) {
+          if (remoteFile.path === localChangedFile.path) {
+            rebasedFile = fileIndexModel.createFile({
+              path: remoteFile.path,
+              pathInBase: remoteFile.path,
+              blobId: remoteFile.blobId,
+              blobHash: remoteFile.blobHash,
+              blobIdInBase: remoteFile.blobId
+            });
+          } else {
+            const pathResult = ensureAvailablePath(localChangedFile.path,remoteFiles,
+              rebasedFiles);
+            rebasedFile = fileIndexModel.createFile({
+              path: pathResult.path,
+              pathInBase: remoteFile.path,
+              blobId: remoteFile.blobId,
+              blobHash: remoteFile.blobHash,
+              blobIdInBase: remoteFile.blobId,
+              conflicting: pathResult.conflicting,
+              conflictReason: pathResult.conflicting
+                ? 'The file was renamed because it\'s path became occupied.'
+                : undefined
+              // renamed: true
+            });
+          }
+        } else if (localChangedFile.renamed && localChangedFile.deleted) {
+          if (remoteFile.path === localChangedFile.path) {
+            rebasedFile = fileIndexModel.createFile({
+              path: remoteFile.path,
+              pathInBase: remoteFile.path,
+              blobId: remoteFile.blobId,
+              blobHash: remoteFile.blobHash,
+              blobIdInBase: remoteFile.blobId,
+              conflicting: true,
+              conflictReason: 'The file was deleted locally but it also changed remotely.'
+            });
+          } else {
+            const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles,
+              rebasedFiles);
+            rebasedFile = fileIndexModel.createFile({
+              path: pathResult.path,
+              pathInBase: remoteFile.path,
+              blobId: remoteFile.blobId,
+              blobHash: remoteFile.blobHash,
+              blobIdInBase: remoteFile.blobId,
+              conflicting:true,
+              conflictReason: 'The file was deleted locally but it also changed remotely.'
+                + (pathResult.conflicting
+                  ? ' The file was also renamed because it\'s path became occupied.'
+                  : '')
+              // renamed: true
+            });
+          }
+        } else if (localChangedFile.renamed && localChangedFile.modified) {
+          let pathResult;
+          if (remoteFile.path === localChangedFile.path) {
+            pathResult = {
+              path: remoteFile.path,
+              conflicting: false
+            };
+          } else {
+            pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          }
+          const mergeResult = await mergeBlobs(
+            // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist
+            remoteFile.blobIdInBase!,
+            remoteFile.blobId,
+            localChangedFile.blobId,
+            remoteIndex.commitSha!
+          );
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: mergeResult.blobId,
+            blobHash: mergeResult.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: pathResult.conflicting || mergeResult.conflicting,
+            conflictReason: [
+              pathResult.conflicting
+                && 'The file was renamed because it\'s path became occupied.',
+              mergeResult.conflicting
+                && 'Automatic merging failed.'
+            ].filter((str) => !!str).join(' ') || undefined
+            // modified: mergeResult.blobId !== remoteFile.blobId
+            // renamed: pathResult.path !== remoteFile.path
+          });
+        }
+      } else {
+        //
+        // ======== REMOTE NOT CHANGED ========
+        //
+        if (!localChangedFile) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.deleted) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            deleted: true
+          });
+        } else if (!localChangedFile.renamed && localChangedFile.modified) {
+          rebasedFile = fileIndexModel.createFile({
+            path: remoteFile.path,
+            pathInBase: remoteFile.path,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: remoteFile.blobId
+            // modified: true
+          });
+        } else if (localChangedFile.renamed && !localChangedFile.modified
+          && !localChangedFile.deleted
+        ) {
           const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
           rebasedFile = fileIndexModel.createFile({
             path: pathResult.path,
@@ -455,235 +544,154 @@ export default async function rebase(repositoryId: string) {
             blobId: remoteFile.blobId,
             blobHash: remoteFile.blobHash,
             blobIdInBase: remoteFile.blobId,
-            conflicting:true,
-            conflictReason: 'The file was deleted locally but it also changed remotely.'
-              + (pathResult.conflicting
-                ? ' The file was also renamed because it\'s path became occupied.'
-                : '')
+            conflicting: pathResult.conflicting,
+            conflictReason: pathResult.conflicting
+              ? 'The file was renamed because it\'s path became occupied.'
+              : undefined
             // renamed: true
           });
+        } else if (localChangedFile.renamed && localChangedFile.deleted) {
+          const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: remoteFile.blobId,
+            blobHash: remoteFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            deleted: true
+            // renamed: true
+            // conflict does not matter, because we're deleting and contents did not change
+          });
+        } else if (localChangedFile.renamed && localChangedFile.modified) {
+          const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
+          rebasedFile = fileIndexModel.createFile({
+            path: pathResult.path,
+            pathInBase: remoteFile.path,
+            blobId: localChangedFile.blobId,
+            blobHash: localChangedFile.blobHash,
+            blobIdInBase: remoteFile.blobId,
+            conflicting: pathResult.conflicting,
+            conflictReason: pathResult.conflicting
+              ? 'The file was renamed because it\'s path became occupied.'
+              : undefined
+            // modified: true
+            // renamed: true
+          });
+          rebasedFile.path = pathResult.path;
+          rebasedFile.pathInBase = remoteFile.path;
+          rebasedFile.blobId = localChangedFile.blobId;
+          rebasedFile.blobHash = localChangedFile.blobHash;
+          rebasedFile.modified = true;
+          if (pathResult.conflicting) {
+            rebasedFile.conflicting = true;
+            rebasedFile.conflictReason
+              = 'The file was renamed because it\'s path became occupied.';
+          }
         }
-      } else if (localChangedFile.renamed && localChangedFile.modified) {
-        let pathResult;
-        if (remoteFile.path === localChangedFile.path) {
-          pathResult = {
-            path: remoteFile.path,
-            conflicting: false
-          };
-        } else {
-          pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        }
-        const mergeResult = await mergeBlobs(
-          // The diffing wouldn't have found the remote modification if blobIdInBase didn't exist
-          remoteFile.blobIdInBase!,
-          remoteFile.blobId,
-          localChangedFile.blobId,
-          remoteIndex.commitSha!
-        );
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: mergeResult.blobId,
-          blobHash: mergeResult.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting || mergeResult.conflicting,
-          conflictReason: [
-            pathResult.conflicting
-              && 'The file was renamed because it\'s path became occupied.',
-            mergeResult.conflicting
-              && 'Automatic merging failed.'
-          ].filter((str) => !!str).join(' ') || undefined
-          // modified: mergeResult.blobId !== remoteFile.blobId
-          // renamed: pathResult.path !== remoteFile.path
-        });
       }
-    } else {
-      //
-      // ======== REMOTE NOT CHANGED ========
-      //
-      if (!localChangedFile) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.deleted) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          deleted: true
-        });
-      } else if (!localChangedFile.renamed && localChangedFile.modified) {
-        rebasedFile = fileIndexModel.createFile({
-          path: remoteFile.path,
-          pathInBase: remoteFile.path,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: remoteFile.blobId
-          // modified: true
-        });
-      } else if (localChangedFile.renamed && !localChangedFile.modified
-        && !localChangedFile.deleted
-      ) {
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting,
-          conflictReason: pathResult.conflicting
-            ? 'The file was renamed because it\'s path became occupied.'
-            : undefined
-          // renamed: true
-        });
-      } else if (localChangedFile.renamed && localChangedFile.deleted) {
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: remoteFile.blobId,
-          blobHash: remoteFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          deleted: true
-          // renamed: true
-          // conflict does not matter, because we're deleting and contents did not change
-        });
-      } else if (localChangedFile.renamed && localChangedFile.modified) {
-        const pathResult = ensureAvailablePath(localChangedFile.path, remoteFiles, rebasedFiles);
-        rebasedFile = fileIndexModel.createFile({
-          path: pathResult.path,
-          pathInBase: remoteFile.path,
-          blobId: localChangedFile.blobId,
-          blobHash: localChangedFile.blobHash,
-          blobIdInBase: remoteFile.blobId,
-          conflicting: pathResult.conflicting,
-          conflictReason: pathResult.conflicting
-            ? 'The file was renamed because it\'s path became occupied.'
-            : undefined
-          // modified: true
-          // renamed: true
-        });
-        rebasedFile.path = pathResult.path;
-        rebasedFile.pathInBase = remoteFile.path;
-        rebasedFile.blobId = localChangedFile.blobId;
-        rebasedFile.blobHash = localChangedFile.blobHash;
-        rebasedFile.modified = true;
-        if (pathResult.conflicting) {
-          rebasedFile.conflicting = true;
-          rebasedFile.conflictReason
-            = 'The file was renamed because it\'s path became occupied.';
-        }
+
+      if (rebasedFile !== undefined) {
+        rebasedFiles.set(rebasedFile.path, rebasedFile);
       }
     }
 
-    if (rebasedFile !== undefined) {
+    // Handle locally added files
+    const localAddedFiles = filterMap(localIndex.index, (node): node is File => {
+      return node.type === 'file' && node.added;
+    });
+    for (const localAddedFile of localAddedFiles.values()) {
+      const pathResult = ensureAvailablePath(localAddedFile.path, new Map(), rebasedFiles);
+      const rebasedFile = fileIndexModel.createFile({
+        path: pathResult.path,
+        blobId: localAddedFile.blobId,
+        blobHash: localAddedFile.blobHash,
+        conflicting: pathResult.conflicting,
+        conflictReason: pathResult.conflicting
+          ? 'The file was renamed because it\'s path became occupied.'
+          : undefined
+        // added: true
+      });
       rebasedFiles.set(rebasedFile.path, rebasedFile);
     }
-  }
 
-  // Handle locally added files
-  const localAddedFiles = filterMap(localIndex.index, (node): node is File => {
-    return node.type === 'file' && node.added;
-  });
-  for (const localAddedFile of localAddedFiles.values()) {
-    const pathResult = ensureAvailablePath(localAddedFile.path, new Map(), rebasedFiles);
-    const rebasedFile = fileIndexModel.createFile({
-      path: pathResult.path,
-      blobId: localAddedFile.blobId,
-      blobHash: localAddedFile.blobHash,
-      conflicting: pathResult.conflicting,
-      conflictReason: pathResult.conflicting
-        ? 'The file was renamed because it\'s path became occupied.'
-        : undefined
-      // added: true
+    // Assemble the rebase fileIndex
+    const rebaseIndex = fileIndexModel.createFileIndex({
+      repositoryId,
+      indexId: 'rebase'
     });
-    rebasedFiles.set(rebasedFile.path, rebasedFile);
-  }
+    for (const file of rebasedFiles.values()) {
+      fileIndexModel.putFileInIndex(rebaseIndex, file);
+    }
+    await fileIndexModel.addFileIndex(rebaseIndex);
 
-  // Assemble the rebase fileIndex
-  const rebaseIndex = fileIndexModel.createFileIndex({
-    repositoryId,
-    indexId: 'rebase'
-  });
-  for (const file of rebasedFiles.values()) {
-    fileIndexModel.putFileInIndex(rebaseIndex, file);
-  }
-  await fileIndexModel.addFileIndex(rebaseIndex);
-
-  // Add manual rebasing state to repository if there are conflicts
-  if (fileIndexModel.getRootTreeNode(rebaseIndex).fileStats.conflicting > 0) {
-    await repositoryModel.update(repositoryId, (repository) => {
-      repository.manualRebaseInProgress = true;
-      return repository;
-    });
-  }
-}
-
-function ensureAvailablePath(
-  path: string,
-  remoteFiles: Map<string, File>,
-  rebasedFiles: Map<string, File>
-) {
-  let resultPath = path;
-  let pathOccupied = remoteFiles.has(resultPath) || rebasedFiles.has(resultPath);
-  while (pathOccupied) {
-    const match = resultPath.match(/(-\d+)?(\.[^.]+)?$/);
-    if (!match) throw new Error('Suffix matching must always work.');
-    const [fullSuffix, numberPart, extensionPart] = match;
-    const basePart = resultPath.slice(0, -fullSuffix.length);
-    const parsedNumber = numberPart ? Number(numberPart.slice(1)) : undefined;
-    const newNumberPart = Number.isNaN(parsedNumber) || parsedNumber === undefined
-      ? '-2'
-      : `-${parsedNumber + 1}`;
-    resultPath = `${basePart}${newNumberPart}${extensionPart || ''}`;
-    pathOccupied = remoteFiles.has(resultPath) || rebasedFiles.has(resultPath);
-  }
-  return {
-    path: resultPath,
-    conflicting: path !== resultPath
+    // Add manual rebasing state to repository if there are conflicts
+    if (fileIndexModel.getRootTreeNode(rebaseIndex).fileStats.conflicting > 0) {
+      await repositoryModel.update(repositoryId, (repository) => {
+        repository.manualRebaseInProgress = true;
+        return repository;
+      });
+    }
   };
-}
 
-async function mergeBlobs(
-  baseBlobId: string,
-  remoteBlobId: string,
-  localBlobId: string,
-  remoteCommitSha: string
-) {
-  const baseBlob = await blobModel.get(baseBlobId);
-  if (baseBlob === undefined) {
-    throw new Error('Missing base blob');
+  function ensureAvailablePath(
+    path: string,
+    remoteFiles: Map<string, File>,
+    rebasedFiles: Map<string, File>
+  ) {
+    let resultPath = path;
+    let pathOccupied = remoteFiles.has(resultPath) || rebasedFiles.has(resultPath);
+    while (pathOccupied) {
+      const match = resultPath.match(/(-\d+)?(\.[^.]+)?$/);
+      if (!match) throw new Error('Suffix matching must always work.');
+      const [fullSuffix, numberPart, extensionPart] = match;
+      const basePart = resultPath.slice(0, -fullSuffix.length);
+      const parsedNumber = numberPart ? Number(numberPart.slice(1)) : undefined;
+      const newNumberPart = Number.isNaN(parsedNumber) || parsedNumber === undefined
+        ? '-2'
+        : `-${parsedNumber + 1}`;
+      resultPath = `${basePart}${newNumberPart}${extensionPart || ''}`;
+      pathOccupied = remoteFiles.has(resultPath) || rebasedFiles.has(resultPath);
+    }
+    return {
+      path: resultPath,
+      conflicting: path !== resultPath
+    };
   }
-  const remoteBlob = await blobModel.get(remoteBlobId);
-  if (remoteBlob === undefined) {
-    throw new Error('Missing remote blob');
-  }
-  const localBlob = await blobModel.get(localBlobId);
-  if (localBlob === undefined) {
-    throw new Error('Missing local blob');
-  }
-  const mergeResult = await threeWayMerge(remoteBlob, baseBlob, localBlob);
-  const mergedBlob = mergeResult.joinedResults()
-    .replace('<<<<<<< YOUR CHANGES', `<<<<<<< Remote changes (${remoteCommitSha.slice(0, 7)})`)
-    .replace('>>>>>>> APP AUTHORS CHANGES', '>>>>>>> Local changes');
-  const mergedBlobHash = await gitBlobHash(mergedBlob);
 
-  const modified = mergedBlobHash !== remoteBlobId;
-  let mergedBlobId = remoteBlobId;
-  if (modified) {
-    mergedBlobId = Math.random().toString().slice(2);
-    await blobModel.put(mergedBlobId, mergedBlob);
+  async function mergeBlobs(
+    baseBlobId: string,
+    remoteBlobId: string,
+    localBlobId: string,
+    remoteCommitSha: string
+  ) {
+    const baseBlob = await blobModel.get(baseBlobId);
+    if (baseBlob === undefined) {
+      throw new Error('Missing base blob');
+    }
+    const remoteBlob = await blobModel.get(remoteBlobId);
+    if (remoteBlob === undefined) {
+      throw new Error('Missing remote blob');
+    }
+    const localBlob = await blobModel.get(localBlobId);
+    if (localBlob === undefined) {
+      throw new Error('Missing local blob');
+    }
+    const mergeResult = await threeWayMerge(remoteBlob, baseBlob, localBlob);
+    const mergedBlob = mergeResult.joinedResults()
+      .replace('<<<<<<< YOUR CHANGES', `<<<<<<< Remote changes (${remoteCommitSha.slice(0, 7)})`)
+      .replace('>>>>>>> APP AUTHORS CHANGES', '>>>>>>> Local changes');
+    const mergedBlobHash = await gitBlobHash(mergedBlob);
+
+    const modified = mergedBlobHash !== remoteBlobId;
+    let mergedBlobId = remoteBlobId;
+    if (modified) {
+      mergedBlobId = Math.random().toString().slice(2);
+      await blobModel.put(mergedBlobId, mergedBlob);
+    }
+    return {
+      blobId: mergedBlobId,
+      blobHash: mergedBlobHash,
+      conflicting: mergeResult.conflict
+    };
   }
-  return {
-    blobId: mergedBlobId,
-    blobHash: mergedBlobHash,
-    conflicting: mergeResult.conflict
-  };
 }

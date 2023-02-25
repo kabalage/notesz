@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogPanel,
 } from '@headlessui/vue';
-import useVirtualKeyboard from '@/utils/useVirtualKeyboard';
+import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
 
 const props = defineProps<{
   initialFocus?: HTMLElement | null,

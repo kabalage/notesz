@@ -29,8 +29,8 @@ import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
 import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import RibbonButton from '@/components/RibbonButton.vue';
 import IconButton from '@/components/IconButton.vue';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
-import { useEditorState } from '@/stores/editorState';
+import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import { useEditorService } from '@/services/editorService';
 
 const CodemirrorEditor = defineAsyncComponent({
   loader: () => import('./CodemirrorEditor.vue'),
@@ -39,7 +39,7 @@ const CodemirrorEditor = defineAsyncComponent({
 });
 
 const isTouchDevice = useIsTouchDevice();
-const editorState = useEditorState()!;
+const editorService = useEditorService();
 const editorFocused = ref<boolean>(false);
 const selectMode = ref<boolean>(false);
 let editorBlurTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -47,8 +47,8 @@ let editorBlurTimeout: ReturnType<typeof setTimeout> | undefined;
 const codemirrorEditor = ref<InstanceType<typeof CodemirrorEditor> | null>(null);
 
 async function onNoteInput(newValue: string) {
-  // console.log('input', editorState.currentFile?.path);
-  editorState.currentFileBlob.data = newValue;
+  // console.log('input', editorService.currentFile?.path);
+  editorService.currentFileBlob.data = newValue;
 }
 
 function onEditorFocus() {
@@ -60,7 +60,7 @@ function onEditorFocus() {
 }
 
 function onEditorBlur() {
-  editorState.currentFileBlob.flushThrottledPut();
+  editorService.currentFileBlob.flushThrottledPut();
   editorBlurTimeout = setTimeout(() => {
     editorFocused.value = false;
   }, 200);
@@ -73,67 +73,67 @@ function onEditorBlur() {
     class="overflow-hidden flex flex-col"
   >
     <div
-      v-if="!editorState.currentFile"
+      v-if="!editorService.currentFile"
       class="self-center mt-16 text-main-200/60"
     >
       Select a note to edit...
       <!-- <input class="block mt-96 z-10" /> -->
     </div>
-    <template v-if="editorState.currentFile">
+    <template v-if="editorService.currentFile">
       <div class="px-3 lg:px-11 py-6 flex justify-between items-center">
         <div class="flex-1 flex items-center">
           <IconButton
             class="hidden sm:block"
-            @click="editorState.sidebarIsOpen = !editorState.sidebarIsOpen"
+            @click="editorService.sidebarIsOpen = !editorService.sidebarIsOpen"
           >
             <SidebarIcon class="w-6 h-6" />
           </IconButton>
         </div>
         <div class="flex-col justify-center truncate">
           <div
-            v-if="editorState.currentTree?.path"
+            v-if="editorService.currentTree?.path"
             class="flex-1 text-center text-sm font-semibold text-accent-300/60 leading-tight
               truncate"
           >
-            {{ editorState.currentTree.path }}
+            {{ editorService.currentTree.path }}
           </div>
           <h2
             class="flex-1 text-center text-lg font-semibold text-accent-300 leading-tight truncate"
           >
-            {{ editorState.currentFileName }}
+            {{ editorService.currentFileName }}
           </h2>
         </div>
         <div class="flex-1 flex items-center justify-end">
           <IconButton
             class="hidden sm:block"
-            @click="editorState.deleteCurrentFile()"
+            @click="editorService.deleteCurrentFile()"
           >
             <TrashIcon class="w-6 h-6" />
           </IconButton>
           <IconButton
-            v-if="editorState.currentFile.conflicting"
+            v-if="editorService.currentFile.conflicting"
             class="hidden sm:block"
-            @click="editorState.resolveConflict()"
+            @click="editorService.resolveConflict()"
           >
             <CheckIcon class="w-6 h-6" />
           </IconButton>
         </div>
       </div>
       <div
-        v-if="editorState.currentFile.conflictReason"
+        v-if="editorService.currentFile.conflictReason"
         class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
       >
         <MessageBox
-          :message="editorState.currentFile.conflictReason"
+          :message="editorService.currentFile.conflictReason"
           type="warning"
         />
       </div>
       <CodemirrorEditor
-        v-if="editorState.currentFileBlob.data !== undefined"
+        v-if="editorService.currentFileBlob.data !== undefined"
         ref="codemirrorEditor"
-        :key="editorState.currentFile.path"
+        :key="editorService.currentFile.path"
         class="flex-1 overflow-hidden lg:mx-8"
-        :value="editorState.currentFileBlob.data"
+        :value="editorService.currentFileBlob.data"
         @input="onNoteInput"
         @focus="onEditorFocus"
         @blur="onEditorBlur"
@@ -150,30 +150,30 @@ function onEditorBlur() {
           <ButtonBarMobileButton
             class="flex-1"
             label="Back"
-            @click="editorState.closeFile()"
+            @click="editorService.closeFile()"
           >
             <ArrowLeftIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             class="flex-1"
             label="Sync"
-            :disabled="editorState.syncDisabled"
-            @click="editorState.startSync()"
+            :disabled="editorService.syncDisabled"
+            @click="editorService.startSync()"
           >
             <SyncIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             class="flex-1"
             label="Delete"
-            @click="editorState.deleteCurrentFile"
+            @click="editorService.deleteCurrentFile"
           >
             <TrashIcon class="w-6 h-6" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
-            v-if="editorState.currentFile.conflicting"
+            v-if="editorService.currentFile.conflicting"
             class="flex-1"
             label="Resolve"
-            @click="editorState.resolveConflict()"
+            @click="editorService.resolveConflict()"
           >
             <CheckIcon class="w-6 h-6" />
           </ButtonBarMobileButton>

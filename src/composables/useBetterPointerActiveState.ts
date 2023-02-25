@@ -25,7 +25,7 @@ const defaultOptions: BetterPointerActiveStateOptions = {
  * If not enough time passes between the pointerdown and pointerup events the active state persists
  * until the minimal time elapsed.
  */
-export default function useBetterPointerActiveState(
+export function useBetterPointerActiveState(
   target: MaybeComputedRef<EventTarget | null | undefined>,
   options: Partial<BetterPointerActiveStateOptions> = {}
 ) {

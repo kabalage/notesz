@@ -1,6 +1,6 @@
-import trial from '@/utils/trial';
+import { trial } from '@/utils/trial';
 import type createMessageBus from '@/utils/createMessageBus';
-import waitForChildWindowClose from '@/utils/waitForChildWindowClose';
+import { waitForChildWindowClose } from '@/utils/waitForChildWindowClose';
 
 // TODO needs more constraints
 interface CallbackData {
@@ -8,7 +8,7 @@ interface CallbackData {
   params: any;
 }
 
-export default async function waitForCallback<T extends {
+export async function waitForCallback<T extends {
   'callback': CallbackData
 }>(
   type: string,

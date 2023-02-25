@@ -1,17 +1,42 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { deleteDB } from 'idb';
 import GitHubIcon from '@/assets/icons/github.svg?component';
-import useSettings from '@/composables/useSettings';
 import BasicButton from '@/components/BasicButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
 import MessageBox from '@/components/MessageBox.vue';
-import useRepositoryConnectAction from '@/integration/github/useRepositoryConnectAction';
+import { trial } from '@/utils/trial';
+import { useGitHubIntegration } from '@/services/integration/githubIntegration';
+import { useSettings } from '@/services/settingsService';
+import { useUserModel } from '@/services/model/userModel';
 
 const router = useRouter();
 const settings = useSettings();
-const { isAuthorizing, authError, connect } = useRepositoryConnectAction();
+const githubIntegration = useGitHubIntegration();
+const userModel = useUserModel();
+
+const authError = ref<Error | undefined>(undefined);
+const isAuthorizing = ref(false);
+
+async function authorizeThenRedirect() {
+  isAuthorizing.value = true;
+  const connectRoute = '/connect?redirect=/';
+  const user = await userModel.get();
+  if (!user) {
+    const [user, error] = await trial(() => githubIntegration.authorize());
+    if (user) {
+      router.push(connectRoute);
+    } else {
+      if (error.code !== 'canceled') {
+        authError.value = error;
+      }
+      isAuthorizing.value = false;
+    }
+  } else {
+    router.push(connectRoute);
+  }
+}
 
 watch(() => settings.data?.selectedRepositoryId, async (selectedRepositoryId) => {
   if (selectedRepositoryId) {
@@ -56,7 +81,7 @@ async function clearStorage() {
       <BasicButton
         class="mx-auto"
         :loading="isAuthorizing"
-        @click="connect({ redirect: '/' })"
+        @click="authorizeThenRedirect()"
       >
         <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
         <div class="text-center">

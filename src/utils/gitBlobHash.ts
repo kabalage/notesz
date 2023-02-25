@@ -1,4 +1,4 @@
-export default async function gitBlobHash(blob: string) {
+export async function gitBlobHash(blob: string) {
   const blobEncoded = new TextEncoder().encode(blob);
   const prefixEncoded = new TextEncoder().encode(`blob ${blobEncoded.length}\0`);
   const objectEncoded = new Uint8Array(prefixEncoded.length + blobEncoded.length);

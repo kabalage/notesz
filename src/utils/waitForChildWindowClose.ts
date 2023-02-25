@@ -1,6 +1,6 @@
-import debounce from '@/utils/debounce';
+import { debounce } from '@/utils/debounce';
 
-export default async function waitForChildWindowClose(
+export async function waitForChildWindowClose(
   childWindow: Window,
   abortSignal?: AbortSignal
 ): Promise<void> {

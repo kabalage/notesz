@@ -174,9 +174,8 @@ function off(listener: Listener) {
   listeners.delete(listener);
 }
 
-const VirtualKeyboardEvents = {
+export const VirtualKeyboardEvents = {
   setupDefaultHandler,
   onChange,
   off
 };
-export default VirtualKeyboardEvents;

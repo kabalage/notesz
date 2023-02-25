@@ -1,27 +1,25 @@
 <script setup lang="ts">
 import { defineAsyncComponent, Transition } from 'vue';
 import { RouterView } from 'vue-router';
-import { provideThemeState } from '@/stores/themeState';
-import { provideDialogState } from '@/stores/dialogState';
+
+import NoteszTransition from '@/components/NoteszTransition.vue';
+import DialogHost from '@/views/DialogHost.vue';
 
 import { vSmoothResize } from '@/composables/useSmoothResize';
-import NoteszTransition from '@/components/NoteszTransition.vue';
-import useIsTouchDevice from '@/composables/useIsTouchDevice';
-import DialogHost from '@/views/DialogHost.vue';
+import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
+import { useThemeService } from '@/services/themeService';
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
 const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
 
-const dialogState = provideDialogState();
-const themeState = provideThemeState(dialogState);
-
+const themeService = useThemeService();
 const isTouchDevice = useIsTouchDevice();
 
 </script>
 
 <template>
   <div
-    v-if="themeState.loaded"
+    v-if="themeService.loaded"
     class="w-full h-full flex flex-col bg-main-400/20"
   >
     <MobileDevConsole
@@ -54,7 +52,7 @@ const isTouchDevice = useIsTouchDevice();
       leave-to-class="translate-y-full"
     >
       <ThemeSettings
-        v-if="themeState.themeSettingsOpen"
+        v-if="themeService.themeSettingsOpen"
         class="flex-none"
         key="theme-settings"
       />

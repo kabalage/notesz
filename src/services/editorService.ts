@@ -1,27 +1,30 @@
-import useFromDb from '@/composables/useFromDb';
-import useNoteszMessageBus from '@/composables/useNoteszMessageBus';
-import blobModel from '@/model/blobModel';
-import fileIndexModel from '@/model/fileIndexModel';
-import repositoryModel from '@/model/repositoryModel';
-import { createInjectionState } from '@/utils/createInjectionState';
-import { useOnline } from '@vueuse/core';
-import { computed, reactive, ref, watch, type Ref } from 'vue';
+import { computed, ref, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDialogState } from '@/stores/dialogState';
-import validatePath from '@/utils/validatePath';
+import { useOnline } from '@vueuse/core';
+import { defineService } from '@/utils/injector';
+import { validatePath } from '@/utils/validatePath';
+import { useFromDb } from '@/composables/useFromDb';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import { useBlobModel } from '@/services/model/blobModel';
+import { useFileIndexModel } from '@/services/model/fileIndexModel';
+import { useRepositoryModel } from '@/services/model/repositoryModel';
+import { useDialogService } from '@/services/dialogService';
 
-const [provideEditorState, useEditorState] = createInjectionState((
-  repositoryId: Ref<string>,
-  currentFilePath: Ref<string>
-) => {
+export const useEditorService = defineService('EditorService', () => {
   const router = useRouter();
-  const sidebarIsOpen = ref(true);
-
-  const dialogState = useDialogState()!;
+  const dialogService = useDialogService();
   const messages = useNoteszMessageBus();
+  const blobModel = useBlobModel();
+  const fileIndexModel = useFileIndexModel();
+  const repositoryModel = useRepositoryModel();
+
+  const sidebarIsOpen = ref(true);
+  const repositoryId = ref('');
+  const currentFilePath = ref('');
 
   const repository = useFromDb({
     get() {
+      if (!repositoryId.value) return undefined;
       return repositoryModel.get(repositoryId.value);
     }
   });
@@ -30,11 +33,12 @@ const [provideEditorState, useEditorState] = createInjectionState((
       repository.refetch();
     }
   });
-  watch(() => !repository.data && repository.isInitialized, (isDisconnected) => {
-    if (isDisconnected) {
-      router.push('/settings');
-    }
-  });
+  watch(() => repositoryId.value && !repository.data && repository.isInitialized,
+    (isDisconnected) => {
+      if (isDisconnected) {
+        router.push('/settings');
+      }
+    });
 
   const currentFileIndexId = computed(() => {
     if (!repository.data) return undefined;
@@ -135,7 +139,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
       `${path}/`
       : '';
 
-    let newFilePath = await dialogState.prompt({
+    let newFilePath = await dialogService.prompt({
       title: 'New file',
       initialValue: placeholderPath,
       description: 'Any valid path is allowed.'
@@ -174,7 +178,7 @@ const [provideEditorState, useEditorState] = createInjectionState((
 
   async function deleteCurrentFile() {
     if (!currentFile.value || !currentFileIndexId.value) return;
-    const confirmed = await dialogState.confirm({
+    const confirmed = await dialogService.confirm({
       title: 'Delete file?',
       description: `Are you sure you want to delete <em class="break-words">${currentFile.value.path}</em>?`,
       confirmButtonLabel: 'Delete',
@@ -220,5 +224,3 @@ const [provideEditorState, useEditorState] = createInjectionState((
     resolveConflict
   });
 });
-
-export { provideEditorState, useEditorState };

@@ -1,16 +1,16 @@
-import { computed, reactive, ref, watch } from 'vue';
-import { createInjectionState } from '@/utils/createInjectionState';
-import { mainPalette, backgroundPalette, type ColorName } from '@/model/themeData';
-import useSettings from '@/composables/useSettings';
-import type { Theme } from '@/model/settingsModel';
-import type { provideDialogState } from './dialogState';
+import { computed, ref, watch, reactive } from 'vue';
+import { defineService } from '@/utils/injector';
+import { mainPalette, backgroundPalette, type ColorName }
+  from '@/services/model/settingsModel/themeData';
+import { useDialogService } from '@/services/dialogService';
+import { useSettings } from '@/services/settingsService';
+import type { Theme } from '@/services/model/settingsModel';
 
-const [provideThemeState, useThemeState] = createInjectionState((
-  dialogState: ReturnType<typeof provideDialogState>
-) => {
+export const useThemeService = defineService('ThemeService', () => {
+  const settings = useSettings();
+  const dialogService = useDialogService();
 
   const themeSettingsOpen = ref(false);
-  const settings = useSettings();
 
   const selectedThemeIndex = ref<number>();
   const selectedThemeCopy = ref<Theme>();
@@ -55,7 +55,7 @@ const [provideThemeState, useThemeState] = createInjectionState((
     const themes = settings.data.themes;
     if (!themes[index]) throw new Error('Invalid theme index');
     if (selectedThemeChanged.value) {
-      const shouldSave = await dialogState.confirm({
+      const shouldSave = await dialogService.confirm({
         title: 'Save changes?',
         description: 'You have unsaved changes to the theme. Do you want to save them?',
         confirmButtonLabel: 'Save',
@@ -136,7 +136,7 @@ const [provideThemeState, useThemeState] = createInjectionState((
 
   async function closeThemeSettings() {
     if (selectedThemeChanged.value) {
-      const shouldSave = await dialogState.confirm({
+      const shouldSave = await dialogService.confirm({
         title: 'Save changes?',
         description: 'You have unsaved changes to the theme. Do you want to save them?',
         confirmButtonLabel: 'Save',
@@ -173,5 +173,3 @@ const [provideThemeState, useThemeState] = createInjectionState((
     openThemeSettings
   });
 });
-
-export { provideThemeState, useThemeState };
