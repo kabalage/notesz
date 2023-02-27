@@ -25,6 +25,8 @@ type Listener = (event: VirtualKeyboardChangeEvent) => void;
 const listeners: Set<Listener> = new Set();
 let lastViewportHeight = 0;
 const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
+const safariMajorVersion = Number(navigator.userAgent.match(/Safari\/(\d+)/)?.[1] || '0');
+const iosMagicOffsetNeeded = isIpad && safariMajorVersion < 605;
 
 function setupDefaultHandler(defaultHandler = defaultChangeHandler) {
   if (navigator.virtualKeyboard) {
@@ -119,7 +121,7 @@ export function handleShowIos(event: VirtualKeyboardChangeEvent) {
     // console.log('handleShowIos');
     document.documentElement.scrollTop = -1;
     const resizeToHeight = isInstalled && isIpad
-      ? event.viewportHeight - 1 - 24
+      ? event.viewportHeight - 1 - Number(iosMagicOffsetNeeded) * 24
         // 1px for a border above the keyboard
         // 24px magic offset to fix reported standalone safari viewport height on the iPad
       : event.viewportHeight - 1;
