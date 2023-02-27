@@ -185,12 +185,6 @@ function onChange(newContents: string) {
 function insertText(text: string) {
   if (!cmEditorView.value) return;
   const range = cmEditorView.value.state.selection.ranges[0];
-  // console.log(range);
-  // cmEditorView.value.dispatch({
-  //   selection: {
-  //     anchor: range.from + 1
-  //   }
-  // });
   cmEditorView.value.dispatch({
     changes: {
       from: range.from,
@@ -198,9 +192,22 @@ function insertText(text: string) {
       insert: text
     },
     selection: {
-      anchor: range.from + 1,
+      anchor: range.from + text.length,
     }
   });
+
+  cmEditorView.value.dispatch({
+    effects: EditorView.scrollIntoView(cmEditorView.value.state.selection.ranges[0], {
+      y: 'nearest',
+      yMargin: 16
+    })
+  });
+}
+
+function getSelectionText() {
+  if (!cmEditorView.value) return '';
+  const range = cmEditorView.value.state.selection.ranges[0];
+  return cmEditorView.value.state.doc.sliceString(range.from, range.to);
 }
 
 function insertBrackets(bracket: string, pair?: string) {
@@ -332,9 +339,22 @@ function focus() {
   cmEditorView.value.focus();
 }
 
+async function copyToClipboard() {
+  const text = getSelectionText();
+  if (text) {
+    await navigator.clipboard.writeText(text);
+  }
+}
+
+async function pasteFromClipboard() {
+  const text = await navigator.clipboard.readText();
+  insertText(text);
+}
+
 defineExpose({
   insertBrackets,
   insertText,
+  getSelectionText,
   moveCursorLeft,
   moveCursorRight,
   moveCursorUp,
@@ -358,7 +378,9 @@ defineExpose({
   moveLineDown,
   moveLineUp,
   openSearch,
-  focus
+  focus,
+  copyToClipboard,
+  pasteFromClipboard
 });
 
 </script>

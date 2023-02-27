@@ -22,6 +22,8 @@ import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import TrashIcon from '@/assets/icons/trash.svg?component';
 import SyncIcon from '@/assets/icons/sync.svg?component';
 import CheckIcon from '@/assets/icons/check.svg?component';
+import ClipboardCopyIcon from '@/assets/icons/clipboard-copy.svg?component';
+import ClipboardPasteIcon from '@/assets/icons/clipboard-paste.svg?component';
 
 import EmptyPlaceholder from './EmptyPlaceholder.vue';
 import MessageBox from '@/components/MessageBox.vue';
@@ -195,6 +197,14 @@ function onEditorBlur() {
           >
             <RibbonButton
               class="snap-center"
+              @click="codemirrorEditor?.insertText('#')"
+            >
+              <div class="w-6 h-6 flex items-center justify-center text-lg font-mono font-medium">
+                #
+              </div>
+            </RibbonButton>
+            <RibbonButton
+              class="snap-center"
               @click="codemirrorEditor?.insertText('-')"
             >
               <div class="w-6 h-6 flex items-center justify-center text-lg font-mono font-medium">
@@ -267,30 +277,6 @@ function onEditorBlur() {
             </RibbonButton>
             <RibbonButton
               class="snap-center"
-              @click="codemirrorEditor?.indentMore()"
-            >
-              <IndentRightIcon class="w-6 h-6" />
-            </RibbonButton>
-            <RibbonButton
-              class="snap-center"
-              @click="codemirrorEditor?.indentLess()"
-            >
-              <IndentLeftIcon class="w-6 h-6" />
-            </RibbonButton>
-            <RibbonButton
-              class="snap-center"
-              @click="codemirrorEditor?.moveLineUp()"
-            >
-              <MoveLinesUpIcon class="w-6 h-6" />
-            </RibbonButton>
-            <RibbonButton
-              class="snap-center"
-              @click="codemirrorEditor?.moveLineDown()"
-            >
-              <MoveLinesDownIcon class="w-6 h-6" />
-            </RibbonButton>
-            <RibbonButton
-              class="snap-center"
               :toggled="selectMode"
               @click="selectMode = !selectMode"
             >
@@ -302,6 +288,18 @@ function onEditorBlur() {
                 v-else
                 class="w-6 h-6"
               />
+            </RibbonButton>
+            <RibbonButton
+              class="snap-center"
+              @click="codemirrorEditor?.copyToClipboard()"
+            >
+              <ClipboardCopyIcon class="w-6 h-6" />
+            </RibbonButton>
+            <RibbonButton
+              class="snap-center"
+              @click="codemirrorEditor?.pasteFromClipboard()"
+            >
+              <ClipboardPasteIcon class="w-6 h-6" />
             </RibbonButton>
             <RibbonButton
               class="snap-center"
@@ -381,6 +379,28 @@ function onEditorBlur() {
                   : codemirrorEditor?.moveCursorLineEnd()"
               >
                 <CursorLineEndIcon class="w-6 h-6" />
+              </RibbonButton>
+            </div>
+            <div class="w-44 px-2 flex-none flex flex-row snap-center">
+              <RibbonButton
+                @click="codemirrorEditor?.moveLineUp()"
+              >
+                <MoveLinesUpIcon class="w-6 h-6" />
+              </RibbonButton>
+              <RibbonButton
+                @click="codemirrorEditor?.moveLineDown()"
+              >
+                <MoveLinesDownIcon class="w-6 h-6" />
+              </RibbonButton>
+              <RibbonButton
+                @click="codemirrorEditor?.indentLess()"
+              >
+                <IndentLeftIcon class="w-6 h-6" />
+              </RibbonButton>
+              <RibbonButton
+                @click="codemirrorEditor?.indentMore()"
+              >
+                <IndentRightIcon class="w-6 h-6" />
               </RibbonButton>
             </div>
           </div>
