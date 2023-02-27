@@ -187,7 +187,7 @@ function onEditorBlur() {
       >
         <div
           v-if="editorFocused && isTouchDevice"
-          class="flex flex-row pt-px"
+          class="flex flex-row pt-px sm:touch:pl-px"
         >
           <div
             class="flex-1 px-2 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
