@@ -54,8 +54,8 @@ const isTouchDevice = useIsTouchDevice();
       v-smooth-resize="{ watchParent: true, animationDuration: 300 }"
     >
       <RouterView class="" v-slot="{ Component }">
-        <component
-          :is="isTouchDevice ? 'v-fragment' : Transition"
+        <Transition
+          v-if="!isTouchDevice"
           enter-active-class="duration-200 transition-all ease-out
             motion-reduce:transition-none"
           leave-active-class="duration-100 transition-all ease-in
@@ -65,7 +65,8 @@ const isTouchDevice = useIsTouchDevice();
           mode="out-in"
         >
           <component :is="Component" />
-        </component>
+        </Transition>
+        <component v-else :is="Component" />
       </RouterView>
     </div>
     <NoteszTransition
