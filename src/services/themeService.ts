@@ -1,12 +1,12 @@
 import { computed, ref, watch, reactive } from 'vue';
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { mainPalette, backgroundPalette, type ColorName }
   from '@/services/model/settingsModel/themeData';
 import { useDialogService } from '@/services/dialogService';
 import { useSettings } from '@/services/settingsService';
 import type { Theme } from '@/services/model/settingsModel';
 
-export const useThemeService = defineService('ThemeService', () => {
+export const [provideThemeService, useThemeService] = defineService('ThemeService', () => {
   const settings = useSettings();
   const dialogService = useDialogService();
 

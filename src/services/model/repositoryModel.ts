@@ -1,4 +1,4 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useBlobModel } from './blobModel';
@@ -20,7 +20,7 @@ export function createRepository(
   };
 }
 
-export const useRepositoryModel = defineService('RepositoryModel', () => {
+export const [provideRepositoryModel, useRepositoryModel] = defineService('RepositoryModel', () => {
   const { initTransaction } = useNoteszDb();
   const messages = useNoteszMessageBus();
   const blobModel = useBlobModel();

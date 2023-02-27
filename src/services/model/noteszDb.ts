@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase, type IDBPTransaction, type StoreNames } from 'idb';
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import type { NoteszDb } from './noteszDb/noteszDbSchema';
 import { initDb } from './noteszDb/initDb';
 import { upgradeDb } from './noteszDb/upgradeDb';
@@ -9,7 +9,7 @@ export type NoteszDbTransaction = IDBPTransaction<
     id?: string
   };
 
-export const useNoteszDb = defineService('NoteszDb', () => {
+export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
   let db: IDBPDatabase<NoteszDb> | undefined;
   let dbPromise: Promise<IDBPDatabase<NoteszDb>> | undefined;
   let closeTimeout: ReturnType<typeof setTimeout> | undefined;

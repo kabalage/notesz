@@ -1,7 +1,7 @@
 import { computed, ref, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useOnline } from '@vueuse/core';
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { validatePath } from '@/utils/validatePath';
 import { useFromDb } from '@/composables/useFromDb';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
@@ -10,7 +10,7 @@ import { useFileIndexModel } from '@/services/model/fileIndexModel';
 import { useRepositoryModel } from '@/services/model/repositoryModel';
 import { useDialogService } from '@/services/dialogService';
 
-export const useEditorService = defineService('EditorService', () => {
+export const [provideEditorService, useEditorService] = defineService('EditorService', () => {
   const router = useRouter();
   const dialogService = useDialogService();
   const messages = useNoteszMessageBus();

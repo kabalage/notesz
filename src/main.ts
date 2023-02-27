@@ -1,6 +1,5 @@
 import { createApp } from 'vue';
 import { registerSW } from 'virtual:pwa-register';
-import { createInjector } from '@/utils/injector';
 import { VirtualKeyboardEvents } from '@/utils/VirtualKeyboardEvents';
 import App from './App.vue';
 import router from './router';
@@ -20,7 +19,6 @@ const updateSW = registerSW({
 VirtualKeyboardEvents.setupDefaultHandler();
 
 const app = createApp(App);
-app.use(createInjector());
 app.use(router);
 
 // TODO temporary solution for EditorView until this gets sorted out:

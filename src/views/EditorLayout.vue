@@ -5,8 +5,8 @@ import EditorSidebarMobile from './EditorSidebarMobile.vue';
 import EditorContents from './EditorContents.vue';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
-import { useEditorService } from '@/services/editorService';
-import { useExplorerService } from '@/services/explorerService';
+import { provideEditorService } from '@/services/editorService';
+import { provideExplorerService } from '@/services/explorerService';
 
 const props = defineProps<{
   repo: string,
@@ -14,8 +14,8 @@ const props = defineProps<{
 }>();
 
 const isTouchDevice = useIsTouchDevice();
-const editorService = useEditorService();
-useExplorerService();
+const editorService = provideEditorService();
+provideExplorerService();
 
 watch(() => `${props.repo}/${props.path}`, () => {
   editorService.repositoryId = props.repo;

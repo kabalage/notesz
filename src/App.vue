@@ -7,12 +7,33 @@ import DialogHost from '@/views/DialogHost.vue';
 
 import { vSmoothResize } from '@/composables/useSmoothResize';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
-import { useThemeService } from '@/services/themeService';
+import { provideThemeService } from '@/services/themeService';
+import { provideDialogService } from '@/services/dialogService';
+import { provideNoteszDb } from './services/model/noteszDb';
+import { provideSettings } from './services/settingsService';
+import { provideNoteszMessageBus } from './services/noteszMessageBus';
+import { provideBlobModel } from './services/model/blobModel';
+import { provideFileIndexModel } from './services/model/fileIndexModel';
+import { provideRepositoryModel } from './services/model/repositoryModel';
+import { provideSettingsModel } from './services/model/settingsModel';
+import { provideUserModel } from './services/model/userModel';
+import { provideGitHubIntegration } from './services/integration/githubIntegration';
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
 const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
 
-const themeService = useThemeService();
+provideNoteszMessageBus();
+provideNoteszDb();
+provideDialogService();
+provideBlobModel();
+provideFileIndexModel();
+provideRepositoryModel();
+provideSettingsModel();
+provideUserModel();
+provideSettings();
+provideGitHubIntegration();
+const themeService = provideThemeService();
+
 const isTouchDevice = useIsTouchDevice();
 
 </script>

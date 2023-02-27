@@ -1,4 +1,4 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { defaultThemes, type ColorName } from './settingsModel/themeData';
@@ -28,7 +28,7 @@ export function createSettings(
   };
 }
 
-export const useSettingsModel = defineService('SettingsModel', () => {
+export const [provideSettingsModel, useSettingsModel] = defineService('SettingsModel', () => {
   const { initTransaction } = useNoteszDb();
   const messages = useNoteszMessageBus();
 

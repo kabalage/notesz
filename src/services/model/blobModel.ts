@@ -1,4 +1,4 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { NoteszError } from '@/utils/NoteszError';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
@@ -8,7 +8,7 @@ export interface BlobRefCount {
   refCount: number
 }
 
-export const useBlobModel = defineService('BlobModel', () => {
+export const [provideBlobModel, useBlobModel] = defineService('BlobModel', () => {
   const { initTransaction } = useNoteszDb();
   const messages = useNoteszMessageBus();
 
@@ -87,7 +87,7 @@ export const useBlobModel = defineService('BlobModel', () => {
       const blobRefCountStore = tx.objectStore('blobRefCounts');
       const byRefCountIndex = blobRefCountStore.index('byRefCount');
       const blobRefCountsWithZeroRefs = await byRefCountIndex.getAll(0);
-      const garbageBlobIds = blobRefCountsWithZeroRefs.map(blobRefCount => blobRefCount.blobId);
+      const garbageBlobIds = blobRefCountsWithZeroRefs.map((blobRefCount) => blobRefCount.blobId);
       for (let i = 0; i < garbageBlobIds.length; ++i) {
         const blobId = garbageBlobIds[i];
         await blobStore.delete(blobId);

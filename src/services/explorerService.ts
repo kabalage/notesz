@@ -1,9 +1,9 @@
 import { computed, ref, watch, reactive } from 'vue';
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useEditorService } from '@/services/editorService';
 import { useFileIndexModel, type File, type Tree } from '@/services/model/fileIndexModel';
 
-export const useExplorerService = defineService('ExplorerService', () => {
+export const [provideExplorerService, useExplorerService] = defineService('ExplorerService', () => {
   const editorService = useEditorService();
   const fileIndexModel = useFileIndexModel();
 

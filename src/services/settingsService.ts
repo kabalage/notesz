@@ -1,9 +1,9 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useFromDb } from '@/composables/useFromDb';
 import { useSettingsModel } from '@/services/model/settingsModel';
 
-export const useSettings = defineService('SettingsService', () => {
+export const [provideSettings, useSettings] = defineService('SettingsService', () => {
   const messages = useNoteszMessageBus();
   const settingsModel = useSettingsModel();
 

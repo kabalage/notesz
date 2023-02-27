@@ -1,4 +1,4 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
 import { gitBlobHash } from '@/utils/gitBlobHash';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
@@ -101,7 +101,7 @@ export function createFile(
   return file;
 }
 
-export const useFileIndexModel = defineService('FileIndexModel', () => {
+export const [provideFileIndexModel, useFileIndexModel] = defineService('FileIndexModel', () => {
   const { initTransaction } = useNoteszDb();
   const messages = useNoteszMessageBus();
   const blobModel = useBlobModel();

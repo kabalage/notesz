@@ -1,4 +1,4 @@
-import { defineService } from '@/utils/injector';
+import { defineService } from '@/utils/defineService';
 import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 
@@ -17,7 +17,7 @@ export function createUser(
   };
 }
 
-export const useUserModel = defineService('UserModel', () => {
+export const [provideUserModel, useUserModel] = defineService('UserModel', () => {
   const { initTransaction } = useNoteszDb();
   const messages = useNoteszMessageBus();
 
