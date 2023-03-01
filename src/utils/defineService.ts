@@ -88,10 +88,10 @@ export function defineService<Arguments extends Array<any>, Service>(
   };
 
   function _inject(componentInstance: ExtendedComponentInternalInstance) {
-    const instance = componentInstance.provides[key as symbol] as Service | undefined;
-    if (instance === undefined) {
+    if (!((key as symbol) in componentInstance.provides)) {
       throw new Error(`Could not inject "${name}". You need to provide it before using it.`);
     }
+    const instance = componentInstance.provides[key as symbol] as Service;
     return instance;
   }
 
