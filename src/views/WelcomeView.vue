@@ -7,14 +7,24 @@ import BasicButton from '@/components/BasicButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
 import MessageBox from '@/components/MessageBox.vue';
 import { trial } from '@/utils/trial';
+import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useGitHubIntegration } from '@/services/integration/githubIntegration';
 import { useSettings } from '@/services/settingsService';
 import { useUserModel } from '@/services/model/userModel';
+import { useFromDb } from '@/composables/useFromDb';
 
 const router = useRouter();
 const settings = useSettings();
 const githubIntegration = useGitHubIntegration();
 const userModel = useUserModel();
+const messages = useNoteszMessageBus();
+
+const user = useFromDb({
+  get: userModel.get
+});
+messages.on('change:user', () => {
+  user.refetch();
+});
 
 const authError = ref<Error | undefined>(undefined);
 const isAuthorizing = ref(false);
@@ -22,10 +32,12 @@ const isAuthorizing = ref(false);
 async function authorizeThenRedirect() {
   isAuthorizing.value = true;
   const connectRoute = '/connect?redirect=/';
-  const user = await userModel.get();
-  if (!user) {
-    const [user, error] = await trial(() => githubIntegration.authorize());
-    if (user) {
+  // Fetching user must be done before calling authorize, because authorize opens a popup that
+  // requires to be called from a user interaction. Awaiting here for the user to be fetched
+  // would cause the popup to be blocked.
+  if (!user.data) {
+    const [authResult, error] = await trial(() => githubIntegration.authorize());
+    if (authResult) {
       router.push(connectRoute);
     } else {
       if (error.code !== 'canceled') {

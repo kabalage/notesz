@@ -47,16 +47,25 @@ messages.on('change:repository', () => {
   repositoryList.refetch();
 });
 
+const user = useFromDb({
+  get: userModel.get
+});
+messages.on('change:user', () => {
+  user.refetch();
+});
+
 const authError = ref<Error | undefined>(undefined);
 const isAuthorizing = ref(false);
 
 async function authorizeThenRedirect() {
   isAuthorizing.value = true;
   const connectRoute = '/connect?redirect=/settings';
-  const user = await userModel.get();
-  if (!user) {
-    const [user, error] = await trial(() => githubIntegration.authorize());
-    if (user) {
+  // Fetching user must be done before calling authorize, because authorize opens a popup that
+  // requires to be called from a user interaction. Awaiting here for the user to be fetched
+  // would cause the popup to be blocked.
+  if (!user.data) {
+    const [authResult, error] = await trial(() => githubIntegration.authorize());
+    if (authResult) {
       router.push(connectRoute);
     } else {
       if (error.code !== 'canceled') {
