@@ -11,17 +11,12 @@ export default defineConfig({
   plugins: [
     // basicSsl(),
     VitePWA({
+      registerType: 'prompt',
       workbox: {
         globPatterns: [
-          '**/*.{js,css,html,svg}'
+          '**/*.{js,css,html,svg,ico,png}'
         ]
       },
-      includeAssets: [
-        'favicon.svg',
-        'favicon.ico',
-        'ios-touch-icon.png',
-        'maskable-icon.png'
-      ],
       manifest: {
         'id': '/',
         'start_url': '/?utm_source=pwa-install',

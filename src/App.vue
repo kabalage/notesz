@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, Transition } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import { RouterView } from 'vue-router';
 
 import NoteszTransition from '@/components/NoteszTransition.vue';
@@ -18,6 +18,7 @@ import { provideRepositoryModel } from './services/model/repositoryModel';
 import { provideSettingsModel } from './services/model/settingsModel';
 import { provideUserModel } from './services/model/userModel';
 import { provideGitHubIntegration } from './services/integration/githubIntegration';
+import { provideServiceWorkerUpdates } from './services/serviceWorkerUpdates';
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
 const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
@@ -32,6 +33,7 @@ provideSettingsModel();
 provideUserModel();
 provideSettings();
 provideGitHubIntegration();
+provideServiceWorkerUpdates();
 const themeService = provideThemeService();
 
 const isTouchDevice = useIsTouchDevice();
