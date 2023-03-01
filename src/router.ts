@@ -3,10 +3,18 @@ import EditorLayout from '@/views/EditorLayout.vue';
 
 const pwaMode = window.matchMedia('(display-mode: standalone)').matches;
 
+let routerHistory;
+if (pwaMode && !import.meta.env.DEV) {
+  // In PWA mode, we don't want back/forward navigation because it's confusing that is does not
+  // work like in a native app
+  routerHistory = createMemoryHistory(import.meta.env.BASE_URL);
+  routerHistory.replace(location.pathname);
+} else {
+  routerHistory = createWebHistory(import.meta.env.BASE_URL);
+}
+
 const router = createRouter({
-  history: pwaMode && !import.meta.env.DEV
-    ? createMemoryHistory(import.meta.env.BASE_URL)
-    : createWebHistory(import.meta.env.BASE_URL),
+  history: routerHistory,
   routes: [
     {
       path: '/',
