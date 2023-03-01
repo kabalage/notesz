@@ -21,11 +21,19 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
   const sidebarIsOpen = ref(true);
   const repositoryId = ref('');
   const currentFilePath = ref('');
+  const repoIsDisconnected = ref(false);
 
   const repository = useFromDb({
-    get() {
-      if (!repositoryId.value) return undefined;
-      return repositoryModel.get(repositoryId.value);
+    watch() {
+      return repositoryId.value;
+    },
+    async get(repositoryId) {
+      if (!repositoryId) return undefined;
+      const repo = await repositoryModel.get(repositoryId);
+      if (!repo) {
+        repoIsDisconnected.value = true;
+      }
+      return repo;
     }
   });
   messages.on('change:repository', (id) => {
@@ -33,12 +41,11 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
       repository.refetch();
     }
   });
-  watch(() => repositoryId.value && !repository.data && repository.isInitialized,
-    (isDisconnected) => {
-      if (isDisconnected) {
-        router.push('/settings');
-      }
-    });
+  watch(() => repoIsDisconnected.value, (isDisconnected) => {
+    if (isDisconnected) {
+      router.push('/settings');
+    }
+  });
 
   const currentFileIndexId = computed(() => {
     if (!repository.data) return undefined;
@@ -178,6 +185,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
 
   async function deleteCurrentFile() {
     if (!currentFile.value || !currentFileIndexId.value) return;
+    await currentFileBlob.flushThrottledPut();
     const confirmed = await dialogService.confirm({
       title: 'Delete file?',
       description: `Are you sure you want to delete <em class="break-words">${currentFile.value.path}</em>?`,

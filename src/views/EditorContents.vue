@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineAsyncComponent } from 'vue';
+import { ref, defineAsyncComponent, onBeforeUnmount } from 'vue';
 
 import IndentRightIcon from '@/assets/icons/indent-right.svg?component';
 import IndentLeftIcon from '@/assets/icons/indent-left.svg?component';
@@ -62,11 +62,15 @@ function onEditorFocus() {
 }
 
 function onEditorBlur() {
-  editorService.currentFileBlob.flushThrottledPut();
   editorBlurTimeout = setTimeout(() => {
     editorFocused.value = false;
+    editorService.currentFileBlob.flushThrottledPut();
   }, 200);
 }
+
+onBeforeUnmount(() => {
+  editorService.currentFileBlob.flushThrottledPut();
+});
 
 </script>
 

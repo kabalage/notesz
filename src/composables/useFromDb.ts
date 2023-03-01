@@ -1,5 +1,6 @@
-import { NoteszError } from '@/utils/NoteszError';
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
+import { trial } from '@/utils/trial';
+import throttle from 'lodash-es/throttle';
 
 export function useFromDb<T, WatchParam>({
   get,
@@ -18,94 +19,105 @@ export function useFromDb<T, WatchParam>({
   const isInitialized = ref(false);
   const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
-  let lastPutTime = 0;
-  let putThrottlingTimer: ReturnType<typeof setTimeout> | undefined;
-  let throttledPut: (() => any) | undefined;
-  let ongoingPut: Promise<any> | undefined;
+  let getQueued: {
+    params: WatchParam | undefined
+  } | undefined;
+  let putQueued: {
+    newValue: UnwrapRef<T>
+  } | undefined;
+  let processPromise: Promise<void> = Promise.resolve();
+  let isProcessing = false;
+
+  const throttledQueuePut = throttle(_queuePut, putThrottling);
 
   if (watchParam) {
-    watch(watchParam, _get, {
+    watch(watchParam, _queueGet, {
       immediate: true
     });
   } else {
-    _get();
+    _queueGet();
+  }
+
+  async function _queueGet(params?: WatchParam) {
+    // console.log('useFromDb _queueGet');
+    getQueued = { params };
+    if (isProcessing) {
+      return processPromise;
+    } else {
+      processPromise = _process();
+      return processPromise;
+    }
+  }
+
+  async function _queuePut(newValue: UnwrapRef<T>) {
+    // console.log('useFromDb _queuePut');
+    putQueued = { newValue };
+    if (isProcessing) {
+      return processPromise;
+    } else {
+      processPromise = _process();
+      return processPromise;
+    }
+  }
+
+  async function _process() {
+    // console.log('useFromDb _process');
+    isProcessing = true;
+    while (getQueued || putQueued) {
+      if (putQueued) {
+        const newValue = putQueued.newValue;
+        putQueued = undefined;
+        await _put(newValue);
+      }
+      if (getQueued) {
+        const params = getQueued.params;
+        getQueued = undefined;
+        await _get(params);
+      }
+    }
+    isProcessing = false;
   }
 
   async function _get(params?: WatchParam) {
-    if (isFetching.value) {
-      return;
-    }
     // console.log('useFromDb _get');
-    try {
+    const [, getError] = await trial(async () => {
       isFetching.value = true;
-      await flushThrottledPut();
-      stopUpdateWatch();
       error.value = undefined;
-      data.value = await get(params) as UnwrapRef<T>;
-    } catch(err) {
-      if (err instanceof Error) {
-        error.value = err;
-      } else {
-        error.value = new NoteszError('Failed to get resource', {
-          cause: err
-        });
-      }
-    } finally {
-      isFetching.value = false;
+      const newValue = await get(params) as UnwrapRef<T>;
+      stopUpdateWatch();
+      data.value = newValue;
+    });
+    if (getError) {
+      error.value = getError;
+    } else {
       isInitialized.value = true;
-      if (put && data.value !== undefined) {
-        startUpdateWatch();
-      }
+    }
+    isFetching.value = false;
+    if (put && data.value !== undefined) {
+      startUpdateWatch();
     }
   }
 
   async function _put(newValue: UnwrapRef<T>) {
     if (!put) return;
-    if (ongoingPut) {
-      try {
-        await ongoingPut;
-      } catch(err) {
-        // do nothing
-      }
-    }
     // console.log('useFromDb _put');
-    lastPutTime = Date.now();
-    error.value = undefined;
-    isPutting.value = true;
-    try {
-      ongoingPut = put(toRaw(newValue));
-      await ongoingPut;
-    } catch(err: any) {
-      console.error('useFromDb put failed', err);
-      error.value = err as Error;
-    } finally {
-      isPutting.value = false;
-      ongoingPut = undefined;
+    const [, putError] = await trial(async () => {
+      isPutting.value = true;
+      error.value = undefined;
+      await put(toRaw(newValue));
+    });
+    if (putError) {
+      error.value = putError;
     }
+    isPutting.value = false;
   }
 
   function startUpdateWatch() {
-    // console.log('startUpdateWatch');
+    // console.log('useFromDb startUpdateWatch');
     if (!put) return;
     updateWatchStopHandler = watch(data, function updateWatchHandler(newValue) {
       if (newValue !== undefined && newValue !== null) {
-        const elapsed = Date.now() - lastPutTime;
-
-        if (putThrottlingTimer) {
-          clearTimeout(putThrottlingTimer);
-          putThrottlingTimer = undefined;
-          throttledPut = undefined;
-        }
-
-        if (elapsed >= putThrottling) {
-          _put(newValue);
-        } else {
-          throttledPut = () => {
-            throttledPut = undefined;
-            return _put(newValue);
-          };
-          putThrottlingTimer = setTimeout(throttledPut, putThrottling - elapsed);
-        }
+        throttledQueuePut(newValue);
       }
     }, {
       deep: true
@@ -113,21 +125,19 @@ export function useFromDb<T, WatchParam>({
   }
 
   async function stopUpdateWatch() {
-    // console.log('stopUpdateWatch');
     if (updateWatchStopHandler) {
+      // console.log('useFromDb stopUpdateWatch');
       updateWatchStopHandler();
+      updateWatchStopHandler = undefined;
     }
-    updateWatchStopHandler = undefined;
   }
 
   async function flushThrottledPut() {
-    if (throttledPut) {
-      const throttledPutCopy = throttledPut;
-      throttledPut = undefined;
-      await throttledPutCopy();
-    } else if (ongoingPut) {
-      await ongoingPut;
+    const putPromise = throttledQueuePut.flush();
+    if (putPromise) {
+      return putPromise;
     }
+    return processPromise;
   }
 
   return reactive({
@@ -136,8 +146,8 @@ export function useFromDb<T, WatchParam>({
     isFetching,
     isPutting,
     isInitialized,
-    refetch: _get,
-    put: _put,
+    refetch: _queueGet,
+    put: _queuePut,
     flushThrottledPut
   });
 }

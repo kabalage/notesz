@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, inject, onUnmounted, ref, type App, type RendererElement } from 'vue';
+import { watch, shallowRef, inject, onUnmounted, ref, type App, type RendererElement } from 'vue';
 import { Codemirror } from 'vue-codemirror';
 import VueCodemirror from 'vue-codemirror';
 import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
@@ -27,7 +27,7 @@ import {
 const props = defineProps<{
   value: string
 }>();
-const emit = defineEmits(['input', 'change', 'focus', 'blur']);
+const emit = defineEmits(['input', 'focus', 'blur']);
 const isFocused = ref(false);
 
 // TODO temporary solution until this gets sorted out:
@@ -117,13 +117,10 @@ const extensions = [
   // }),
   EditorView.domEventHandlers({
     blur() {
-      // console.log('Codemirror blur');
       isFocused.value = false;
       emit('blur');
-      emitChange();
     },
     focus() {
-      // console.log('Codemirror focus');
       isFocused.value = true;
       emit('focus');
     }
@@ -136,8 +133,9 @@ const extensions = [
 ];
 
 const cmEditorView = shallowRef<EditorView>();
-const modelValue = ref(props.value); // maybe watch prop
-const emittedValue = ref(props.value);
+const modelValue = ref(props.value);
+let lastEmitTime = 0;
+let lastEmitValue: string | undefined;
 const isTouchDevice = useIsTouchDevice();
 
 function onReady(payload: {
@@ -157,27 +155,22 @@ function onReady(payload: {
       event.preventDefault();
       handleShowIos(event);
       handleShowNonIos(event);
-      payload.view.dispatch({
-        effects: EditorView.scrollIntoView(payload.view.state.selection.ranges[0], {
-          y: 'nearest',
-          yMargin: 16
-        })
-      });
+      scrollIntoView();
     }
   }
 
 }
 
-function emitChange() {
-  if (modelValue.value !== emittedValue.value) {
-    emittedValue.value = modelValue.value;
-    emit('change', modelValue.value);
+watch(() => props.value, (newContents) => {
+  if (Date.now() - lastEmitTime > 1000 && newContents !== lastEmitValue) {
+    modelValue.value = newContents;
   }
-}
+}, { immediate: true });
 
 function onChange(newContents: string) {
   // Change is called on every input. We just save the value and emit change when blur occurs.
-  modelValue.value = newContents;
+  lastEmitValue = newContents;
+  lastEmitTime = Date.now();
   emit('input', newContents);
   // console.log('change', newContents.slice(0, 10));
 }
@@ -195,11 +188,15 @@ function insertText(text: string) {
       anchor: range.from + text.length,
     }
   });
+  scrollIntoView();
+}
 
+function scrollIntoView() {
+  if (!cmEditorView.value) return;
   cmEditorView.value.dispatch({
     effects: EditorView.scrollIntoView(cmEditorView.value.state.selection.ranges[0], {
       y: 'nearest',
-      yMargin: 16
+      yMargin: 48
     })
   });
 }
@@ -321,13 +318,15 @@ function redo() {
   if (!cmEditorView.value) return;
   commands.redo(cmEditorView.value);
 }
-function moveLineDown() {
+async function moveLineDown() {
   if (!cmEditorView.value) return;
   commands.moveLineDown(cmEditorView.value);
+  scrollIntoView();
 }
 function moveLineUp() {
   if (!cmEditorView.value) return;
   commands.moveLineUp(cmEditorView.value);
+  scrollIntoView();
 }
 function openSearch() {
   if (!cmEditorView.value) return;
@@ -387,7 +386,7 @@ defineExpose({
 
 <template>
   <Codemirror
-    :model-value="props.value"
+    :model-value="modelValue"
     @update:model-value="onChange"
     class="!block text-sm select-auto cursor-text"
     :class="{

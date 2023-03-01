@@ -4,7 +4,7 @@ import EditorLayout from '@/views/EditorLayout.vue';
 const pwaMode = window.matchMedia('(display-mode: standalone)').matches;
 
 const router = createRouter({
-  history: pwaMode
+  history: pwaMode && !import.meta.env.DEV
     ? createMemoryHistory(import.meta.env.BASE_URL)
     : createWebHistory(import.meta.env.BASE_URL),
   routes: [
