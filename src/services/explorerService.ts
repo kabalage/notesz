@@ -108,13 +108,21 @@ export const [provideExplorerService, useExplorerService] = defineService('Explo
     path.value = parentTreePath.value;
   }
 
+  function toggleBrowseAllDuringManualRebase() {
+    browseAllDuringManualRebase.value = !browseAllDuringManualRebase.value;
+    if (browseAllDuringManualRebase.value) {
+      path.value = '';
+    }
+  }
+
   return reactive({
     path,
     explorerTree,
-    navigateBack,
     browseAllDuringManualRebase,
     loading,
     items,
-    conflictingFiles
+    conflictingFiles,
+    navigateBack,
+    toggleBrowseAllDuringManualRebase
   });
 });

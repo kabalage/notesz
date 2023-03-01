@@ -98,7 +98,7 @@ function locationReload() {
           v-if="!explorerService.browseAllDuringManualRebase"
           class="mt-8 mx-auto"
           ghost
-          @click="explorerService.browseAllDuringManualRebase = true"
+          @click="explorerService.toggleBrowseAllDuringManualRebase()"
         >
           Browse all files
         </BasicButton>
@@ -110,7 +110,7 @@ function locationReload() {
             All files
           </h2>
           <IconButton
-            @click="explorerService.browseAllDuringManualRebase = false"
+            @click="explorerService.toggleBrowseAllDuringManualRebase()"
           >
             <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>

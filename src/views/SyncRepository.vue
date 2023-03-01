@@ -82,8 +82,8 @@ function navigateBack() {
           <MessageBox
             :type="error.code === 'rebaseConflicts' ? 'warning' : 'error'"
             :message="error.code === 'rebaseConflicts'
-              ? `Some local changes conflict with remote changes.
-                Resolve them to be able to continue the synchronization.`
+              ? `Some local changes are conflicting with remote changes.
+                Resolve them to be able to continue with the synchronization.`
               : error.message"
           />
           <div class="mt-4 flex items-center">

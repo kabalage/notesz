@@ -85,7 +85,7 @@ const explorerService = useExplorerService();
           v-if="!explorerService.browseAllDuringManualRebase"
           class="mt-8 mx-auto"
           ghost
-          @click="explorerService.browseAllDuringManualRebase = true"
+          @click="explorerService.toggleBrowseAllDuringManualRebase()"
         >
           Browse all files
         </BasicButton>
@@ -98,7 +98,7 @@ const explorerService = useExplorerService();
           </h2>
           <IconButton
             class="-my-2"
-            @click="explorerService.browseAllDuringManualRebase = false"
+            @click="explorerService.toggleBrowseAllDuringManualRebase()"
           >
             <XmarkIcon class="w-6 h-6 opacity-50" />
           </IconButton>
