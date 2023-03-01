@@ -28,40 +28,40 @@ export function useFromDb<T, WatchParam>({
   let processPromise: Promise<void> = Promise.resolve();
   let isProcessing = false;
 
-  const throttledQueuePut = throttle(_queuePut, putThrottling);
+  const throttledQueuePut = throttle(queuePut, putThrottling);
 
   if (watchParam) {
-    watch(watchParam, _queueGet, {
+    watch(watchParam, queueGet, {
       immediate: true
     });
   } else {
-    _queueGet();
+    queueGet();
   }
 
-  async function _queueGet(params?: WatchParam) {
-    // console.log('useFromDb _queueGet');
+  async function queueGet(params?: WatchParam) {
+    // console.log('useFromDb queueGet');
     getQueued = { params };
     if (isProcessing) {
       return processPromise;
     } else {
-      processPromise = _process();
+      processPromise = process();
       return processPromise;
     }
   }
 
-  async function _queuePut(newValue: UnwrapRef<T>) {
-    // console.log('useFromDb _queuePut');
+  async function queuePut(newValue: UnwrapRef<T>) {
+    // console.log('useFromDb queuePut');
     putQueued = { newValue };
     if (isProcessing) {
       return processPromise;
     } else {
-      processPromise = _process();
+      processPromise = process();
       return processPromise;
     }
   }
 
-  async function _process() {
-    // console.log('useFromDb _process');
+  async function process() {
+    // console.log('useFromDb process');
     isProcessing = true;
     while (getQueued || putQueued) {
       if (putQueued) {
@@ -146,8 +146,8 @@ export function useFromDb<T, WatchParam>({
     isFetching,
     isPutting,
     isInitialized,
-    refetch: _queueGet,
-    put: _queuePut,
+    refetch: queueGet,
+    put: queuePut,
     flushThrottledPut
   });
 }
