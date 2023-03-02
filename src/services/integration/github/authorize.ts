@@ -97,29 +97,8 @@ export function useAuthorize() {
     }
     const token = tokenSchemaCheckResult.token;
 
-    // Fetch user's primary email
-    const [email, emailError] = await trial(async () => {
-      const response = await octokitRequest('GET /user/emails', {
-        headers: {
-          authorization: `Bearer ${token}`
-        }
-      });
-      return response.data.find((email) => {
-        return email.primary;
-      })?.email;
-    });
-    if (emailError) {
-      throw new NoteszError('Getting primary email failed', {
-        cause: emailError
-      });
-    }
-    if (!email) {
-      throw new NoteszError('Missing primary email');
-    }
-
-    // Save email and token
+    // Save token
     const user = userModel.createUser({
-      email,
       token
     });
     await userModel.put(user);

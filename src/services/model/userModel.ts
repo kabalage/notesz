@@ -4,12 +4,11 @@ import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 
 export interface User {
   readonly type: 'user',
-  email: string,
   token: string
 }
 
 export function createUser(
-  initialValues: Pick<User, 'email' | 'token'> & Partial<User>
+  initialValues: Pick<User, 'token'> & Partial<User>
 ): User {
   return {
     type: 'user',

@@ -94,7 +94,7 @@ export function usePush() {
         message: commitMessage,
         tree: treeResponse.data.sha,
         parents: [baseIndex.commitSha!]
-        // author and commiter are the aurthorized user by default
+        // author and commiter are the authorized user by default
       });
     });
     if (commitError) {
