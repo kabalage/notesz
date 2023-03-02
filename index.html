@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-black text-main-200 leading-snug h-full overflow-hidden touch-none overscroll-none fixed inset-0 select-none">
+<html lang="en" class="bg-background text-main-200 leading-snug overflow-hidden touch-none overscroll-none select-none fixed inset-0">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="A cross-platform, open-source note taking app that stores your notes on GitHub." />
@@ -9,8 +9,8 @@
     <link rel="apple-touch-icon" href="/ios-touch-icon.png">
     <title>Notesz</title>
   </head>
-  <body class="h-full overflow-hidden">
-    <div id="app" class="h-full touch:overflow-hidden touch:rounded-t-3xl bg-background"></div>
+  <body class="bg-black h-full overflow-hidden">
+    <div id="app" class="transform-gpu h-full touch:overflow-hidden touch:rounded-t-[2rem] bg-background"></div>
     <div class="touch:hidden fixed top-0 left-0 right-0 border-t-4 border-main-500"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

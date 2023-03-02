@@ -7,6 +7,7 @@
     font-size: 16px;
     scrollbar-width: thin;
     -webkit-tap-highlight-color: transparent;
+    color-scheme: dark;
   }
 
   *:focus-visible {
@@ -17,9 +18,10 @@
     @apply text-accent-300 font-medium not-italic;
   }
 
-  /* ::selection {
-    background: theme('colors.indigo.500');
-  } */
+  ::selection {
+    @apply bg-main-400/40
+  }
+
 
   /* desktop scrollbar */
   @media (hover: hover) and (pointer: fine) {

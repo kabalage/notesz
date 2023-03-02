@@ -196,7 +196,7 @@ onBeforeUnmount(() => {
           <div
             class="flex-1 px-2 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
               overscroll-y-none touch-pan-x bg-main-400/20
-              text-main-300 snap-x rounded-tr-lg mr-0.5"
+              text-main-300 snap-x rounded-tr-lg mr-px"
             @click.capture="codemirrorEditor?.focus()"
           >
             <RibbonButton

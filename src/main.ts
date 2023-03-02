@@ -1,20 +1,8 @@
 import { createApp } from 'vue';
-// import { registerSW } from 'virtual:pwa-register';
 import { VirtualKeyboardEvents } from '@/utils/VirtualKeyboardEvents';
 import App from './App.vue';
 import router from './router';
 import './assets/main.css';
-
-// const updateSW = registerSW({
-//   onNeedRefresh() {
-//     console.log('sw onNeedRefresh');
-//     alert('A new version is available.');
-//     updateSW();
-//   },
-//   onOfflineReady() {
-//     console.log('sw onOfflineReady - App ready to work offline');
-//   },
-// });
 
 VirtualKeyboardEvents.setupDefaultHandler();
 
