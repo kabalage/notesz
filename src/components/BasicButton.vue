@@ -16,8 +16,7 @@ const props = defineProps<{
 <template>
   <BaseButton
     class="
-      px-5 py-3 flex items-center justify-center rounded-lg font-semibold
-      text-white
+      px-4 py-2.5 flex items-center justify-center rounded-lg font-medium text-white
       transform transition-transform duration-200 ease-in-out
       motion-reduce:transition-none motion-reduce:transform-none
       relative before:absolute before:inset-0

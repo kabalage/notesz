@@ -83,7 +83,6 @@ onBeforeUnmount(() => {
       class="self-center mt-16 text-main-200/60"
     >
       Select a note to edit...
-      <!-- <input class="block mt-96 z-10" /> -->
     </div>
     <template v-if="editorService.currentFile">
       <div class="px-3 lg:px-11 py-6 flex justify-between items-center">
@@ -98,7 +97,7 @@ onBeforeUnmount(() => {
         <div class="flex-col justify-center truncate">
           <div
             v-if="editorService.currentTree?.path"
-            class="flex-1 text-center text-sm font-semibold text-accent-300/60 leading-tight
+            class="flex-1 text-center text-sm font-medium text-accent-300/60 leading-tight
               truncate"
           >
             {{ editorService.currentTree.path }}

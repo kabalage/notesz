@@ -19,7 +19,7 @@ export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
       return dbPromise;
     }
     console.log('DB open');
-    dbPromise = openDB<NoteszDb>('notesz', 3, {
+    dbPromise = openDB<NoteszDb>('notesz', 4, {
       async upgrade(db, oldVersion, newVersion, tx) {
         if (oldVersion === 0) {
           await initDb(db);

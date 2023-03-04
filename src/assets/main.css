@@ -11,11 +11,15 @@
   }
 
   *:focus-visible {
-    @apply rounded-lg !border-transparent ring-2 ring-offset-2 ring-offset-black ring-white outline-none;
+    @apply rounded-lg !border-transparent ring-2 !ring-accent-400 outline-none appearance-none;
   }
 
   em {
     @apply text-accent-300 font-medium not-italic;
+  }
+
+  p {
+    @apply select-text;
   }
 
   ::selection {

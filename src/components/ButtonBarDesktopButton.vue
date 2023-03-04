@@ -12,7 +12,7 @@ const props = defineProps<{
 <template>
   <BaseButton
     class="p-1.5 rounded-xl border-2 border-main-400/40 bg-main-400/20
-      text-accent-200 disabled:opacity-50
+      text-accent-300 disabled:opacity-50
       transform transition-transform duration-200 ease-in-out
       motion-reduce:transition-none motion-reduce:transform-none
       relative before:absolute before:inset-0

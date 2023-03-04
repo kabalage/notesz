@@ -11,14 +11,15 @@ import SpinnerIcon48 from '@/assets/icons/spinner-48.svg?component';
 import PlusIcon from '@/assets/icons/plus.svg?component';
 import LockClosedIcon from '@/assets/icons/lock-closed.svg?component';
 
-import BottomBarMobile from '@/components/ButtonBarMobile.vue';
-import BottomBarMobileButton from '@/components/ButtonBarMobileButton.vue';
-import BottomBarDesktop from '@/components/ButtonBarDesktop.vue';
-import BottomBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
+import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
+import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
+import BottomButtonBarDesktop from '@/components/BottomButtonBarDesktop.vue';
+import ButtonBarDesktopButton from '@/components/ButtonBarDesktopButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import NoteszTransition from '@/components/NoteszTransition.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
+import BasicInput from '@/components/BasicInput.vue';
 
 import { useFromDb } from '@/composables/useFromDb';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
@@ -155,7 +156,7 @@ async function handleCreateRepository() {
                 }}
                 <br/>
                 Setup which repositories
-                <span class="font-semibold text-accent-300">
+                <span class="font-medium text-accent-300">
                   Notesz
                 </span>
                 may use.
@@ -178,27 +179,36 @@ async function handleCreateRepository() {
                 </BasicButton>
               </div>
               <template v-else>
-                <div
-                  class="max-w-screen-sm bg-main-400/20 flex items-center rounded-lg
-                    border-2 border-transparent touch:-mx-2 touch:sm:mx-0
-                    focus-within:bg-main-400/20 focus-within:border-main-400 relative"
-                >
-                  <SearchIcon class="text-accent-300 m-2 w-6 h-6" />
-                  <input
-                    class="flex-1 bg-transparent focus:outline-none text-white"
+                <div class="relative touch:-mx-2 touch:sm:mx-0">
+                  <BasicInput
+                    class="w-full pl-10"
+                    :class="{
+                      'pr-10': filterText.length > 0,
+                      'pr-4': filterText.length === 0
+                    }"
                     v-model="filterText"
                   />
+                  <div
+                    class="p-2 absolute top-0 left-0 bottom-0 pointer-events-none flex items-center
+                      justify-center"
+                  >
+                    <SearchIcon class="text-accent-300 w-6 h-6" />
+                  </div>
                   <NoteszTransition
                     enter-from-class="opacity-0 transform scale-50"
                     leave-to-class="opacity-0 transform scale-50"
                   >
-                    <IconButton
+                    <div
                       v-if="filterText.length > 0"
-                      class="ml-2 p-2"
-                      @click="filterText = ''"
+                      class="absolute top-0 right-0 bottom-0 flex items-center justify-center"
                     >
-                      <XmarkIcon class="w-6 h-6" />
-                    </IconButton>
+                      <IconButton
+                        class="p-2 rounded-lg"
+                        @click="filterText = ''"
+                      >
+                        <XmarkIcon class="w-6 h-6" />
+                      </IconButton>
+                    </div>
                   </NoteszTransition>
                 </div>
                 <ul class="mt-2 touch:mt-4 touch:-mx-4 touch:sm:mx-0 sm:max-w-screen-sm">
@@ -213,7 +223,7 @@ async function handleCreateRepository() {
                       @click="handleCreateRepository"
                     >
                       <PlusIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
-                      <div class="flex-1 text-left font-semibold text-white">
+                      <div class="flex-1 text-left font-medium text-white">
                         Create new repository
                       </div>
                     </BaseButton>
@@ -230,14 +240,14 @@ async function handleCreateRepository() {
                       @click="connect(repo.full_name)"
                     >
                         <GitHubIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
-                        <div class="flex-1 text-left font-semibold text-white">
+                        <div class="flex-1 text-left font-medium text-white">
                           {{ repo.owner.login }}/<wbr/>{{ repo.name }}
                         </div>
                     </BaseButton>
                   </li>
                   <div
                     v-if="filteredAuthorizedRepositories.length === 0"
-                    class="mt-8 mb-16 text-white font-semibold text-center"
+                    class="mt-8 mb-16 text-white font-medium text-center"
                   >
                     No repositories match the term
                   </div>
@@ -262,7 +272,7 @@ async function handleCreateRepository() {
             </template>
             <div
               v-else-if="authorizedRepositories.error?.code === 'unauthorized'"
-              class="text-center text-main-200 font-semibold"
+              class="text-center text-main-200 font-medium"
             >
               {{ authError?.message || 'You need to login again with GitHub.' }}
               <BasicButton
@@ -274,7 +284,7 @@ async function handleCreateRepository() {
             </div>
             <div
               v-else-if="authorizedRepositories.error"
-              class="text-center text-main-200 font-semibold"
+              class="text-center text-main-200 font-medium"
             >
               {{ authorizedRepositories.error?.message }}
               <BasicButton
@@ -288,21 +298,21 @@ async function handleCreateRepository() {
         </div>
       </div>
     </div>
-    <BottomBarMobile
+    <ButtonBarMobile
       v-if="isTouchDevice"
       class="flex-none"
     >
-      <BottomBarMobileButton :to="props.redirect">
+      <ButtonBarMobileButton :to="props.redirect">
         <ArrowLeftIcon class="w-6 h-6" />
-      </BottomBarMobileButton>
-    </BottomBarMobile>
-    <BottomBarDesktop
-      v-else-if="!isTouchDevice"
-      class="flex-none w-full max-w-5xl mx-auto mb-8 mt-4"
-    >
-      <BottomBarDesktopButton :to="props.redirect">
-        <ArrowLeftIcon class="w-8 h-8" />
-      </BottomBarDesktopButton>
-    </BottomBarDesktop>
+      </ButtonBarMobileButton>
+    </ButtonBarMobile>
+    <BottomButtonBarDesktop v-else-if="!isTouchDevice">
+      <ButtonBarDesktopButton
+        :to="props.redirect"
+        class="!p-2.5"
+      >
+        <ArrowLeftIcon class="w-6 h-6" />
+      </ButtonBarDesktopButton>
+    </BottomButtonBarDesktop>
   </div>
 </template>

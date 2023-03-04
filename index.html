@@ -2,15 +2,23 @@
 <html lang="en" class="bg-background text-main-200 leading-snug overflow-hidden touch-none overscroll-none select-none fixed inset-0">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="A cross-platform, open-source note taking app that stores your notes on GitHub." />
     <link rel="icon" href="/favicon.ico" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+    <meta property="og:image" content="https://notesz.app/maskable-icon-512.png">
+    <meta property="og:url" content="https://notesz.app/">
+    <meta property="og:title" content="Notesz">
+    <meta property="og:type" content="website">
+    <meta name="description" content="A cross-platform, open-source note taking app that stores your notes on GitHub." />
+    <meta property="og:description" content="A cross-platform, open-source note taking app that stores your notes on GitHub.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:creator" content="@kabalage_">
+    <meta name="twitter:site" content="@kabalage_">
     <link rel="apple-touch-icon" href="/ios-touch-icon.png">
     <title>Notesz</title>
   </head>
   <body class="bg-black h-full overflow-hidden">
-    <div id="app" class="transform-gpu h-full touch:overflow-hidden touch:rounded-t-[2rem] bg-background"></div>
+    <div id="app" class="transform-gpu h-full pwa:overflow-hidden pwa:rounded-t-[2rem] bg-background"></div>
     <div class="touch:hidden fixed top-0 left-0 right-0 border-t-4 border-main-500"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

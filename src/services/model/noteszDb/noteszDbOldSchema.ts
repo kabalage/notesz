@@ -9,7 +9,8 @@ import type { BlobRefCount } from '../blobModel';
 export type NoteszDbVersions = {
   1: NoteszDbV1,
   2: NoteszDbV2,
-  3: NoteszDbV3
+  3: NoteszDbV3,
+  4: NoteszDbV4
 };
 
 export interface NoteszDbV1 extends DBSchema {
@@ -53,7 +54,7 @@ interface SettingsV1 {
   selectedRepositoryId: string | null
 }
 
-export interface NoteszDbV2 {
+export interface NoteszDbV2 extends DBSchema {
   repositories: NoteszDbV1['repositories'],
   fileIndexes: NoteszDbV1['fileIndexes'],
   blobs: NoteszDbV1['blobs'],
@@ -64,9 +65,13 @@ export interface NoteszDbV2 {
   }
 }
 
-interface SettingsV2 extends Settings {}
+interface SettingsV2 {
+  readonly type: 'settings',
+  selectedRepositoryId: string | null,
+  selectedTheme: number
+}
 
-export interface NoteszDbV3 {
+export interface NoteszDbV3 extends DBSchema {
   repositories: NoteszDbV1['repositories'],
   fileIndexes: NoteszDbV1['fileIndexes'],
   blobs: NoteszDbV1['blobs'],
@@ -78,3 +83,16 @@ export interface NoteszDbV3 {
 }
 
 interface UserV2 extends User {}
+
+export interface NoteszDbV4 extends DBSchema {
+  repositories: NoteszDbV1['repositories'],
+  fileIndexes: NoteszDbV1['fileIndexes'],
+  blobs: NoteszDbV1['blobs'],
+  blobRefCounts: NoteszDbV1['blobRefCounts'],
+  app: {
+    key: string,
+    value: SettingsV4 | UserV2
+  }
+}
+
+interface SettingsV4 extends Settings {}

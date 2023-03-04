@@ -34,4 +34,15 @@ export async function upgradeDb(
       }));
     }
   }
+  if (oldVersion <= 3) {
+    const txV3 = tx as unknown as VersionChangeTransaction<NoteszDbVersions[3]>;
+    const appStoreV3 = txV3.objectStore('app');
+    const appStore = tx.objectStore('app');
+    const settingsV2 = await appStoreV3.get('settings');
+    if (settingsV2?.type === 'settings') {
+      await appStore.put(createSettings({
+        ...settingsV2
+      }));
+    }
+  }
 }

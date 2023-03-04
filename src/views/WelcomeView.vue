@@ -74,7 +74,7 @@ async function clearStorage() {
       v-if="settings.data && !settings.data.selectedRepositoryId"
       class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
     >
-      <h1 class="font-semibold mb-4 text-center">Welcome to</h1>
+      <h1 class="font-medium mb-4 text-center">Welcome to</h1>
       <div class="flex justify-center mb-8" @click="clearStorage">
         <NoteszLogo
           class="h-12"
@@ -83,7 +83,7 @@ async function clearStorage() {
           icon-shade-class="text-main-400/40"
         />
       </div>
-      <p class="max-w-sm mx-auto font-semibold text-white mb-4">
+      <p class="max-w-sm mx-auto font-medium text-white mb-4">
         A cross-platform, open-source note taking app that stores your notes on GitHub.
       </p>
       <p class="max-w-sm mx-auto mb-8">

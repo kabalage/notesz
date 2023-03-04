@@ -51,7 +51,7 @@ const isTouchDevice = useIsTouchDevice();
       class="h-32"
     />
     <div
-      class="flex-1 overflow-hidden bg-background"
+      class="flex-1 overflow-hidden bg-background relative"
       key="main-area"
       v-smooth-resize="{ watchParent: true, animationDuration: 300 }"
     >

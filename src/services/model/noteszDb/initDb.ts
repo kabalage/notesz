@@ -20,7 +20,5 @@ export async function initDb(
   const settingsStore = db.createObjectStore('app', {
     keyPath: 'type'
   });
-  await settingsStore.put(createSettings({
-    selectedTheme: 5
-  }));
+  await settingsStore.put(createSettings());
 }

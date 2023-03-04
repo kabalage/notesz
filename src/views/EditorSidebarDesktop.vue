@@ -50,7 +50,7 @@ const explorerService = useExplorerService();
     </ButtonBarDesktop>
     <div class="flex-1 py-1.5 px-2 overflow-y-auto">
       <template v-if="!explorerService.loading && explorerService.conflictingFiles.length > 0">
-        <h2 class="text-accent-300 font-semibold mt-2 pl-2">
+        <h2 class="text-accent-300 font-medium mt-2 pl-2">
           Conflicting files
         </h2>
         <ul class="mt-2">
@@ -93,7 +93,7 @@ const explorerService = useExplorerService();
           v-if="explorerService.browseAllDuringManualRebase"
           class="flex items-center my-4 pt-4 pl-2 border-t-2 border-main-400/20"
         >
-          <h2 class="flex-1 text-accent-300 font-semibold">
+          <h2 class="flex-1 text-accent-300 font-medium">
             All files
           </h2>
           <IconButton
@@ -150,8 +150,7 @@ const explorerService = useExplorerService();
               class="flex-1 mr-2 truncate"
               :class="{
                 'text-main-200': item.unchanged,
-                'text-green-400': item.added,
-                'text-accent-300': item.modified
+                'text-accent-400': item.added || item.modified
               }"
             >
               {{ item.name }}
@@ -166,8 +165,7 @@ const explorerService = useExplorerService();
             :class="{
               'bg-main-400/20': item.path === editorService.currentFilePath,
               'hover:bg-main-400/10': item.path !== editorService.currentFilePath,
-              'text-green-400': item.added,
-              'text-accent-400': item.modified,
+              'text-accent-400': item.added || item.modified,
               'text-white': item.unchanged
             }"
             active-class="!bg-main-400/20"
@@ -182,7 +180,7 @@ const explorerService = useExplorerService();
             />
             <PlusIcon20
               v-if="item.added"
-              class="text-green-400 w-5 mr-0.5 text-center"
+              class="text-accent-400 w-5 mr-0.5 text-center"
             />
           </BaseButton>
         </li>

@@ -5,6 +5,7 @@ import {
   DialogDescription,
 } from '@headlessui/vue';
 import BasicButton from './BasicButton.vue';
+import BasicInput from './BasicInput.vue';
 import BasicDialog from './BasicDialog.vue';
 import MessageBox from '@/components/MessageBox.vue';
 import { vSmoothResize } from '@/composables/useSmoothResize';
@@ -49,8 +50,8 @@ async function close(value: string | null) {
   emit('close', value);
 }
 
-function onInput(event: Event) {
-  inputValue.value = (event.target as HTMLInputElement).value;
+function onInput(newValue: string) {
+  inputValue.value = newValue;
   validationError.value = null;
 }
 
@@ -75,18 +76,16 @@ function onInput(event: Event) {
       <span v-html="props.description" />
     </DialogDescription>
     <form @submit.prevent>
-
-      <input
+      <BasicInput
         ref="inputRef"
         type="text"
-        class="mt-4 w-full py-3 px-6 bg-background/50 rounded-lg"
-        autocapitalize="off"
+        class="mt-4 w-full"
         enterkeyhint="done"
-        spellcheck="false"
-        :value="inputValue"
+        darken
         :placeholder="props.placeholder"
-        @input="onInput"
-      >
+        :model-value="inputValue"
+        @update:model-value="onInput"
+      />
       <div v-smooth-resize class="relative overflow-hidden">
         <Transition
           enter-active-class="duration-200 delay-200 transition-all ease-in-out

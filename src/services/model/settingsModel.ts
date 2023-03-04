@@ -13,7 +13,13 @@ export interface Settings {
   readonly type: 'settings',
   selectedRepositoryId: string | null,
   selectedTheme: number,
-  themes: Theme[]
+  syntaxTheme: 'notesz' | 'dracula',
+  themes: Theme[],
+  backdropFilter?: boolean,
+  editorFontSize?: number,
+  spellcheck?: boolean,
+  autocorrect?: boolean,
+  autocapitalize?: boolean
 }
 
 export function createSettings(
@@ -22,8 +28,14 @@ export function createSettings(
   return {
     type: 'settings',
     selectedRepositoryId: null,
-    selectedTheme: 0,
+    selectedTheme: 5,
+    syntaxTheme: 'notesz',
     themes: window.structuredClone(defaultThemes),
+    backdropFilter: true,
+    editorFontSize: 0.875,
+    spellcheck: false,
+    autocorrect: true,
+    autocapitalize: true,
     ...initialValues,
   };
 }

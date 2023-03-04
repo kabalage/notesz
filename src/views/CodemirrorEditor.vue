@@ -7,7 +7,7 @@ import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { drawSelection, EditorView, highlightSpecialChars, keymap }
   from '@codemirror/view';
-import { darkTheme } from '@/utils/codeMirrorTheme';
+import { darkTheme, draculaTheme } from '@/utils/codeMirrorTheme';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches, search, openSearchPanel }
   from '@codemirror/search';
@@ -23,6 +23,7 @@ import {
   handleShowNonIos,
   type VirtualKeyboardChangeEvent,
 } from '@/utils/VirtualKeyboardEvents';
+import { useSettings } from '@/services/settingsService';
 
 const props = defineProps<{
   value: string
@@ -39,6 +40,13 @@ if (!app._context.components.VueCodemirror) {
     extensions: []
   });
 }
+
+const settings = useSettings();
+
+const syntaxThemes = {
+  'dracula': draculaTheme,
+  'notesz': darkTheme
+};
 
 const extensions = [
   highlightSpecialChars(),
@@ -83,7 +91,7 @@ const extensions = [
       stringPrefixes: []
     }
   }),
-  darkTheme,
+  syntaxThemes[settings.data?.syntaxTheme || 'notesz'],
   EditorView.lineWrapping,
   EditorView.theme({
     '.cm-line': {
@@ -92,7 +100,7 @@ const extensions = [
     },
     '.cm-content': {
       paddingTop: '1rem',
-      paddingBottom: '1rem',
+      paddingBottom: '4rem',
       textUnderlineOffset: '0.2rem',
       boxShadow: 'none'
     },
@@ -126,9 +134,9 @@ const extensions = [
     }
   }),
   EditorView.contentAttributes.of({
-    autocapitalize: 'on',
-    autocorrect: 'on',
-    // spellcheck: 'true'
+    autocapitalize: settings.data?.autocapitalize ? 'on' : 'off',
+    autocorrect: settings.data?.autocorrect ? 'on' : 'off',
+    spellcheck: settings.data?.spellcheck ? 'true' : 'false'
   }),
 ];
 
@@ -388,12 +396,18 @@ defineExpose({
   <Codemirror
     :model-value="modelValue"
     @update:model-value="onChange"
-    class="!block text-sm select-auto cursor-text"
+    class="!block select-auto cursor-text"
     :class="{
       '[&_.cm-placeholder]:font-sans [&_.cm-placeholder]:text-main-200/60':
         props.value === '' && !isFocused
     }"
-    :style="{ height: '100%' }"
+    :style="{
+      height: '100%',
+      fontSize: settings.data?.editorFontSize
+        ? `${settings.data.editorFontSize}rem`
+        : '0.875rem'
+
+    }"
     :autofocus="!isTouchDevice || (!isIos && props.value === '')"
     :placeholder="!isFocused
       ? isTouchDevice

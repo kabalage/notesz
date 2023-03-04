@@ -7,6 +7,9 @@ import {
   DialogPanel,
 } from '@headlessui/vue';
 import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
+import { useSettings } from '@/services/settingsService';
+
+const settings = useSettings();
 
 const props = defineProps<{
   initialFocus?: HTMLElement | null,
@@ -55,7 +58,11 @@ function afterLeave() {
     >
       <div
         v-if="isOpen"
-        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        class="absolute inset-0"
+        :class="{
+          'bg-black/40 backdrop-blur-sm': settings.data?.backdropFilter,
+          'bg-black/80': !settings.data?.backdropFilter,
+        }"
       />
     </Transition>
   </Teleport>

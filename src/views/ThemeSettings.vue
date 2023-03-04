@@ -101,7 +101,7 @@ const paletteOrder: (ColorName)[] = [
     >
       <!-- Theme selector -->
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0">
-        <div class="mb-2 text-white font-semibold">
+        <div class="mb-2 text-white font-medium">
           Theme:
         </div>
         <div class="flex-1 grid grid-cols-5 gap-2">
@@ -114,7 +114,7 @@ const paletteOrder: (ColorName)[] = [
               relative before:absolute before:inset-0
               before:transition-all before:duration-200 before:ease-in-out
               motion-reduce:before:transition-none motion-reduce:before:transform-none
-              grid grid-cols-2"
+              grid grid-cols-2 ring-offset-2 ring-offset-black"
             active-class="scale-50 motion-reduce:opacity-50
               before:scale-200 motion-reduce:before:opacity-50"
             :style="{
@@ -123,7 +123,7 @@ const paletteOrder: (ColorName)[] = [
                 : `rgb(${backgroundPalette[theme.backgroundColor]})`
             }"
             :class="{
-              'ring-2 ring-offset-2 ring-offset-black ring-white':
+              'ring-2 ring-white':
                 themeService.selectedTheme === index
             }"
             @click="themeService.selectTheme(index)"
@@ -166,7 +166,7 @@ const paletteOrder: (ColorName)[] = [
 
       <!-- Main color selector -->
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0">
-        <div class="mb-2 text-white font-semibold">
+        <div class="mb-2 text-white font-medium">
           Main color:
         </div>
         <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
@@ -179,14 +179,15 @@ const paletteOrder: (ColorName)[] = [
               motion-reduce:transition-none motion-reduce:transform-none
               relative before:absolute before:inset-0
               before:transition-all before:duration-200 before:ease-in-out
-              motion-reduce:before:transition-none motion-reduce:before:transform-none"
+              motion-reduce:before:transition-none motion-reduce:before:transform-none
+              ring-offset-2 ring-offset-black"
             active-class="scale-50 motion-reduce:opacity-50
               before:scale-200 motion-reduce:before:opacity-50"
             :style="{
               background: `rgb(${mainPalette[colorName]['500']})`
             }"
             :class="{
-              'ring-2 ring-offset-2 ring-offset-black ring-white':
+              'ring-2 ring-white':
                 colorName === themeService.selectedThemeCopy.mainColor,
               'col-span-2': index === 13
             }"
@@ -199,7 +200,7 @@ const paletteOrder: (ColorName)[] = [
 
       <!-- Background color selector -->
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0">
-        <div class="mb-2 text-white font-semibold">
+        <div class="mb-2 text-white font-medium">
           Background color:
         </div>
         <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
@@ -216,13 +217,14 @@ const paletteOrder: (ColorName)[] = [
                 relative before:absolute before:inset-0
                 before:transition-all before:duration-200 before:ease-in-out
                 motion-reduce:before:transition-none motion-reduce:before:transform-none
-                after:absolute after:inset-0 after:rounded-lg"
+                after:absolute after:inset-0 after:rounded-lg
+                ring-offset-2 ring-offset-black"
               active-class="scale-50 motion-reduce:opacity-50
                 before:scale-200 motion-reduce:before:opacity-50"
               :class="{
                 'after:bg-white/10': index !== 12,
                 'after:bg-white/5': index === 12,
-                'ring-2 ring-offset-2 ring-offset-black ring-white':
+                'ring-2 ring-white':
                   index === themeService.selectedThemeCopy.backgroundColor,
                 'col-span-2 justify-self-end': index === 15
               }"
@@ -239,7 +241,7 @@ const paletteOrder: (ColorName)[] = [
 
       <!-- Accent color selector -->
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0">
-        <div class="mb-2 text-white font-semibold">
+        <div class="mb-2 text-white font-medium">
           Accent color:
         </div>
         <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
@@ -251,14 +253,15 @@ const paletteOrder: (ColorName)[] = [
               motion-reduce:transition-none motion-reduce:transform-none
               relative before:absolute before:inset-0
               before:transition-all before:duration-200 before:ease-in-out
-              motion-reduce:before:transition-none motion-reduce:before:transform-none"
+              motion-reduce:before:transition-none motion-reduce:before:transform-none
+              ring-offset-2 ring-offset-black"
             active-class="scale-50 motion-reduce:opacity-50
               before:scale-200 motion-reduce:before:opacity-50"
             :style="{
               background: `rgb(${mainPalette[colorName]['500']})`
             }"
             :class="{
-              'ring-2 ring-offset-2 ring-offset-black ring-white':
+              'ring-2 ring-white':
                 colorName === themeService.selectedThemeCopy.accentColor,
               'col-span-2': index === 13
             }"
@@ -273,21 +276,21 @@ const paletteOrder: (ColorName)[] = [
       <div class="flex-none snap-center p-4 mx-2 lg:mx-0 flex flex-col items-center justify-center">
         <template v-if="themeService.selectedThemeChanged">
           <BasicButton
-            class="w-32 mb-2"
+            class="w-28 mb-2"
             @click="themeService.saveSelectedTheme"
           >
             Save
           </BasicButton>
           <BasicButton
-            class="w-32"
+            class="w-28"
             @click="themeService.resetSelectedTheme"
           >
-            Reset
+            Discard
           </BasicButton>
         </template>
         <BasicButton
           v-else
-          class="w-32"
+          class="w-28"
           @click="themeService.closeThemeSettings()"
         >
           <CheckIcon class="flex-none w-6 h-6 text-accent-300 mr-2" />

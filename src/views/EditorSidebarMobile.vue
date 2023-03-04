@@ -32,7 +32,7 @@ function locationReload() {
 </script>
 
 <template>
-  <div class="pt-1 flex flex-col">
+  <div class="pt-1 flex flex-col relative">
     <div class="flex-1 py-4 overflow-y-auto">
       <div class="flex justify-center mb-3">
         <NoteszLogo
@@ -62,7 +62,7 @@ function locationReload() {
         </div>
       </div> -->
       <template v-if="!explorerService.loading && explorerService.conflictingFiles.length > 0">
-        <h2 class="text-accent-300 font-semibold mt-8 px-4 leading-loose" >
+        <h2 class="text-accent-300 font-medium mt-8 px-4 leading-loose">
           Conflicting files
         </h2>
         <ul
@@ -106,7 +106,7 @@ function locationReload() {
           v-if="explorerService.browseAllDuringManualRebase"
           class="flex items-center mt-8 pl-4 pr-2"
         >
-          <h2 class="flex-1 text-accent-300 font-semibold leading-loose">
+          <h2 class="flex-1 text-accent-300 font-medium leading-loose">
             All files
           </h2>
           <IconButton
@@ -169,8 +169,7 @@ function locationReload() {
               class="flex-1 mr-2 truncate"
               :class="{
                 'text-main-200': item.unchanged,
-                'text-green-400': item.added,
-                'text-accent-300': item.modified
+                'text-accent-400': item.added || item.modified
               }"
             >
               {{ item.name }}
@@ -184,8 +183,7 @@ function locationReload() {
             class="flex items-center py-3 px-4 font-medium"
             :class="{
               'bg-main-400/20': item.path === editorService.currentFilePath,
-              'text-green-400': item.added,
-              'text-accent-400': item.modified,
+              'text-accent-400': item.added || item.modified,
               'text-white': item.unchanged
             }"
             active-class="bg-main-400/20"
@@ -202,7 +200,7 @@ function locationReload() {
             />
             <PlusIcon20
               v-if="item.added"
-              class="text-green-400 w-5 mr-0.5 text-center"
+              class="text-accent-400 w-5 mr-0.5 text-center"
             />
           </BaseButton>
         </li>

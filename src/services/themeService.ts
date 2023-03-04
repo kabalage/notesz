@@ -144,6 +144,8 @@ export const [provideThemeService, useThemeService] = defineService('ThemeServic
       });
       if (shouldSave) {
         saveSelectedTheme();
+      } else {
+        initLocalState();
       }
     }
     themeSettingsOpen.value = false;

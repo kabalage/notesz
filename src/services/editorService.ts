@@ -157,6 +157,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
       confirmButtonLabel: 'Create',
       cancelButtonLabel: 'Cancel',
       validate(path: string) {
+        path = path.trim();
         if (path && !path.endsWith('/') && !path.endsWith('.md')) {
           path += '.md'; // extension should be included in length validation
         }
@@ -170,6 +171,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
       }
     });
     if (!newFilePath) return;
+    newFilePath = newFilePath.trim();
     if (!newFilePath.endsWith('.md')) {
       newFilePath += '.md';
     }

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { request as octokitRequest } from '@octokit/request';
 import { waitForCallback } from '@/utils/waitForCallback';
 import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';

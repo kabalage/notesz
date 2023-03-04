@@ -51,6 +51,7 @@ module.exports = {
       screens: {
         touch: { raw: '(pointer: coarse)' },
         mouse: { raw: '(pointer: fine)' },
+        pwa: { raw: '(display-mode: standalone)' },
         '<2xl': {'max': '1535px'},
         '<xl': {'max': '1279px'},
         '<lg': {'max': '1023px'},
