@@ -74,8 +74,15 @@ async function clearStorage() {
       v-if="settings.data && !settings.data.selectedRepositoryId"
       class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
     >
-      <h1 class="font-medium mb-4 text-center">Welcome to</h1>
-      <div class="flex justify-center mb-8" @click="clearStorage">
+      <h1 class="font-medium mb-4 text-center">
+        Welcome to
+        <span class="sr-only">Notesz</span>
+      </h1>
+      <div
+        class="flex justify-center mb-8"
+        aria-hidden="true"
+        @click="clearStorage"
+      >
         <NoteszLogo
           class="h-12"
           text-class="text-white"
@@ -95,7 +102,7 @@ async function clearStorage() {
         :loading="isAuthorizing"
         @click="authorizeThenRedirect()"
       >
-        <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" />
+        <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" aria-hidden="true" />
         <div class="text-center">
           Connect GitHub repository
         </div>
@@ -105,6 +112,7 @@ async function clearStorage() {
         class="mt-4 justify-center"
         :message="authError.message"
         type="error"
+        role="alert"
       />
     </div>
   </div>

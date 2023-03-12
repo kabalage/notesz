@@ -58,12 +58,13 @@ const paletteOrder: (ColorName)[] = [
 </script>
 
 <template>
-  <div
+  <aside
     v-if="themeService.loaded && themeService.selectedThemeCopy"
     class="relative bg-black border-t-2 border-main-400/60"
     :class="{
       'pb-[calc(env(safe-area-inset-bottom,0.5rem)-0.5rem)]': !virtualKeyboard.visible.value
     }"
+    aria-label="Theme settings"
   >
     <!-- Scroll indicators -->
     <NoteszTransition
@@ -75,6 +76,7 @@ const paletteOrder: (ColorName)[] = [
         class="absolute top-0 right-0 bottom-0 z-10 w-12 pointer-events-none mb-safe-b
           flex items-center justify-end
           bg-gradient-to-r from-transparent to-black/90 via-black/70"
+        aria-hidden="true"
       >
         <CaretRightIcon class="w-8 h-8 mr-1 absolute animate-pulse text-white" />
       </div>
@@ -88,6 +90,7 @@ const paletteOrder: (ColorName)[] = [
         class="absolute top-0 left-0 bottom-0 z-10 w-12 pointer-events-none mb-safe-b
           flex items-center justify-start
           bg-gradient-to-l from-transparent to-black/90 via-black/70"
+        aria-hidden="true"
       >
         <CaretLeftIcon class="w-8 h-8 mr-1 absolute animate-pulse text-white" />
       </div>
@@ -104,7 +107,11 @@ const paletteOrder: (ColorName)[] = [
         <div class="mb-2 text-white font-medium">
           Theme:
         </div>
-        <div class="flex-1 grid grid-cols-5 gap-2">
+        <section
+          class="flex-1 grid grid-cols-5 gap-2"
+          aria-label="Themes"
+          role="radiogroup"
+        >
           <BaseButton
             v-for="(theme, index) in themeService.themes"
             :key="index"
@@ -126,6 +133,9 @@ const paletteOrder: (ColorName)[] = [
               'ring-2 ring-white':
                 themeService.selectedTheme === index
             }"
+            role="radio"
+            :aria-label="`Theme ${index + 1}`"
+            :aria-checked="themeService.selectedTheme === index"
             @click="themeService.selectTheme(index)"
           >
             <span
@@ -161,7 +171,7 @@ const paletteOrder: (ColorName)[] = [
               />
             </span>
           </BaseButton>
-        </div>
+        </section>
       </div>
 
       <!-- Main color selector -->
@@ -169,8 +179,11 @@ const paletteOrder: (ColorName)[] = [
         <div class="mb-2 text-white font-medium">
           Main color:
         </div>
-        <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
-
+        <div
+          class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]"
+          aria-label="Main colors"
+          role="radiogroup"
+        >
           <BaseButton
             v-for="(colorName, index) in paletteOrder"
             :key="index"
@@ -191,6 +204,9 @@ const paletteOrder: (ColorName)[] = [
                 colorName === themeService.selectedThemeCopy.mainColor,
               'col-span-2': index === 13
             }"
+            role="radio"
+            :aria-label="colorName"
+            :aria-checked="colorName === themeService.selectedThemeCopy.mainColor"
             @click="themeService.setMainColor(colorName)"
           >
             ·
@@ -203,7 +219,11 @@ const paletteOrder: (ColorName)[] = [
         <div class="mb-2 text-white font-medium">
           Background color:
         </div>
-        <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
+        <div
+          class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]"
+          aria-label="Background colors"
+          role="radiogroup"
+        >
           <template
             v-for="(color, index) in backgroundPalette"
             :key="index"
@@ -231,6 +251,9 @@ const paletteOrder: (ColorName)[] = [
               :style="{
                 background: `rgb(${color})`
               }"
+              role="radio"
+              :aria-label="`Background color ${index + 1}`"
+              :aria-checked="index === themeService.selectedThemeCopy.backgroundColor"
               @click="themeService.setBackgroundColor(index)"
             >·
             </BaseButton>
@@ -244,7 +267,11 @@ const paletteOrder: (ColorName)[] = [
         <div class="mb-2 text-white font-medium">
           Accent color:
         </div>
-        <div class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]">
+        <div
+          class="flex-1 grid grid-cols-5 gap-2 mouse:gap-[0.375rem]"
+          aria-label="Accent colors"
+          role="radiogroup"
+        >
           <BaseButton
             v-for="(colorName, index) in paletteOrder"
             :key="index"
@@ -265,6 +292,9 @@ const paletteOrder: (ColorName)[] = [
                 colorName === themeService.selectedThemeCopy.accentColor,
               'col-span-2': index === 13
             }"
+            role="radio"
+            :aria-label="colorName"
+            :aria-checked="colorName === themeService.selectedThemeCopy.accentColor"
             @click="themeService.setAccentColor(colorName)"
           >
             ·
@@ -293,10 +323,10 @@ const paletteOrder: (ColorName)[] = [
           class="w-28"
           @click="themeService.closeThemeSettings()"
         >
-          <CheckIcon class="flex-none w-6 h-6 text-accent-300 mr-2" />
+          <CheckIcon class="flex-none w-6 h-6 text-accent-300 mr-2" aria-hidden="true" />
           Done
         </BasicButton>
       </div>
     </div>
-  </div>
+  </aside>
 </template>

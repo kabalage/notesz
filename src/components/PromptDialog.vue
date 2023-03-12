@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<{
   cancelButtonLabel?: string,
   initialValue?: string,
   placeholder?: string,
+  inputAriaLabel?: string,
   validate?: (value: string) => string | null | undefined | Promise<string | null | undefined>,
 }>(), {
   confirmButtonLabel: 'OK',
@@ -82,6 +83,7 @@ function onInput(newValue: string) {
         class="mt-4 w-full"
         enterkeyhint="done"
         darken
+        :aria-label="props.inputAriaLabel"
         :placeholder="props.placeholder"
         :model-value="inputValue"
         @update:model-value="onInput"
@@ -100,6 +102,7 @@ function onInput(newValue: string) {
             class="mt-4 !text-left w-full"
             :message="validationError"
             type="warning"
+            role="alert"
           />
         </Transition>
       </div>

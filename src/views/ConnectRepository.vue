@@ -133,7 +133,7 @@ async function handleCreateRepository() {
 
 <template>
   <div class="h-full overflow-hidden flex flex-col">
-    <div class="flex-1 overflow-y-auto">
+    <main class="flex-1 overflow-y-auto">
       <div class="p-4 max-w-xl mx-auto">
         <h1 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-center">
           Select a repository
@@ -142,6 +142,8 @@ async function handleCreateRepository() {
           <SpinnerIcon48
             v-if="authorizedRepositories.isFetching || isAuthorizing"
             class="w-12 h-12 text-main-400 mx-auto"
+            aria-label="Loading"
+            role="status"
           />
           <template v-else>
             <template v-if="notConnectedAuthorizedRepositories && filteredAuthorizedRepositories">
@@ -164,7 +166,10 @@ async function handleCreateRepository() {
                   class="mt-4 mx-auto"
                   @click="_install"
                 >
-                  <LockClosedIcon class="w-6 h-6 flex-none mr-2 text-accent-300" />
+                  <LockClosedIcon
+                    class="w-6 h-6 flex-none mr-2 text-accent-300"
+                    aria-hidden="true"
+                  />
                   Set permissions
                 </BasicButton>
                 <br/>
@@ -174,7 +179,10 @@ async function handleCreateRepository() {
                   class="mt-4 mx-auto"
                   @click="handleCreateRepository"
                 >
-                  <PlusIcon class="w-6 h-6 flex-none mr-2 text-accent-300" />
+                  <PlusIcon
+                    class="w-6 h-6 flex-none mr-2 text-accent-300"
+                    aria-hidden="true"
+                  />
                   Create new repository
                 </BasicButton>
               </div>
@@ -182,6 +190,7 @@ async function handleCreateRepository() {
                 <div class="relative touch:-mx-2 touch:sm:mx-0">
                   <BasicInput
                     class="w-full pl-10"
+                    aria-label="Filter"
                     :class="{
                       'pr-10': filterText.length > 0,
                       'pr-4': filterText.length === 0
@@ -191,6 +200,7 @@ async function handleCreateRepository() {
                   <div
                     class="p-2 absolute top-0 left-0 bottom-0 pointer-events-none flex items-center
                       justify-center"
+                    aria-hidden="true"
                   >
                     <SearchIcon class="text-accent-300 w-6 h-6" />
                   </div>
@@ -204,6 +214,7 @@ async function handleCreateRepository() {
                     >
                       <IconButton
                         class="p-2 rounded-lg"
+                        aria-label="Clear filtering"
                         @click="filterText = ''"
                       >
                         <XmarkIcon class="w-6 h-6" />
@@ -222,7 +233,10 @@ async function handleCreateRepository() {
                       active-class="bg-main-400/20"
                       @click="handleCreateRepository"
                     >
-                      <PlusIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
+                      <PlusIcon
+                        class="w-6 h-6 flex-none mr-2 text-main-400"
+                        aria-hidden="true"
+                      />
                       <div class="flex-1 text-left font-medium text-white">
                         Create new repository
                       </div>
@@ -237,9 +251,13 @@ async function handleCreateRepository() {
                       class="w-full mouse:enabled:hover:bg-main-400/20
                         flex items-center px-4 py-3 mouse:px-3 mouse:py-2 mouse:rounded-lg"
                       active-class="bg-main-400/20"
+                      :aria-label="repo.full_name"
                       @click="connect(repo.full_name)"
                     >
-                        <GitHubIcon class="w-6 h-6 flex-none mr-2 text-main-400" />
+                        <GitHubIcon
+                          class="w-6 h-6 flex-none mr-2 text-main-400"
+                          aria-hidden="true"
+                        />
                         <div class="flex-1 text-left font-medium text-white">
                           {{ repo.owner.login }}/<wbr/>{{ repo.name }}
                         </div>
@@ -253,24 +271,22 @@ async function handleCreateRepository() {
                   </div>
 
                 </ul>
-                <div class="my-8">
+                <p class="my-8">
                   Missing a repository?
                   <br/>
                   <BaseButton
                     class="text-accent-300 cursor-pointer mouse:hover:underline"
-                    tag="a"
-                    href=""
                     active-class="underline"
-                    @click.prevent="_install()"
+                    @click="_install()"
                   >
                     Update which repositories
                     <span class="font-semibold">Notesz</span>
                     may use.
                   </BaseButton>
-                </div>
+                </p>
               </template>
             </template>
-            <div
+            <p
               v-else-if="authorizedRepositories.error?.code === 'unauthorized'"
               class="text-center text-main-200 font-medium"
             >
@@ -281,8 +297,8 @@ async function handleCreateRepository() {
               >
                 Relogin
               </BasicButton>
-            </div>
-            <div
+            </p>
+            <p
               v-else-if="authorizedRepositories.error"
               class="text-center text-main-200 font-medium"
             >
@@ -293,25 +309,29 @@ async function handleCreateRepository() {
               >
                 Retry
               </BasicButton>
-            </div>
+            </p>
           </template>
         </div>
       </div>
-    </div>
+    </main>
     <ButtonBarMobile
       v-if="isTouchDevice"
       class="flex-none"
     >
-      <ButtonBarMobileButton :to="props.redirect">
-        <ArrowLeftIcon class="w-6 h-6" />
+      <ButtonBarMobileButton
+        :to="props.redirect"
+        aria-label="Back"
+      >
+        <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
     </ButtonBarMobile>
     <BottomButtonBarDesktop v-else-if="!isTouchDevice">
       <ButtonBarDesktopButton
         :to="props.redirect"
         class="!p-2.5"
+        aria-label="Back"
       >
-        <ArrowLeftIcon class="w-6 h-6" />
+        <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarDesktopButton>
     </BottomButtonBarDesktop>
   </div>

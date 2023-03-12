@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full max-w-5xl mx-auto">
+  <nav class="relative w-full max-w-5xl mx-auto" aria-label="Main navigation">
     <div class="flex justify-center space-x-1 mb-8 mt-4">
       <div
         class="flex-1 h-[2px] rounded bg-gradient-to-l from-main-400/40 to-transparent
@@ -15,5 +15,5 @@
       class="absolute z-10 h-16 inset-x-0 top-0 -mt-16 pointer-events-none
         bg-gradient-to-t from-background to-transparent"
     />
-  </div>
+  </nav>
 </template>

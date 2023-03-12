@@ -18,7 +18,7 @@ watch(() => themeService.themeSettingsOpen, () => {
 </script>
 
 <template>
-  <div class="relative">
+  <nav class="relative" aria-label="Main navigation">
     <div
       class="px-2 flex items-center justify-around bg-main-400/20 text-main-300"
       :class="{
@@ -32,5 +32,5 @@ watch(() => themeService.themeSettingsOpen, () => {
       class="absolute z-10 h-16 inset-x-0 top-0 -mt-16 pointer-events-none
         bg-gradient-to-t from-background/60 to-transparent"
     />
-  </div>
+  </nav>
 </template>

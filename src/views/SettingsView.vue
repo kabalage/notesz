@@ -130,23 +130,30 @@ async function clearStorage() {
 
 <template>
   <div class="h-full overflow-hidden flex flex-col">
-    <div class="flex-1 overflow-y-auto overscroll-contain">
+    <main class="flex-1 overflow-y-auto overscroll-contain">
       <div
         v-if="settings.data && repositoryList.data && repositoryList.isInitialized"
         class="p-4 pb-16 max-w-xl mx-auto"
       >
 
         <!-- Repositories -->
-        <div>
-          <h2 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-left">
-            Repositories
-          </h2>
+        <h1 class="text-xl font-semibold text-accent-300 mt-4 mb-8 text-left">
+          Repositories
+        </h1>
+        <section aria-label="Repositories">
           <p class="mb-6">
             You may connect multiple repositories to
             <span class="text-white font-medium">Notesz</span>.
             Select the one you want to work on.
           </p>
-          <NoteszTransitionGroup tag="ul" class="space-y-4">
+          <NoteszTransitionGroup
+            tag="ul"
+            class="space-y-4"
+            aria-label="List of repositories"
+            :role="repositoryList.data.length > 0
+              ? 'listbox'
+              : 'presentation'"
+          >
             <li
               v-if="repositoryList.data.length === 0"
               class="text-center"
@@ -157,6 +164,9 @@ async function clearStorage() {
               v-for="repo in repositoryList.data"
               :key="repo.id"
               class="flex"
+              role="option"
+              :aria-label="repo.id"
+              :aria-selected="settings.data.selectedRepositoryId === repo.id"
             >
               <BaseButton
                 class="flex-1 border rounded-lg sm:flex divide-y sm:divide-y-0 sm:divide-x
@@ -185,6 +195,7 @@ async function clearStorage() {
                   active-class="!bg-transparent"
                   :disabled="settings.data.selectedRepositoryId === repo.id"
                   :stop-pointer-event-propagation="false"
+                  :aria-label="`Select ${repo.id}`"
                   @click="selectRepository(repo.id)"
                   @keyup.enter="selectRepository(repo.id)"
                 >
@@ -193,9 +204,16 @@ async function clearStorage() {
                     class="w-6 h-6 flex-none mr-2 text-accent-300"
                     :class="settings.data.selectedRepositoryId !== repo.id
                       ? 'invisible': ''"
+                    aria-hidden="true"
                   />
-                  <GitHubIcon class="w-6 h-6 flex-none mr-2 text-main-300" />
-                  <div class="flex-1 font-medium text-white truncate">
+                  <GitHubIcon
+                    class="w-6 h-6 flex-none mr-2 text-main-300"
+                    aria-hidden="true"
+                  />
+                  <div
+                    class="flex-1 font-medium text-white truncate"
+                    aria-hidden="true"
+                  >
                     {{ repo.id }}
                   </div>
                 </BaseButton>
@@ -214,12 +232,13 @@ async function clearStorage() {
                       mouse:hover:bg-main-500/20 mouse:enabled:hover:rounded-br-lg
                       mouse:enabled:hover:sm:rounded-tr-lg"
                     active-class="bg-main-500/20"
-                    :href="`https://github.com/${repo.id}`"
                     target="_blank"
+                    aria-label="Open on GitHub"
+                    :href="`https://github.com/${repo.id}`"
                     @click.stop
                   >
                     Open
-                    <ExternalLinkIcon20 class="ml-1 w-5 h-5 flex-none" />
+                    <ExternalLinkIcon20 class="ml-1 w-5 h-5 flex-none" aria-hidden="true" />
                   </BaseButton>
                 </div>
               </BaseButton>
@@ -228,33 +247,44 @@ async function clearStorage() {
 
           <BasicButton
             class="mx-auto mt-8"
+            aria-label="Connect new repository"
             :loading="isAuthorizing"
             @click="authorizeThenRedirect()"
           >
-            <PlusIcon class="w-6 h-6 text-accent-300 mr-2" />
+            <PlusIcon class="w-6 h-6 text-accent-300 mr-2" aria-hidden="true"/>
             <span>Connect repository</span>
           </BasicButton>
-          <div v-if="authError" class="mt-4 font-medium text-red-400 text-center">
+          <div
+            v-if="authError"
+            role="alert"
+            class="mt-4 font-medium text-red-400 text-center"
+          >
             {{ authError.message }}
           </div>
-        </div>
+        </section>
 
         <!-- Settings -->
         <div class="flex items-center mt-16 mb-8">
-          <h2 class="text-xl font-semibold text-accent-300 text-left">
+          <h1 class="text-xl font-semibold text-accent-300 text-left">
             Settings
-          </h2>
+          </h1>
           <div
             class="ml-4 flex-1 h-[2px] rounded bg-gradient-to-r from-main-400/30 to-transparent
               self-center"
           />
         </div>
-        <div class="bg-main-400/20 rounded-lg divide-y divide-main-400/20">
+        <section
+          class="bg-main-400/20 rounded-lg divide-y divide-main-400/20"
+          aria-label="Settings"
+        >
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div class="text-white font-medium flex-1 mr-2" aria-hidden="true">
               Theme
             </div>
             <BasicButton
+              :aria-label="themeService.themeSettingsOpen
+                ? 'Close theme settings'
+                : 'Open theme settings'"
               @click="themeService.themeSettingsOpen
                 ? themeService.closeThemeSettings()
                 : themeService.openThemeSettings()"
@@ -263,50 +293,84 @@ async function clearStorage() {
             </BasicButton>
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="syntaxThemeLabel"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Syntax theme
             </div>
             <BasicSelect
+              id="syntaxTheme"
+              label-id="syntaxThemeLabel"
               class="w-40"
               v-model="settings.data.syntaxTheme"
               :options="syntaxThemes"
             />
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="editorFontSizeLabel"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Editor font size
             </div>
             <BasicSelect
+              id="editorFontSize"
+              label-id="editorFontSizeLabel"
               class="w-40"
               v-model="settings.data.editorFontSize"
               :options="editorFontSizes"
             />
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="spellcheck"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Spellcheck
             </div>
-            <BasicSwitch v-model="settings.data.spellcheck" />
+            <BasicSwitch
+              v-model="settings.data.spellcheck"
+              label-id="spellcheck"
+            />
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="autocapitalize"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Autocapitalize
             </div>
-            <BasicSwitch v-model="settings.data.autocapitalize" />
+            <BasicSwitch
+              v-model="settings.data.autocapitalize"
+              label-id="autocapitalize"
+            />
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="autocorrect"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Autocorrect
             </div>
-            <BasicSwitch v-model="settings.data.autocorrect" />
+            <BasicSwitch
+              v-model="settings.data.autocorrect"
+              label-id="autocorrect"
+            />
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
-            <div class="text-white font-medium flex-1 mr-2">
+            <div
+              id="backdropFilter"
+              class="text-white font-medium flex-1 mr-2"
+            >
               Backdrop blur effects
             </div>
-            <BasicSwitch v-model="settings.data.backdropFilter" />
+            <BasicSwitch
+              v-model="settings.data.backdropFilter"
+              label-id="backdropFilter"
+            />
           </div>
-        </div>
+        </section>
 
         <!-- About -->
         <div class="flex items-center mt-16 mb-8">
@@ -318,7 +382,7 @@ async function clearStorage() {
               self-center"
           />
         </div>
-        <article class="text-main-200 space-y-6">
+        <article class="text-main-200 space-y-6" aria-label="About">
           <p>
             I'm <span class="text-white font-medium">Balázs Kaufmann</span> (
             <a
@@ -370,19 +434,23 @@ async function clearStorage() {
         </BasicButton>
 
       </div>
-    </div>
+    </main>
 
     <ButtonBarMobile v-if="isTouchDevice">
-      <ButtonBarMobileButton :to="backNavigationPath">
-        <ArrowLeftIcon class="w-6 h-6" />
+      <ButtonBarMobileButton
+        :to="backNavigationPath"
+        aria-label="Back"
+      >
+        <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
     </ButtonBarMobile>
     <BottomButtonBarDesktop v-else-if="!isTouchDevice">
       <ButtonBarDesktopButton
         :to="backNavigationPath"
         class="!p-2.5"
+        aria-label="Back"
       >
-        <ArrowLeftIcon class="w-6 h-6" />
+        <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarDesktopButton>
     </BottomButtonBarDesktop>
   </div>

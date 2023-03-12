@@ -43,8 +43,10 @@ const props = defineProps<{
     <div
       v-if="props.loading"
       class="!visible absolute inset-0 flex items-center justify-center"
+      aria-label="Loading"
+      role="status"
     >
-      <SpinnerIcon class="w-6 h-6 text-main-300" />
+      <SpinnerIcon class="w-6 h-6 text-main-300" aria-hidden="true" />
     </div>
     <slot />
   </BaseButton>

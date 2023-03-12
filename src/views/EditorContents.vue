@@ -75,55 +75,62 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    class="overflow-hidden flex flex-col"
-  >
+  <main class="overflow-hidden flex flex-col" aria-label="Opened file">
     <div
       v-if="!editorService.currentFile"
       class="self-center mt-16 text-main-200/60"
     >
-      Select a note to edit...
+      Select a file to edit...
     </div>
     <template v-if="editorService.currentFile">
-      <div class="px-3 lg:px-11 py-6 flex justify-between items-center">
+      <header
+        class="px-3 lg:px-11 py-6 flex justify-between items-center"
+        aria-label="Document header"
+      >
         <div class="flex-1 flex items-center">
           <IconButton
             class="hidden sm:block"
+            aria-label="Toggle sidebar"
             @click="editorService.sidebarIsOpen = !editorService.sidebarIsOpen"
           >
-            <SidebarIcon class="w-6 h-6" />
+            <SidebarIcon class="w-6 h-6" aria-hidden="true" />
           </IconButton>
         </div>
-        <div class="flex-col justify-center truncate">
-          <div
-            v-if="editorService.currentTree?.path"
-            class="flex-1 text-center text-sm font-medium text-accent-300/60 leading-tight
-              truncate"
-          >
-            {{ editorService.currentTree.path }}
-          </div>
-          <h2
+        <div
+          class="flex flex-col-reverse justify-center truncate"
+        >
+          <h1
             class="flex-1 text-center text-lg font-semibold text-accent-300 leading-tight truncate"
           >
             {{ editorService.currentFileName }}
+          </h1>
+          <h2
+            v-if="editorService.currentTree?.path"
+            class="flex-1 text-center text-sm font-medium text-accent-300/60 leading-tight
+              truncate"
+            aria-hidden="true"
+          >
+            {{ editorService.currentTree.path }}
           </h2>
         </div>
         <div class="flex-1 flex items-center justify-end">
           <IconButton
             class="hidden sm:block"
+            aria-label="Delete current file"
             @click="editorService.deleteCurrentFile()"
           >
-            <TrashIcon class="w-6 h-6" />
+            <TrashIcon class="w-6 h-6" aria-hidden="true" />
           </IconButton>
           <IconButton
             v-if="editorService.currentFile.conflicting"
             class="hidden sm:block"
+            aria-label="Resolve conflict"
             @click="editorService.resolveConflict()"
           >
-            <CheckIcon class="w-6 h-6" />
+            <CheckIcon class="w-6 h-6" aria-hidden="true" />
           </IconButton>
         </div>
-      </div>
+      </header>
       <div
         v-if="editorService.currentFile.conflictReason"
         class="px-3 lg:px-11 mb-2 lg:flex lg:justify-center"
@@ -135,9 +142,12 @@ onBeforeUnmount(() => {
       </div>
       <CodemirrorEditor
         v-if="editorService.currentFileBlob.data !== undefined"
+        id="codemirrorEditor"
         ref="codemirrorEditor"
-        :key="editorService.currentFile.path"
         class="flex-1 overflow-hidden lg:mx-8"
+        role="region"
+        aria-label="Editor"
+        :key="editorService.currentFile.path"
         :value="editorService.currentFileBlob.data"
         @input="onNoteInput"
         @focus="onEditorFocus"
@@ -154,33 +164,33 @@ onBeforeUnmount(() => {
         >
           <ButtonBarMobileButton
             class="flex-1"
-            label="Back"
+            aria-label="Back"
             @click="editorService.closeFile()"
           >
-            <ArrowLeftIcon class="w-6 h-6" />
+            <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             class="flex-1"
             label="Sync"
-            :disabled="editorService.syncDisabled"
+            aria-:disabled="editorService.syncDisabled"
             @click="editorService.startSync()"
           >
-            <SyncIcon class="w-6 h-6" />
+            <SyncIcon class="w-6 h-6" aria-hidden="true" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             class="flex-1"
-            label="Delete"
+            aria-label="Delete"
             @click="editorService.deleteCurrentFile"
           >
-            <TrashIcon class="w-6 h-6" />
+            <TrashIcon class="w-6 h-6" aria-hidden="true" />
           </ButtonBarMobileButton>
           <ButtonBarMobileButton
             v-if="editorService.currentFile.conflicting"
             class="flex-1"
-            label="Resolve"
+            aria-label="Resolve"
             @click="editorService.resolveConflict()"
           >
-            <CheckIcon class="w-6 h-6" />
+            <CheckIcon class="w-6 h-6" aria-hidden="true" />
           </ButtonBarMobileButton>
         </ButtonBarMobile>
       </Transition>
@@ -196,6 +206,9 @@ onBeforeUnmount(() => {
             class="flex-1 px-2 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
               overscroll-y-none touch-pan-x bg-main-400/20
               text-main-300 snap-x rounded-tr-lg mr-px"
+            role="toolbar"
+            aria-label="Editor commands"
+            aria-controls="codemirrorEditor"
             @click.capture="codemirrorEditor?.focus()"
           >
             <RibbonButton
@@ -281,134 +294,164 @@ onBeforeUnmount(() => {
             <RibbonButton
               class="snap-center"
               :toggled="selectMode"
+              :aria-label="selectMode ? 'Stop selection' : 'Start selection'"
               @click="selectMode = !selectMode"
             >
               <TextSelectActiveIcon
                 v-if="selectMode"
                 class="w-6 h-6"
+                aria-hidden="true"
               />
               <TextSelectIcon
                 v-else
                 class="w-6 h-6"
+                aria-hidden="true"
               />
             </RibbonButton>
             <RibbonButton
               class="snap-center"
+              aria-label="Copy selection to clipboard"
               @click="codemirrorEditor?.copyToClipboard()"
             >
-              <ClipboardCopyIcon class="w-6 h-6" />
+              <ClipboardCopyIcon class="w-6 h-6" aria-hidden="true" />
             </RibbonButton>
             <RibbonButton
               class="snap-center"
+              aria-label="Paste selection from clipboard"
               @click="codemirrorEditor?.pasteFromClipboard()"
             >
-              <ClipboardPasteIcon class="w-6 h-6" />
+              <ClipboardPasteIcon class="w-6 h-6" aria-hidden="true" />
             </RibbonButton>
             <RibbonButton
               class="snap-center"
+              aria-label="Undo"
               @click="codemirrorEditor?.undo()"
             >
-              <UndoIcon class="w-6 h-6" />
+              <UndoIcon class="w-6 h-6" aria-hidden="true" />
             </RibbonButton>
             <RibbonButton
               class="snap-center"
+              aria-label="Redo"
               @click="codemirrorEditor?.redo()"
             >
-              <RedoIcon class="w-6 h-6" />
+              <RedoIcon class="w-6 h-6" aria-hidden="true" />
             </RibbonButton>
           </div>
           <div
             class="w-44 flex overflow-x-scroll overflow-y-hidden overscroll-x-contain
               overscroll-y-none touch-pan-x bg-main-400/20 text-main-300 snap-x snap-mandatory
               rounded-tl-lg border-background"
+            role="toolbar"
+            aria-label="Editor navigation"
+            aria-controls="codemirrorEditor"
             @click.capture="codemirrorEditor?.focus()"
           >
             <div class="w-44 px-2 flex-none flex flex-row snap-center">
               <RibbonButton
+                :aria-label="selectMode ? 'Select upwards' : 'Move cursor up'"
                 @click="selectMode
                   ? codemirrorEditor?.selectUp()
                   : codemirrorEditor?.moveCursorUp()"
               >
-                <CursorUpIcon class="w-6 h-6" />
+                <CursorUpIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                :aria-label="selectMode ? 'Select downwards' : 'Move cursor down'"
                 @click="selectMode
                   ? codemirrorEditor?.selectDown()
                   : codemirrorEditor?.moveCursorDown()"
               >
-                <CursorDownIcon class="w-6 h-6" />
+                <CursorDownIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                :aria-label="selectMode ? 'Select left' : 'Move cursor left'"
                 @click="selectMode
                   ? codemirrorEditor?.selectLeft()
                   : codemirrorEditor?.moveCursorLeft()"
               >
-                <CursorLeftIcon class="w-6 h-6" />
+                <CursorLeftIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
 
               <RibbonButton
+                :aria-label="selectMode ? 'Select right' : 'Move cursor right'"
                 @click="selectMode
                   ? codemirrorEditor?.selectRight()
                   : codemirrorEditor?.moveCursorRight()"
               >
-                <CursorRightIcon class="w-6 h-6" />
+                <CursorRightIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
             </div>
             <div class="w-44 px-2 flex-none flex flex-row snap-center">
               <RibbonButton
+                :aria-label="selectMode
+                  ? 'Select to document start'
+                  : 'Move cursor to document start'"
                 @click="selectMode
                   ? codemirrorEditor?.selectDocStart()
                   : codemirrorEditor?.moveCursorDocStart()"
               >
-                <CursorDocStartIcon class="w-6 h-6" />
+                <CursorDocStartIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                :aria-label="selectMode
+                  ? 'Select to document end'
+                  : 'Move cursor to document end'"
                 @click="selectMode
                   ? codemirrorEditor?.selectDocEnd()
                   : codemirrorEditor?.moveCursorDocEnd()"
               >
-                <CursorDocEndIcon class="w-6 h-6" />
+                <CursorDocEndIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                :aria-label="selectMode
+                  ? 'Select to line start'
+                  : 'Move cursor to line start'"
                 @click="selectMode
                   ? codemirrorEditor?.selectLineStart()
                   : codemirrorEditor?.moveCursorLineStart()"
               >
-                <CursorLineStartIcon class="w-6 h-6" />
+                <CursorLineStartIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                :aria-label="selectMode
+                  ? 'Select to line end'
+                  : 'Move cursor to line end'"
                 @click="selectMode
                   ? codemirrorEditor?.selectLineEnd()
                   : codemirrorEditor?.moveCursorLineEnd()"
               >
-                <CursorLineEndIcon class="w-6 h-6" />
+                <CursorLineEndIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
             </div>
             <div class="w-44 px-2 flex-none flex flex-row snap-center">
               <RibbonButton
+                aria-label="Move selection or current line up"
                 @click="codemirrorEditor?.moveLineUp()"
               >
-                <MoveLinesUpIcon class="w-6 h-6" />
+                <MoveLinesUpIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                aria-label="Move selection or current line down"
                 @click="codemirrorEditor?.moveLineDown()"
               >
-                <MoveLinesDownIcon class="w-6 h-6" />
+                <MoveLinesDownIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                aria-label="Indent selection or current line less"
                 @click="codemirrorEditor?.indentLess()"
               >
-                <IndentLeftIcon class="w-6 h-6" />
+                <IndentLeftIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
               <RibbonButton
+                aria-label="Indent selection or current line more"
                 @click="codemirrorEditor?.indentMore()"
               >
-                <IndentRightIcon class="w-6 h-6" />
+                <IndentRightIcon class="w-6 h-6" aria-hidden="true" />
               </RibbonButton>
             </div>
           </div>
         </div>
       </transition>
     </template>
-  </div>
+  </main>
 </template>

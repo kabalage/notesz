@@ -19,7 +19,9 @@ const props = defineProps<{
   options?: {
     label: string,
     value: string | number
-  }[]
+  }[],
+  id?: string,
+  labelId?: string
 }>();
 
 const emit = defineEmits<{
@@ -40,6 +42,7 @@ const selectedOption = computed(() => {
     @update:modelValue="emit('update:modelValue', $event)"
   >
     <ListboxButton
+      :id="id"
       class="flex w-full rounded-lg text-white pl-4 pr-2 py-2 leading-normal disabled:opacity-50
         cursor-pointer"
       :class="props.darken
@@ -47,11 +50,15 @@ const selectedOption = computed(() => {
           enabled:mouse:hover:focus:bg-background/40 placeholder:text-main-200/60`
         : `bg-main-400/20 enabled:mouse:hover:bg-main-400/40
           enabled:mouse:hover:focus:bg-main-400/20 placeholder:text-main-200/60`"
+      :aria-labelledby="`${props.labelId} value-${props.id}`"
     >
-      <span class="flex-1 text-left truncate">
+      <span
+        :id="`value-${props.id}`"
+        class="flex-1 text-left truncate"
+      >
         {{ selectedOption?.label }}
       </span>
-      <CaretUpDownIcon class="w-6 h-6 text-main-400/80 " />
+      <CaretUpDownIcon class="w-6 h-6 text-main-400/80" aria-hidden="true" />
     </ListboxButton>
     <transition
       enter-active-class="transition duration-150 ease-out origin-top"
@@ -68,6 +75,7 @@ const selectedOption = computed(() => {
         :class="settings.data?.backdropFilter
           ? 'bg-background/80 backdrop-blur-md'
           : 'bg-background'"
+        :aria-labelledby="`${props.labelId}`"
       >
         <ListboxOption
           v-for="option in props.options"
@@ -94,6 +102,7 @@ const selectedOption = computed(() => {
               <CheckIcon
                 v-if="selected"
                 class="w-6 h-6 text-accent-400"
+                aria-hidden="true"
               />
               <span class="flex-1 truncate" :class="selected ? 'ml-2' : 'ml-8'">
                 {{ option.label }}

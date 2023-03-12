@@ -154,6 +154,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
         + ' The <em>.md</em> extension is added automatically if'
         + ' missing.',
       placeholder: 'path/to/file[.md]',
+      inputAriaLabel: 'File path',
       confirmButtonLabel: 'Create',
       cancelButtonLabel: 'Cancel',
       validate(path: string) {

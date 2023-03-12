@@ -48,7 +48,7 @@ function navigateBack() {
   <div class="h-full overflow-hidden flex flex-col items-stretch justify-center p-8">
       <div class="mx-auto w-full sm:max-w-sm flex flex-col items-stretch justify-center">
         <div class="mb-2 text-lg font-medium flex">
-          <div class="text-accent-300">
+          <h1 class="text-accent-300">
             <template v-if="error?.code === 'rebaseConflicts'">
               Conflicts detected
             </template>
@@ -58,9 +58,15 @@ function navigateBack() {
             <template v-else>
               Synchronizing...
             </template>
-          </div>
+          </h1>
         </div>
-        <div class="h-1 rounded-full bg-main-400/40">
+        <div
+          class="h-1 rounded-full bg-main-400/40"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          :aria-valuenow="Math.round(syncProgress * 100)"
+        >
           <div
             class="h-1 rounded-full transform bg-accent-300
               transition-transform duration-300 ease-in-out"
@@ -85,6 +91,7 @@ function navigateBack() {
               ? `Some local changes are conflicting with remote changes.
                 Resolve them to be able to continue with the synchronization.`
               : error.message"
+            role="alert"
           />
           <div class="mt-4 flex items-center">
             <BasicButton

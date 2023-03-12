@@ -17,7 +17,7 @@ const props = defineProps<{
         props.type === 'warning'
     }"
   >
-    <ExclamationTriangleIcon class="w-6 h-6 mr-3 flex-none" />
+    <ExclamationTriangleIcon class="w-6 h-6 mr-3 flex-none" aria-hidden="true" />
     <div>
       {{ props.message }}
     </div>

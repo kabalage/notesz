@@ -32,7 +32,7 @@ function locationReload() {
 </script>
 
 <template>
-  <div class="pt-1 flex flex-col relative">
+  <aside class="pt-1 flex flex-col relative" aria-label="Sidebar">
     <div class="flex-1 py-4 overflow-y-auto">
       <div class="flex justify-center mb-3">
         <NoteszLogo
@@ -40,6 +40,8 @@ function locationReload() {
           text-class="text-white"
           icon-class="text-accent-300"
           icon-shade-class="text-main-400/40"
+          role="img"
+          aria-label="Notesz logo"
           @click="locationReload()"
         />
       </div>
@@ -62,27 +64,27 @@ function locationReload() {
         </div>
       </div> -->
       <template v-if="!explorerService.loading && explorerService.conflictingFiles.length > 0">
-        <h2 class="text-accent-300 font-medium mt-8 px-4 leading-loose">
+        <h1 class="text-accent-300 font-medium mt-8 px-4 leading-loose">
           Conflicting files
-        </h2>
+        </h1>
         <ul
           class="mx-4 divide-y divide-main-400/20 bg-main-400/10
             rounded-lg overflow-hidden"
+          aria-label="List of conflicting files"
         >
           <li
             v-for="file in explorerService.conflictingFiles"
             :key="file.path"
           >
             <BaseButton
-              :href="`/edit/${editorService.repositoryId}/${file.path}`"
-              @click.prevent="editorService.openFile(file.path)"
-              class="flex items-center py-3 px-4 text-white font-medium"
+              class="w-full text-left flex items-center py-3 px-4 text-white font-medium"
               :class="{
                 'bg-main-400/20': file.path === editorService.currentFilePath
               }"
               active-class="bg-main-400/20"
+              @click="editorService.openFile(file.path)"
             >
-              <FileIcon class="w-6 h-6 mr-2 text-main-400 flex-none" />
+              <FileIcon class="w-6 h-6 mr-2 text-main-400 flex-none" aria-hidden="true" />
               <div class="flex-1 truncate">
                 <div class="truncate leading-tight">
                   {{ file.name }}
@@ -98,6 +100,7 @@ function locationReload() {
           v-if="!explorerService.browseAllDuringManualRebase"
           class="mt-8 mx-auto"
           ghost
+          aria-label="Show all files"
           @click="explorerService.toggleBrowseAllDuringManualRebase()"
         >
           Browse all files
@@ -106,13 +109,14 @@ function locationReload() {
           v-if="explorerService.browseAllDuringManualRebase"
           class="flex items-center mt-8 pl-4 pr-2"
         >
-          <h2 class="flex-1 text-accent-300 font-medium leading-loose">
+          <h1 class="flex-1 text-accent-300 font-medium leading-loose">
             All files
-          </h2>
+          </h1>
           <IconButton
+            aria-label="Hide all files"
             @click="explorerService.toggleBrowseAllDuringManualRebase()"
           >
-            <XmarkIcon class="w-6 h-6 opacity-50" />
+            <XmarkIcon class="w-6 h-6 opacity-50" aria-hidden="true" />
           </IconButton>
         </div>
       </template>
@@ -127,6 +131,7 @@ function locationReload() {
           'border-b-0': !explorerService.browseAllDuringManualRebase
             && explorerService.items.length === 0
         }"
+        aria-label="Current folder"
       >
         <li
           v-if="explorerService.items.length === 0"
@@ -147,24 +152,33 @@ function locationReload() {
         >
           <BaseButton
             v-if="item.type === 'parentTree'"
-            :href="`/edit/${editorService.repositoryId}/${item.path}`"
-            @click.prevent="explorerService.path = item.path"
-            class="flex items-center py-3 px-4 font-medium"
+            class="w-full text-left flex items-center py-3 px-4 font-medium"
             active-class="bg-main-400/20"
+            aria-label="Go one folder up"
+            @click="explorerService.path = item.path"
           >
-            <CaretLeftIcon class="w-6 h-6 inline-block mr-2 text-main-400" />
-            <div class="flex-1 mr-2 truncate text-main-300">
+            <CaretLeftIcon
+              class="w-6 h-6 inline-block mr-2 text-main-400"
+              aria-hidden="true"
+            />
+            <div
+              class="flex-1 mr-2 truncate text-main-300"
+              aria-hidden="true"
+            >
               {{ item.name }}
             </div>
           </BaseButton>
           <BaseButton
             v-if="item.type === 'tree'"
-            :href="`/edit/${editorService.repositoryId}/${item.path}`"
-            @click.prevent="explorerService.path = item.path"
-            class="flex items-center py-3 px-4 font-medium"
+            class="w-full text-left flex items-center py-3 px-4 font-medium"
             active-class="bg-main-400/20"
+            @click="explorerService.path = item.path"
           >
-            <FolderIcon class="w-6 h-6 mr-2 text-main-400 flex-none"/>
+            <FolderIcon
+              class="w-6 h-6 mr-2 text-main-400 flex-none"
+              aria-hidden="true"
+            />
+            <div class="sr-only">Folder: </div>
             <div
               class="flex-1 mr-2 truncate"
               :class="{
@@ -178,29 +192,34 @@ function locationReload() {
           </BaseButton>
           <BaseButton
             v-if="item.type === 'file'"
-            :href="`/edit/${editorService.repositoryId}/${item.path}`"
-            @click.prevent="editorService.openFile(item.path)"
-            class="flex items-center py-3 px-4 font-medium"
+            class="w-full text-left  flex items-center py-3 px-4 font-medium"
             :class="{
               'bg-main-400/20': item.path === editorService.currentFilePath,
               'text-accent-400': item.added || item.modified,
               'text-white': item.unchanged
             }"
             active-class="bg-main-400/20"
+            @click="editorService.openFile(item.path)"
           >
             <FileIcon
               class="w-6 h-6 mr-2 text-main-400 flex-none"
+              aria-hidden="true"
             />
+            <div class="sr-only">File: </div>
             <div class="flex-1 mr-2 truncate">
               {{ item.name }}
             </div>
             <AsteriskIcon20
               v-if="item.modified"
               class="text-accent-400 w-5 mr-0.5 text-center"
+              role="img"
+              aria-label="(modified)"
             />
             <PlusIcon20
               v-if="item.added"
               class="text-accent-400 w-5 mr-0.5 text-center"
+              role="img"
+              aria-label="(added)"
             />
           </BaseButton>
         </li>
@@ -209,34 +228,34 @@ function locationReload() {
     <ButtonBarMobile class="flex-none">
       <ButtonBarMobileButton
         class="flex-1"
-        label="Back"
+        aria-label="Go one folder up"
         :disabled="!explorerService.explorerTree?.path"
         @click="explorerService.navigateBack()"
       >
-        <ArrowLeftIcon class="w-6 h-6" />
+        <ArrowLeftIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
-        label="New note"
+        aria-label="Create new file"
         @click="editorService.addFile(explorerService.path)"
       >
-        <PlusIcon class="w-6 h-6" />
+        <PlusIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
-        label="Sync"
+        aria-label="Synchronize"
         :disabled="editorService.syncDisabled"
         @click="editorService.startSync"
       >
-        <SyncIcon class="w-6 h-6" />
+        <SyncIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
       <ButtonBarMobileButton
         class="flex-1"
-        label="Settings"
+        aria-label="Settings"
         to="/settings"
       >
-        <CogIcon class="w-6 h-6" />
+        <CogIcon class="w-6 h-6" aria-hidden="true" />
       </ButtonBarMobileButton>
     </ButtonBarMobile>
-  </div>
+  </aside>
 </template>
