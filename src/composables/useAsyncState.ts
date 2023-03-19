@@ -2,7 +2,7 @@ import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 import { trial } from '@/utils/trial';
 import throttle from 'lodash-es/throttle';
 
-export function useFromDb<T, WatchParam>({
+export function useAsyncState<T, WatchParam>({
   get,
   put,
   putThrottling = 1000,
@@ -14,9 +14,10 @@ export function useFromDb<T, WatchParam>({
   putThrottling?: number
 }) {
   const data = ref<T | undefined>(undefined);
-  const isFetching = ref(false);
+  const lastData = ref<T | undefined>(undefined);
+  const isGetting = ref(false);
   const isPutting = ref(false);
-  const isInitialized = ref(false);
+  const isReady = ref(false);
   const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let getQueued: {
@@ -39,7 +40,7 @@ export function useFromDb<T, WatchParam>({
   }
 
   async function queueGet(params?: WatchParam) {
-    // console.log('useFromDb queueGet');
+    // console.log('useAsyncState queueGet');
     getQueued = { params };
     if (isProcessing) {
       return processPromise;
@@ -50,7 +51,9 @@ export function useFromDb<T, WatchParam>({
   }
 
   async function queuePut(newValue: UnwrapRef<T>) {
-    // console.log('useFromDb queuePut');
+    // console.log('useAsyncState queuePut');
+    if (!put) throw new Error('No put function provided');
+    if (!isReady.value) throw new Error('Cannot put before inital get finishes');
     putQueued = { newValue };
     if (isProcessing) {
       return processPromise;
@@ -61,7 +64,7 @@ export function useFromDb<T, WatchParam>({
   }
 
   async function process() {
-    // console.log('useFromDb process');
+    // console.log('useAsyncState process');
     isProcessing = true;
     while (getQueued || putQueued) {
       if (putQueued) {
@@ -79,28 +82,32 @@ export function useFromDb<T, WatchParam>({
   }
 
   async function _get(params?: WatchParam) {
-    // console.log('useFromDb _get');
+    // console.log('useAsyncState _get');
     const [, getError] = await trial(async () => {
-      isFetching.value = true;
+      isGetting.value = true;
       error.value = undefined;
       const newValue = await get(params) as UnwrapRef<T>;
       stopUpdateWatch();
-      data.value = newValue;
+      lastData.value = newValue;
+      if (!putQueued) {
+        // don't update data if in the meantime a put has been queued
+        data.value = structuredClone(newValue);
+      }
     });
     if (getError) {
       error.value = getError;
     } else {
-      isInitialized.value = true;
+      isReady.value = true;
     }
-    isFetching.value = false;
-    if (put && data.value !== undefined) {
+    isGetting.value = false;
+    if (put) {
       startUpdateWatch();
     }
   }
 
   async function _put(newValue: UnwrapRef<T>) {
     if (!put) return;
-    // console.log('useFromDb _put');
+    // console.log('useAsyncState _put');
     const [, putError] = await trial(async () => {
       isPutting.value = true;
       error.value = undefined;
@@ -108,15 +115,19 @@ export function useFromDb<T, WatchParam>({
     });
     if (putError) {
       error.value = putError;
+      stopUpdateWatch();
+      data.value = lastData.value;
+      startUpdateWatch();
     }
     isPutting.value = false;
   }
 
   function startUpdateWatch() {
-    // console.log('useFromDb startUpdateWatch');
+    // console.log('useAsyncState startUpdateWatch');
     if (!put) return;
     updateWatchStopHandler = watch(data, function updateWatchHandler(newValue) {
       if (newValue !== undefined && newValue !== null) {
+        // console.log('useAsyncState updateWatchHandler', newValue);
         throttledQueuePut(newValue);
       }
     }, {
@@ -126,7 +137,7 @@ export function useFromDb<T, WatchParam>({
 
   async function stopUpdateWatch() {
     if (updateWatchStopHandler) {
-      // console.log('useFromDb stopUpdateWatch');
+      // console.log('useAsyncState stopUpdateWatch');
       updateWatchStopHandler();
       updateWatchStopHandler = undefined;
     }
@@ -143,9 +154,9 @@ export function useFromDb<T, WatchParam>({
   return reactive({
     data,
     error,
-    isFetching,
+    isGetting,
     isPutting,
-    isInitialized,
+    isReady,
     refetch: queueGet,
     put: queuePut,
     flushThrottledPut

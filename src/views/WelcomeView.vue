@@ -11,7 +11,7 @@ import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useGitHubIntegration } from '@/services/integration/githubIntegration';
 import { useSettings } from '@/services/settingsService';
 import { useUserModel } from '@/services/model/userModel';
-import { useFromDb } from '@/composables/useFromDb';
+import { useAsyncState } from '@/composables/useAsyncState';
 
 const router = useRouter();
 const settings = useSettings();
@@ -19,7 +19,7 @@ const githubIntegration = useGitHubIntegration();
 const userModel = useUserModel();
 const messages = useNoteszMessageBus();
 
-const user = useFromDb({
+const user = useAsyncState({
   get: userModel.get
 });
 messages.on('change:user', () => {

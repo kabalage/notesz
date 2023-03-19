@@ -57,5 +57,9 @@ export default defineConfig({
   },
   server: {
     port: 5000
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom'
   }
 });

@@ -151,6 +151,7 @@ function onReady(payload: {
   state: EditorState;
   container: HTMLDivElement;
 }) {
+  console.log('Codemirror ready', payload.state);
   cmEditorView.value = payload.view;
 
   VirtualKeyboardEvents.onChange(onVirtualKeyboardChange);
@@ -179,8 +180,9 @@ function onChange(newContents: string) {
   // Change is called on every input. We just save the value and emit change when blur occurs.
   lastEmitValue = newContents;
   lastEmitTime = Date.now();
+  modelValue.value = newContents;
   emit('input', newContents);
-  // console.log('change', newContents.slice(0, 10));
+  console.log('change', newContents.slice(0, 10));
 }
 
 function insertText(text: string) {

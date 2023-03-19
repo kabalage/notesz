@@ -1,7 +1,7 @@
 import { shallowRef } from 'vue';
 import { tryOnScopeDispose } from '@vueuse/core';
 
-export default function createMessageBus<MessageTypes extends { [topic: string]: any }>() {
+export function createMessageBus<MessageTypes extends { [topic: string]: any }>() {
   type Callback = (data: MessageTypes[keyof MessageTypes]) => void;
   type TabMessage<T extends keyof MessageTypes> = {
     id: number;
@@ -9,6 +9,7 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
     data?: MessageTypes[T];
   };
   const subscribers: Map<keyof MessageTypes, Set<Callback>> = new Map();
+  let destroyed = false;
 
   window.addEventListener('storage', storageHandler);
 
@@ -16,6 +17,9 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
     topic: T | T[],
     callback: (data: MessageTypes[T]) => void
   ) {
+    if (destroyed) {
+      throw new Error('Message bus is destroyed');
+    }
     const topicList = Array.isArray(topic) ? topic : [topic];
 
     for (const topic of topicList) {
@@ -34,6 +38,9 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
   function emit<T extends keyof MessageTypes>(
     topic: MessageTypes[T] extends void ? T : never): void;
   function emit<T extends keyof MessageTypes>(topic: T, data?: MessageTypes[T]) {
+    if (destroyed) {
+      throw new Error('Message bus is destroyed');
+    }
     if (subscribers.has(topic)) {
       for (const subscriber of subscribers.get(topic)!) {
         subscriber(data as MessageTypes[T]);
@@ -51,6 +58,9 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
     topic: T | T[],
     callback: (data: MessageTypes[T]) => void
   ) {
+    if (destroyed) {
+      return;
+    }
     const topicList = Array.isArray(topic) ? topic : [topic];
 
     for (const topic of topicList) {
@@ -77,8 +87,11 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
   }
 
   function destroy() {
-    subscribers.clear();
-    window.removeEventListener('storage', storageHandler);
+    if (!destroyed) {
+      subscribers.clear();
+      window.removeEventListener('storage', storageHandler);
+      destroyed = true;
+    }
   }
 
   return {
@@ -89,34 +102,3 @@ export default function createMessageBus<MessageTypes extends { [topic: string]:
     _subscribers: shallowRef(subscribers)
   };
 }
-
-// interface NoteszMessageTypes {
-//   topic1: string;
-//   topic2: number;
-//   topic3: boolean;
-//   topic4: Date
-//   topicWithNoData: void;
-// }
-
-// const bus = createMessageBus<NoteszMessageTypes>();
-
-// bus.on('topic1', (data) => {});
-// bus.on('topic1', (data: number) => {});
-// bus.on('topic2', (data) => {});
-// bus.on('topic3', (data) => {});
-// bus.on(['topic1', 'topic2'], (data) => {});
-// bus.on('topic6', (data) => {});
-
-// const subscriberA = (data: string) => {};
-// const subscriberB = (data: number) => {};
-
-// bus.off('topic1', subscriberA);
-// bus.off('topic1', subscriberB);
-
-// bus.emit('topic2', 123);
-// bus.emit('topic2', '123');
-// bus.emit('topic21', '123');
-// bus.emit('topic6', new Date());
-
-// bus.emit('topicWithNoData');
-// bus.emit('topicWithNoData', 123);

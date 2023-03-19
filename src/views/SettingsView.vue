@@ -20,7 +20,7 @@ import BasicSelect from '@/components/BasicSelect.vue';
 import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 
 import { trial } from '@/utils/trial';
-import { useFromDb } from '@/composables/useFromDb';
+import { useAsyncState } from '@/composables/useAsyncState';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { useThemeService } from '@/services/themeService';
 import { useDialogService } from '@/services/dialogService';
@@ -51,7 +51,7 @@ const editorFontSizes = [
   { label: 'Larger', value: 1 }
 ];
 
-const repositoryList = useFromDb({
+const repositoryList = useAsyncState({
   get() {
     return repositoryModel.list();
   }
@@ -60,7 +60,7 @@ messages.on('change:repository', () => {
   repositoryList.refetch();
 });
 
-const user = useFromDb({
+const user = useAsyncState({
   get: userModel.get
 });
 messages.on('change:user', () => {
@@ -132,7 +132,7 @@ async function clearStorage() {
   <div class="h-full overflow-hidden flex flex-col">
     <main class="flex-1 overflow-y-auto overscroll-contain">
       <div
-        v-if="settings.data && repositoryList.data && repositoryList.isInitialized"
+        v-if="settings.data && repositoryList.data && repositoryList.isReady"
         class="p-4 pb-16 max-w-xl mx-auto"
       >
 

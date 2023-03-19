@@ -1,6 +1,6 @@
 import { onScopeDispose } from 'vue';
 import { defineService } from '@/utils/defineService';
-import createMessageBus from '@/utils/createMessageBus';
+import { createMessageBus } from '@/utils/createMessageBus';
 
 export interface NoteszMessageTypes {
   'change:user': void;

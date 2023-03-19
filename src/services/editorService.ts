@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 import { useOnline } from '@vueuse/core';
 import { defineService } from '@/utils/defineService';
 import { validatePath } from '@/utils/validatePath';
-import { useFromDb } from '@/composables/useFromDb';
+import { useAsyncState } from '@/composables/useAsyncState';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
 import { useBlobModel } from '@/services/model/blobModel';
 import { useFileIndexModel } from '@/services/model/fileIndexModel';
@@ -23,7 +23,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
   const currentFilePath = ref('');
   const repoIsDisconnected = ref(false);
 
-  const repository = useFromDb({
+  const repository = useAsyncState({
     watch() {
       return repositoryId.value;
     },
@@ -52,7 +52,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
     return repository.data.manualRebaseInProgress ? 'rebase' : 'local';
   });
 
-  const fileIndex = useFromDb({
+  const fileIndex = useAsyncState({
     watch() {
       return currentFileIndexId.value;
     },
@@ -87,7 +87,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
     );
   });
 
-  const currentFileBlob = useFromDb({
+  const currentFileBlob = useAsyncState({
     watch() {
       return currentFile.value?.blobId;
     },

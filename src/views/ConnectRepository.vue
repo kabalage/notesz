@@ -21,7 +21,7 @@ import BasicButton from '@/components/BasicButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import BasicInput from '@/components/BasicInput.vue';
 
-import { useFromDb } from '@/composables/useFromDb';
+import { useAsyncState } from '@/composables/useAsyncState';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { trial } from '@/utils/trial';
 import { waitForChildWindowClose } from '@/utils/waitForChildWindowClose';
@@ -46,7 +46,7 @@ const debouncedFilterText = refDebounced(filterText, 250);
 const isAuthorizing = ref(false);
 const authError = ref<Error | undefined>();
 
-const repositoryList = useFromDb({
+const repositoryList = useAsyncState({
   get() {
     return repositoryModel.list();
   }
@@ -63,7 +63,7 @@ const connectedRepositories = computed(() => {
   }
 });
 
-const authorizedRepositories = useFromDb({
+const authorizedRepositories = useAsyncState({
   get(update?: { installationId: number, setupAction: 'update' | 'install'}) {
     return githubIntegration.listAuthorizedRepositories(update);
   }
@@ -140,7 +140,7 @@ async function handleCreateRepository() {
         </h1>
         <div>
           <SpinnerIcon48
-            v-if="authorizedRepositories.isFetching || isAuthorizing"
+            v-if="authorizedRepositories.isGetting || isAuthorizing"
             class="w-12 h-12 text-main-400 mx-auto"
             aria-label="Loading"
             role="status"

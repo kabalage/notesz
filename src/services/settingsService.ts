@@ -1,13 +1,13 @@
 import { defineService } from '@/utils/defineService';
 import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useFromDb } from '@/composables/useFromDb';
+import { useAsyncState } from '@/composables/useAsyncState';
 import { useSettingsModel } from '@/services/model/settingsModel';
 
 export const [provideSettings, useSettings] = defineService('SettingsService', () => {
   const messages = useNoteszMessageBus();
   const settingsModel = useSettingsModel();
 
-  const settings = useFromDb({
+  const settings = useAsyncState({
     get() {
       return settingsModel.get();
     },

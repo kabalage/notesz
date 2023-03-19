@@ -1,5 +1,5 @@
 import { trial } from '@/utils/trial';
-import type createMessageBus from '@/utils/createMessageBus';
+import type { createMessageBus } from '@/utils/createMessageBus';
 import { waitForChildWindowClose } from '@/utils/waitForChildWindowClose';
 
 // TODO needs more constraints

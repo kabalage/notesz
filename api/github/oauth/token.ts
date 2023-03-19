@@ -33,7 +33,7 @@ export default async (req: VercelRequest, res: VercelResponse ) => {
         token: tokenResponse.authentication.token
       });
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       return res.status(500).json({
         message: 'Token creation failed'
       });
