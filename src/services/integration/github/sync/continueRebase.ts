@@ -1,14 +1,20 @@
-import { useRepositoryModel } from '@/services/model/repositoryModel';
-import { useBlobModel } from '@/services/model/blobModel';
-import { useFileIndexModel } from '@/services/model/fileIndexModel';
-import { useNoteszDb } from '@/services/model/noteszDb';
+import type { InjectResult } from '@/utils/injector';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
+import { BlobModel } from '@/services/model/BlobModel';
+import { FileIndexModel } from '@/services/model/FileIndexModel';
+import { NoteszDb } from '@/services/model/NoteszDb';
 import { NoteszError } from '@/utils/NoteszError';
 
-export function useContinueRebase() {
-  const repositoryModel = useRepositoryModel();
-  const blobModel = useBlobModel();
-  const fileIndexModel = useFileIndexModel();
-  const { initTransaction } = useNoteszDb();
+const dependencies = [RepositoryModel, BlobModel, FileIndexModel, NoteszDb];
+useContinueRebase.dependencies = dependencies;
+
+export function useContinueRebase({
+  repositoryModel,
+  blobModel,
+  fileIndexModel,
+  noteszDb
+}: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   /**
    * Sets rebase as **local** and **remote** as **base** if there are no conflicts.
@@ -66,4 +72,3 @@ export function useContinueRebase() {
     });
   };
 }
-

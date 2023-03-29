@@ -2,7 +2,8 @@ import { ref } from 'vue';
 import { createProgress } from '@/utils/createProgress';
 import { clamp } from '@/utils/clamp';
 import { trial } from '@/utils/trial';
-import { useRepositoryModel } from '@/services/model/repositoryModel';
+import type { InjectResult } from '@/utils/injector';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
 import { useContinueRebase } from './sync/continueRebase';
 import { useGetNewCommits } from './sync/getNewCommits';
 import { useInitializeRepository } from './sync/initializeRepository';
@@ -10,14 +11,26 @@ import { useFetchCommit } from './sync/fetchCommit';
 import { useRebase } from './sync/rebase';
 import { usePush } from './sync/push';
 
-export function useUseSyncAction() {
-  const repositoryModel = useRepositoryModel();
-  const continueRebase = useContinueRebase();
-  const getNewCommits = useGetNewCommits();
-  const initializeRepository = useInitializeRepository();
-  const fetchCommit = useFetchCommit();
-  const rebase = useRebase();
-  const push = usePush();
+const dependencies = [
+  RepositoryModel,
+  ...useContinueRebase.dependencies,
+  ...useGetNewCommits.dependencies,
+  ...useInitializeRepository.dependencies,
+  ...useFetchCommit.dependencies,
+  ...useRebase.dependencies,
+  ...usePush.dependencies
+];
+useUseSyncAction.dependencies = dependencies;
+
+export function useUseSyncAction(deps: InjectResult<typeof dependencies>) {
+  const { repositoryModel } = deps;
+
+  const continueRebase = useContinueRebase(deps);
+  const getNewCommits = useGetNewCommits(deps);
+  const initializeRepository = useInitializeRepository(deps);
+  const fetchCommit = useFetchCommit(deps);
+  const rebase = useRebase(deps);
+  const push = usePush(deps);
 
   return function useSyncAction() {
     const isSyncing = ref(false);

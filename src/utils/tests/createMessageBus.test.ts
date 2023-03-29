@@ -62,27 +62,24 @@ describe('createMessageBus', () => {
   });
 
   it('should infer the correct payload type', () => {
-    expectTypeOf(messages.on).toMatchTypeOf<(topic: 'foo', cb: (data: string) => void) => void>();
-    expectTypeOf(messages.on).toMatchTypeOf<(topic: 'bar', cb: (data: number) => void) => void>();
-    expectTypeOf(messages.on).toMatchTypeOf<(topic: 'baz', cb: (data: boolean) => void) => void>();
+    assertType<(topic: 'foo', cb: (data: string) => void) => void>(messages.on);
+    assertType<(topic: 'bar', cb: (data: number) => void) => void>(messages.on);
+    assertType<(topic: 'baz', cb: (data: boolean) => void) => void>(messages.on);
   });
 
   it('should infer the correct union type for the payload when subscribing multiple topics', () => {
-    expectTypeOf(messages.on).toMatchTypeOf<
-      (topic: ['foo', 'bar'], cb: (data: string | number) => void) => void
-    >();
+    assertType<(topic: ['foo', 'bar'], cb: (data: string | number) => void) => void>(messages.on);
   });
 
   it('should produce a compile time error when the callback expects the wrong payload type', () => {
-    expectTypeOf(messages.on).not.toMatchTypeOf<
-      (topic: 'foo', cb: (data: boolean) => void) => void
-    >();
+    // @ts-expect-error wrong type
+    assertType<(topic: 'foo', cb: (data: boolean) => void) => void>(messages.on);
+
   });
 
   it('should produce a compile time error when subscribing a topic that does not exist', () => {
-    expectTypeOf(messages.on).not.toMatchTypeOf<
-      (topic: 'missingTopic', cb: (data: boolean) => void) => void
-    >();
+    // @ts-expect-error wrong type
+    assertType<(topic: 'missingTopic', cb: (data: boolean) => void) => void>(messages.on);
   });
 
 });

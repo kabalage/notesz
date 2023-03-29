@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useDialogService } from '@/services/dialogService';
+import { useService } from '@/utils/injector';
+import { DialogService } from '@/services/DialogService';
 
-const dialogService = useDialogService();
+const dialogService = useService(DialogService);
 
 </script>
 

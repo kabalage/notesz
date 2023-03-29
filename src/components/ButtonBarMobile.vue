@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useThemeService } from '@/services/themeService';
 import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
+import { useService } from '@/utils/injector';
+import { ThemeService } from '@/services/ThemeService';
 
-const themeService = useThemeService();
+const themeService = useService(ThemeService);
 const virtualKeyboard = useVirtualKeyboard();
 
 const animate = ref(false);

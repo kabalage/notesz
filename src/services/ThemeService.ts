@@ -1,15 +1,20 @@
 import { computed, ref, watch, reactive } from 'vue';
-import { defineService } from '@/utils/defineService';
+import { defineService, type InjectResult } from '@/utils/injector';
 import { mainPalette, backgroundPalette, type ColorName }
-  from '@/services/model/settingsModel/themeData';
-import { useDialogService } from '@/services/dialogService';
-import { useSettings } from '@/services/settingsService';
-import type { Theme } from '@/services/model/settingsModel';
+  from '@/services/model/SettingsModel/themeData';
+import { DialogService } from '@/services/DialogService';
+import { Settings } from '@/services/Settings';
+import type { Theme } from '@/services/model/SettingsModel';
 
-export const [provideThemeService, useThemeService] = defineService('ThemeService', () => {
-  const settings = useSettings();
-  const dialogService = useDialogService();
+const dependencies = [Settings, DialogService];
 
+export const ThemeService = defineService({
+  name: 'ThemeService',
+  dependencies,
+  setup
+});
+
+function setup({ settings, dialogService }: InjectResult<typeof dependencies>) {
   const themeSettingsOpen = ref(false);
 
   const selectedThemeIndex = ref<number>();
@@ -174,4 +179,4 @@ export const [provideThemeService, useThemeService] = defineService('ThemeServic
     closeThemeSettings,
     openThemeSettings
   });
-});
+}

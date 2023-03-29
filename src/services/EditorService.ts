@@ -1,22 +1,39 @@
 import { computed, ref, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useOnline } from '@vueuse/core';
-import { defineService } from '@/utils/defineService';
+import { defineService, type InjectResult, type ServiceInstance } from '@/utils/injector';
 import { validatePath } from '@/utils/validatePath';
 import { useAsyncState } from '@/composables/useAsyncState';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useBlobModel } from '@/services/model/blobModel';
-import { useFileIndexModel } from '@/services/model/fileIndexModel';
-import { useRepositoryModel } from '@/services/model/repositoryModel';
-import { useDialogService } from '@/services/dialogService';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { BlobModel } from '@/services/model/BlobModel';
+import { FileIndexModel } from '@/services/model/FileIndexModel';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
+import { DialogService } from '@/services/DialogService';
 
-export const [provideEditorService, useEditorService] = defineService('EditorService', () => {
+export type EditorService = ServiceInstance<typeof EditorService>;
+
+const dependencies = [
+  NoteszMessageBus,
+  BlobModel,
+  FileIndexModel,
+  RepositoryModel,
+  DialogService
+];
+
+export const EditorService = defineService({
+  name: 'EditorService',
+  dependencies,
+  setup
+});
+
+function setup({
+  noteszMessageBus,
+  blobModel,
+  fileIndexModel,
+  repositoryModel,
+  dialogService
+}: InjectResult<typeof dependencies>) {
   const router = useRouter();
-  const dialogService = useDialogService();
-  const messages = useNoteszMessageBus();
-  const blobModel = useBlobModel();
-  const fileIndexModel = useFileIndexModel();
-  const repositoryModel = useRepositoryModel();
 
   const sidebarIsOpen = ref(true);
   const repositoryId = ref('');
@@ -36,7 +53,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
       return repo;
     }
   });
-  messages.on('change:repository', (id) => {
+  noteszMessageBus.on('change:repository', (id) => {
     if (id === repositoryId.value) {
       repository.refetch();
     }
@@ -61,8 +78,10 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
       return fileIndexModel.getFileIndex(repositoryId.value, currentFileIndexId.value);
     }
   });
-  messages.on('change:fileIndex', (change) => {
-    if (change.repositoryId === repositoryId.value && change.indexId === currentFileIndexId.value) {
+  noteszMessageBus.on('change:fileIndex', (change) => {
+    if (change.repositoryId === repositoryId.value
+      && change.indexId === currentFileIndexId.value
+    ) {
       fileIndex.refetch();
     }
   });
@@ -106,7 +125,7 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
     },
     putThrottling: 5000
   });
-  messages.on('change:blob', (blobId) => {
+  noteszMessageBus.on('change:blob', (blobId) => {
     // message emitted by the ongoing put is ignored
     if (!currentFileBlob.isPutting && blobId === currentFile.value?.blobId) {
       currentFileBlob.refetch(blobId);
@@ -234,4 +253,4 @@ export const [provideEditorService, useEditorService] = defineService('EditorSer
     deleteCurrentFile,
     resolveConflict
   });
-});
+}

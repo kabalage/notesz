@@ -1,12 +1,14 @@
 import { request as octokitRequest } from '@octokit/request';
 import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';
-import { useUserModel } from '@/services/model/userModel';
-import { useFileIndexModel } from '@/services/model/fileIndexModel';
+import type { InjectResult } from '@/utils/injector';
+import { UserModel } from '@/services/model/UserModel';
+import { FileIndexModel } from '@/services/model/FileIndexModel';
 
-export function useGetNewCommits() {
-  const userModel = useUserModel();
-  const fileIndexModel = useFileIndexModel();
+const dependencies = [UserModel, FileIndexModel];
+useGetNewCommits.dependencies = dependencies;
+
+export function useGetNewCommits({ userModel, fileIndexModel }: InjectResult<typeof dependencies>) {
 
   /**
    * Determines the new commits that need to be fetched from GitHub.

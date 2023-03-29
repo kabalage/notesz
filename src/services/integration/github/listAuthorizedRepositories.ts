@@ -3,10 +3,13 @@ import { RequestError } from '@octokit/request-error';
 import type { Endpoints } from '@octokit/types';
 import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';
-import { useUserModel } from '@/services/model/userModel';
+import type { InjectResult } from '@/utils/injector';
+import { UserModel } from '@/services/model/UserModel';
 
-export function useListAuthorizedRepositories() {
-  const userModel = useUserModel();
+const dependencies = [UserModel];
+useListAuthorizedRepositories.dependencies = dependencies;
+
+export function useListAuthorizedRepositories({ userModel }: InjectResult<typeof dependencies>) {
 
   return async function listAuthorizedRepositories(update?: {
     installationId: number,

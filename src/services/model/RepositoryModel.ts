@@ -1,8 +1,8 @@
-import { defineService } from '@/utils/defineService';
-import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useBlobModel } from './blobModel';
-import { useFileIndexModel } from './fileIndexModel';
+import { defineService, type InjectResult } from '@/utils/injector';
+import { NoteszDb, type NoteszDbTransaction } from '@/services/model/NoteszDb';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { BlobModel } from './BlobModel';
+import { FileIndexModel } from './FileIndexModel';
 
 export interface Repository {
   readonly id: string,
@@ -20,11 +20,21 @@ export function createRepository(
   };
 }
 
-export const [provideRepositoryModel, useRepositoryModel] = defineService('RepositoryModel', () => {
-  const { initTransaction } = useNoteszDb();
-  const messages = useNoteszMessageBus();
-  const blobModel = useBlobModel();
-  const fileIndexModel = useFileIndexModel();
+const dependencies = [NoteszDb, NoteszMessageBus, BlobModel, FileIndexModel];
+
+export const RepositoryModel = defineService({
+  name: 'RepositoryModel',
+  dependencies,
+  setup
+});
+
+function setup({
+  noteszDb,
+  noteszMessageBus,
+  blobModel,
+  fileIndexModel
+}: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   async function add(repository: Repository, transaction?: NoteszDbTransaction) {
     return initTransaction(transaction, async (tx) => {
@@ -42,7 +52,7 @@ export const [provideRepositoryModel, useRepositoryModel] = defineService('Repos
         repositoryId: repository.id,
         indexId: 'local'
       }), tx);
-      messages.emit('change:repository', repository.id);
+      noteszMessageBus.emit('change:repository', repository.id);
     });
   }
 
@@ -55,7 +65,7 @@ export const [provideRepositoryModel, useRepositoryModel] = defineService('Repos
       await fileIndexModel.deleteFileIndex(id, 'local');
       await fileIndexModel.deleteFileIndex(id, 'rebase');
       await blobModel.collectGarbage();
-      messages.emit('change:repository', id);
+      noteszMessageBus.emit('change:repository', id);
     });
   }
 
@@ -87,7 +97,7 @@ export const [provideRepositoryModel, useRepositoryModel] = defineService('Repos
       const newRepository = updater(repository);
       if (newRepository) {
         await repositoriesStore.put(newRepository);
-        messages.emit('change:repository', newRepository.id);
+        noteszMessageBus.emit('change:repository', newRepository.id);
       }
     });
   }
@@ -100,4 +110,4 @@ export const [provideRepositoryModel, useRepositoryModel] = defineService('Repos
     list,
     update
   };
-});
+}

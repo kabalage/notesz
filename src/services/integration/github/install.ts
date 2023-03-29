@@ -2,15 +2,18 @@ import { z } from 'zod';
 import { NoteszError } from '@/utils/NoteszError';
 import { waitForCallback } from '@/utils/waitForCallback';
 import { trial } from '@/utils/trial';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import type { InjectResult } from '@/utils/injector';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 
 const CallbackParamsSchema = z.object({
   installation_id: z.preprocess((arg: any) => Number(arg), z.number().int()),
   setup_action: z.enum(['update', 'install'])
 });
 
-export function useInstall() {
-  const messageBus = useNoteszMessageBus();
+const dependencies = [NoteszMessageBus];
+useInstall.dependencies = dependencies;
+
+export function useInstall({ noteszMessageBus }: InjectResult<typeof dependencies>) {
 
   return async function install() {
     // Redirect to GitHub
@@ -24,7 +27,7 @@ export function useInstall() {
     const callback = await waitForCallback(
       'githubPostInstall',
       childWindow!,
-      messageBus
+      noteszMessageBus
     );
     if (callback.canceled) {
       return { canceled: true };

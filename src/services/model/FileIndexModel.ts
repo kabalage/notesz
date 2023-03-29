@@ -1,8 +1,8 @@
-import { defineService } from '@/utils/defineService';
-import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
+import { defineService, type InjectResult } from '@/utils/injector';
+import { NoteszDb, type NoteszDbTransaction } from '@/services/model/NoteszDb';
 import { gitBlobHash } from '@/utils/gitBlobHash';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useBlobModel } from './blobModel';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { BlobModel } from './BlobModel';
 
 export interface FileIndex {
   readonly type: 'fileIndex',
@@ -101,10 +101,16 @@ export function createFile(
   return file;
 }
 
-export const [provideFileIndexModel, useFileIndexModel] = defineService('FileIndexModel', () => {
-  const { initTransaction } = useNoteszDb();
-  const messages = useNoteszMessageBus();
-  const blobModel = useBlobModel();
+const dependencies = [NoteszDb, NoteszMessageBus, BlobModel];
+
+export const FileIndexModel = defineService({
+  name: 'FileIndexModel',
+  dependencies,
+  setup
+});
+
+function setup({ noteszDb, noteszMessageBus, blobModel }: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   async function addFileIndex(
     fileIndex: FileIndex,
@@ -121,7 +127,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         }
       }
       await fileIndexStore.add(fileIndex);
-      messages.emit('change:fileIndex', {
+      noteszMessageBus.emit('change:fileIndex', {
         repositoryId: fileIndex.repositoryId,
         indexId: fileIndex.indexId
       });
@@ -148,7 +154,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         }
       }
       await fileIndexStore.delete([repositoryId, indexId]);
-      messages.emit('change:fileIndex', { repositoryId, indexId });
+      noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
     });
   }
 
@@ -212,7 +218,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         await blobModel.collectGarbage(tx);
         await fileIndexStore.put(fileIndex);
       }
-      messages.emit('change:fileIndex', { repositoryId, indexId });
+      noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
       return newBlobId;
     });
   }
@@ -264,7 +270,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         await blobModel.collectGarbage(tx);
         await fileIndexStore.put(fileIndex);
       }
-      messages.emit('change:fileIndex', { repositoryId, indexId });
+      noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
     });
   }
 
@@ -307,7 +313,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         await blobModel.decrementRefCount(file.blobId, tx);
         await blobModel.incrementRefCount(updatedFile.blobId, tx);
         await fileIndexStore.put(fileIndex);
-        messages.emit('change:fileIndex', { repositoryId, indexId });
+        noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
         return newBlobId;
       } else if (blobWasOriginal && newContentsAreTheOriginal) {
         return undefined;
@@ -322,13 +328,13 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
         await blobModel.incrementRefCount(updatedFile.blobId, tx);
         await blobModel.collectGarbage(tx);
         await fileIndexStore.put(fileIndex);
-        messages.emit('change:fileIndex', { repositoryId, indexId });
+        noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
         return file.blobId;
       } else if (!blobWasOriginal && !newContentsAreTheOriginal && contentsChanged) {
         await blobModel.put(file.blobId, data, tx);
         file.blobHash = newHash;
         await fileIndexStore.put(fileIndex);
-        messages.emit('change:fileIndex', { repositoryId, indexId });
+        noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
         return undefined;
       } else if (!blobWasOriginal && !newContentsAreTheOriginal && !contentsChanged) {
         return undefined;
@@ -363,7 +369,7 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
       });
       putFileInIndex(fileIndex, updatedFile);
       await fileIndexStore.put(fileIndex);
-      messages.emit('change:fileIndex', { repositoryId, indexId });
+      noteszMessageBus.emit('change:fileIndex', { repositoryId, indexId });
     });
   }
 
@@ -563,4 +569,4 @@ export const [provideFileIndexModel, useFileIndexModel] = defineService('FileInd
     applyFileChangesInIndex,
     getRootTreeNode
   };
-});
+}

@@ -1,7 +1,7 @@
-import { defineService } from '@/utils/defineService';
-import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { defaultThemes, type ColorName } from './settingsModel/themeData';
+import { defineService, type InjectResult } from '@/utils/injector';
+import { NoteszDb, type NoteszDbTransaction } from '@/services/model/NoteszDb';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { defaultThemes, type ColorName } from './SettingsModel/themeData';
 
 export interface Theme {
   mainColor: ColorName,
@@ -40,9 +40,16 @@ export function createSettings(
   };
 }
 
-export const [provideSettingsModel, useSettingsModel] = defineService('SettingsModel', () => {
-  const { initTransaction } = useNoteszDb();
-  const messages = useNoteszMessageBus();
+const dependencies = [NoteszDb, NoteszMessageBus];
+
+export const SettingsModel = defineService({
+  name: 'SettingsModel',
+  dependencies,
+  setup
+});
+
+function setup({ noteszDb, noteszMessageBus }: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   async function get(transaction?: NoteszDbTransaction) {
     return initTransaction(transaction, async (tx) => {
@@ -55,7 +62,7 @@ export const [provideSettingsModel, useSettingsModel] = defineService('SettingsM
     return initTransaction(transaction, async (tx) => {
       const appStore = tx.objectStore('app');
       const result = await appStore.put(settings);
-      messages.emit('change:settings');
+      noteszMessageBus.emit('change:settings');
       return result;
     });
   }
@@ -73,7 +80,7 @@ export const [provideSettingsModel, useSettingsModel] = defineService('SettingsM
       const newSettings = updater(settings);
       if (newSettings) {
         await appStore.put(newSettings);
-        messages.emit('change:settings');
+        noteszMessageBus.emit('change:settings');
       }
     });
   }
@@ -84,4 +91,4 @@ export const [provideSettingsModel, useSettingsModel] = defineService('SettingsM
     put,
     update
   };
-});
+}

@@ -4,15 +4,17 @@ import { useRouter } from 'vue-router';
 
 import BasicButton from '@/components/BasicButton.vue';
 import MessageBox from '@/components/MessageBox.vue';
-import { useGitHubIntegration } from '@/services/integration/githubIntegration';
+import { useService } from '@/utils/injector';
+import { GitHubIntegration } from '@/services/integration/GitHubIntegration';
 
 const props = defineProps<{
   repo: string,
   redirect: string
 }>();
 
+const githubIntegration = useService(GitHubIntegration);
+
 const router = useRouter();
-const githubIntegration = useGitHubIntegration();
 const { syncProgress, syncProgressMessage, sync } = githubIntegration.useSyncAction();
 
 const error = ref<Error|undefined>(undefined);

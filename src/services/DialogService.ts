@@ -1,5 +1,5 @@
 import { ref, computed, reactive, markRaw, type Component } from 'vue';
-import { defineService } from '@/utils/defineService';
+import { defineService } from '@/utils/injector';
 import type { PropsType, EventType, ComponentWithEvent } from '@/utils/vueTsUtils';
 import AlertDialog from '@/components/AlertDialog.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
@@ -10,7 +10,12 @@ interface Dialog<T extends Component> {
   props: PropsType<T>;
 }
 
-export const [provideDialogService, useDialogService] = defineService('DialogService', () => {
+export const DialogService = defineService({
+  name: 'DialogService',
+  setup
+});
+
+function setup() {
   const dialogs = ref<Dialog<Component>[]>([]);
   const currentDialog = computed(() => dialogs.value.at(-1));
 
@@ -55,4 +60,4 @@ export const [provideDialogService, useDialogService] = defineService('DialogSer
     confirm,
     prompt
   });
-});
+}

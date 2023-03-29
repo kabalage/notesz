@@ -6,7 +6,7 @@ export function useAsyncState<T, WatchParam>({
   get,
   put,
   putThrottling = 1000,
-  watch: watchParam
+  watch: watchFn
 }: {
   get: (params?: WatchParam) => Promise<T> | T,
   put?: ((data: UnwrapRef<T>) => any),
@@ -31,8 +31,8 @@ export function useAsyncState<T, WatchParam>({
 
   const throttledQueuePut = throttle(queuePut, putThrottling);
 
-  if (watchParam) {
-    watch(watchParam, queueGet, {
+  if (watchFn) {
+    watch(watchFn, queueGet, {
       immediate: true
     });
   } else {

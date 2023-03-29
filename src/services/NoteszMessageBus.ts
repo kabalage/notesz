@@ -1,5 +1,5 @@
 import { onScopeDispose } from 'vue';
-import { defineService } from '@/utils/defineService';
+import { defineService } from '@/utils/injector';
 import { createMessageBus } from '@/utils/createMessageBus';
 
 export interface NoteszMessageTypes {
@@ -18,13 +18,13 @@ export interface NoteszMessageTypes {
   };
 }
 
-export const [
-  provideNoteszMessageBus,
-  useNoteszMessageBus
-] = defineService('NoteszMessageBus', () => {
-  const messageBus = createMessageBus<NoteszMessageTypes>();
-  onScopeDispose(() => {
-    messageBus.destroy();
-  });
-  return messageBus;
+export const NoteszMessageBus = defineService({
+  name: 'NoteszMessageBus',
+  setup() {
+    const messageBus = createMessageBus<NoteszMessageTypes>();
+    onScopeDispose(() => {
+      messageBus.destroy();
+    });
+    return messageBus;
+  }
 });

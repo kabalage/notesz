@@ -3,16 +3,22 @@ import type { RequestError } from '@octokit/types';
 import { trial } from '@/utils/trial';
 import { NoteszError } from '@/utils/NoteszError';
 import type { Progress } from '@/utils/createProgress';
-import { useFileIndexModel, type FileIndex } from '@/services/model/fileIndexModel';
-import { useNoteszDb } from '@/services/model/noteszDb';
-import { useBlobModel } from '@/services/model/blobModel';
-import { useUserModel } from '@/services/model/userModel';
+import type { InjectResult } from '@/utils/injector';
+import { FileIndexModel, type FileIndex } from '@/services/model/FileIndexModel';
+import { NoteszDb } from '@/services/model/NoteszDb';
+import { BlobModel } from '@/services/model/BlobModel';
+import { UserModel } from '@/services/model/UserModel';
 
-export function usePush() {
-  const { initTransaction } = useNoteszDb();
-  const fileIndexModel = useFileIndexModel();
-  const blobModel = useBlobModel();
-  const userModel = useUserModel();
+const dependencies = [NoteszDb, UserModel, FileIndexModel, BlobModel];
+usePush.dependencies = dependencies;
+
+export function usePush({
+  noteszDb,
+  userModel,
+  fileIndexModel,
+  blobModel
+}: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   /**
    * Creates a GitHub commit based on the changes in the **local** fileIndex.

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { getPendingCallbacks } from '@/utils/waitForCallback';
 import { useRouter } from 'vue-router';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import { useService } from '@/utils/injector';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 
-const router = useRouter();
 const props = defineProps<{
   type: string
 }>();
-const noteszMessageBus = useNoteszMessageBus();
+const noteszMessageBus = useService(NoteszMessageBus);
+const router = useRouter();
 
 handleCallback();
 

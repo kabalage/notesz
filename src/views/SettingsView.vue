@@ -22,23 +22,25 @@ import NoteszTransitionGroup from '@/components/NoteszTransitionGroup.vue';
 import { trial } from '@/utils/trial';
 import { useAsyncState } from '@/composables/useAsyncState';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
-import { useThemeService } from '@/services/themeService';
-import { useDialogService } from '@/services/dialogService';
-import { useSettings } from '@/services/settingsService';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useGitHubIntegration } from '@/services/integration/githubIntegration';
-import { useUserModel } from '@/services/model/userModel';
-import { useRepositoryModel } from '@/services/model/repositoryModel';
+import { useService } from '@/utils/injector';
+import { ThemeService } from '@/services/ThemeService';
+import { DialogService } from '@/services/DialogService';
+import { Settings } from '@/services/Settings';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { GitHubIntegration } from '@/services/integration/GitHubIntegration';
+import { UserModel } from '@/services/model/UserModel';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
+
+const themeService = useService(ThemeService);
+const dialogService = useService(DialogService);
+const settings = useService(Settings);
+const messages = useService(NoteszMessageBus);
+const repositoryModel = useService(RepositoryModel);
+const githubIntegration = useService(GitHubIntegration);
+const userModel = useService(UserModel);
 
 const router = useRouter();
-const themeService = useThemeService();
-const dialogService = useDialogService();
-const settings = useSettings();
 const isTouchDevice = useIsTouchDevice();
-const messages = useNoteszMessageBus();
-const repositoryModel = useRepositoryModel();
-const githubIntegration = useGitHubIntegration();
-const userModel = useUserModel();
 
 const syntaxThemes = [
   { label: 'Notesz', value: 'notesz' },

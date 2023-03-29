@@ -25,21 +25,23 @@ import { useAsyncState } from '@/composables/useAsyncState';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { trial } from '@/utils/trial';
 import { waitForChildWindowClose } from '@/utils/waitForChildWindowClose';
-import { useRepositoryModel } from '@/services/model/repositoryModel';
-import { useSettingsModel } from '@/services/model/settingsModel';
-import { useGitHubIntegration } from '@/services/integration/githubIntegration';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+
+import { useService } from '@/utils/injector';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
+import { SettingsModel } from '@/services/model/SettingsModel';
+import { GitHubIntegration } from '@/services/integration/GitHubIntegration';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 
 const props = defineProps<{
   redirect: string
 }>();
 
+const messages = useService(NoteszMessageBus);
+const repositoryModel = useService(RepositoryModel);
+const settingsModel = useService(SettingsModel);
+const githubIntegration = useService(GitHubIntegration);
 const router = useRouter();
 const isTouchDevice = useIsTouchDevice();
-const messages = useNoteszMessageBus();
-const repositoryModel = useRepositoryModel();
-const settingsModel = useSettingsModel();
-const githubIntegration = useGitHubIntegration();
 
 const filterText = ref('');
 const debouncedFilterText = refDebounced(filterText, 250);

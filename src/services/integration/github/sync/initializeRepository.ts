@@ -3,16 +3,22 @@ import { RequestError } from '@octokit/request-error';
 import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';
 import type { Progress } from '@/utils/createProgress';
-import { useNoteszDb } from '@/services/model/noteszDb';
-import { useUserModel } from '@/services/model/userModel';
-import { useFileIndexModel } from '@/services/model/fileIndexModel';
-import { useBlobModel } from '@/services/model/blobModel';
+import type { InjectResult } from '@/utils/injector';
+import { NoteszDb } from '@/services/model/NoteszDb';
+import { UserModel } from '@/services/model/UserModel';
+import { FileIndexModel } from '@/services/model/FileIndexModel';
+import { BlobModel } from '@/services/model/BlobModel';
 
-export function useInitializeRepository() {
-  const { initTransaction } = useNoteszDb();
-  const userModel = useUserModel();
-  const fileIndexModel = useFileIndexModel();
-  const blobModel = useBlobModel();
+const dependencies = [NoteszDb, UserModel, FileIndexModel, BlobModel];
+useInitializeRepository.dependencies = dependencies;
+
+export function useInitializeRepository({
+  noteszDb,
+  userModel,
+  fileIndexModel,
+  blobModel
+}: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   /**
    * The GitHub API does not allow git database operations unless the repository is initialized.

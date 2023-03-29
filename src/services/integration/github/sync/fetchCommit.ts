@@ -2,18 +2,24 @@ import { request as octokitRequest } from '@octokit/request';
 import { stringSimilarity } from 'string-similarity-js';
 import { filterMap, keyByMap } from '@/utils/mapUtils';
 import { trial } from '@/utils/trial';
-import type { Progress } from '@/utils/createProgress';
-import { useNoteszDb } from '@/services/model/noteszDb';
-import { useFileIndexModel, type File, type FileIndex } from '@/services/model/fileIndexModel';
 import { NoteszError } from '@/utils/NoteszError';
-import { useUserModel } from '@/services/model/userModel';
-import { useBlobModel } from '@/services/model/blobModel';
+import type { Progress } from '@/utils/createProgress';
+import type { InjectResult } from '@/utils/injector';
+import { NoteszDb } from '@/services/model/NoteszDb';
+import { FileIndexModel, type File, type FileIndex } from '@/services/model/FileIndexModel';
+import { UserModel } from '@/services/model/UserModel';
+import { BlobModel } from '@/services/model/BlobModel';
 
-export function useFetchCommit() {
-  const { initTransaction } = useNoteszDb();
-  const fileIndexModel = useFileIndexModel();
-  const userModel = useUserModel();
-  const blobModel = useBlobModel();
+const dependencies = [NoteszDb, FileIndexModel, UserModel, BlobModel];
+useFetchCommit.dependencies = dependencies;
+
+export function useFetchCommit({
+  noteszDb,
+  fileIndexModel,
+  userModel,
+  blobModel
+}: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   /**
    * Fetches the commit from GitHub and creates the **remote** fileIndex from it.

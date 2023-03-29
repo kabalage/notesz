@@ -7,34 +7,38 @@ import DialogHost from '@/views/DialogHost.vue';
 
 import { vSmoothResize } from '@/composables/useSmoothResize';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
-import { provideThemeService } from '@/services/themeService';
-import { provideDialogService } from '@/services/dialogService';
-import { provideNoteszDb } from './services/model/noteszDb';
-import { provideSettings } from './services/settingsService';
-import { provideNoteszMessageBus } from './services/noteszMessageBus';
-import { provideBlobModel } from './services/model/blobModel';
-import { provideFileIndexModel } from './services/model/fileIndexModel';
-import { provideRepositoryModel } from './services/model/repositoryModel';
-import { provideSettingsModel } from './services/model/settingsModel';
-import { provideUserModel } from './services/model/userModel';
-import { provideGitHubIntegration } from './services/integration/githubIntegration';
-import { provideServiceWorkerUpdates } from './services/serviceWorkerUpdates';
+
+import { provideServices } from '@/utils/injector';
+import { ThemeService } from '@/services/ThemeService';
+import { DialogService } from '@/services/DialogService';
+import { NoteszDb } from './services/model/NoteszDb';
+import { Settings } from './services/Settings';
+import { NoteszMessageBus } from './services/NoteszMessageBus';
+import { BlobModel } from './services/model/BlobModel';
+import { FileIndexModel } from './services/model/FileIndexModel';
+import { RepositoryModel } from './services/model/RepositoryModel';
+import { SettingsModel } from './services/model/SettingsModel';
+import { UserModel } from './services/model/UserModel';
+import { GitHubIntegration } from './services/integration/GitHubIntegration';
+import { ServiceWorkerUpdates } from './services/ServiceWorkerUpdates';
+
+const {  themeService } = provideServices([
+  ThemeService,
+  DialogService,
+  NoteszDb,
+  Settings,
+  NoteszMessageBus,
+  BlobModel,
+  FileIndexModel,
+  RepositoryModel,
+  SettingsModel,
+  UserModel,
+  GitHubIntegration,
+  ServiceWorkerUpdates
+]);
 
 const ThemeSettings = defineAsyncComponent(() => import('@/views/ThemeSettings.vue'));
 const MobileDevConsole = defineAsyncComponent(() => import('@/views/MobileDevConsole.vue'));
-
-provideNoteszMessageBus();
-provideNoteszDb();
-provideDialogService();
-provideBlobModel();
-provideFileIndexModel();
-provideRepositoryModel();
-provideSettingsModel();
-provideUserModel();
-provideSettings();
-provideGitHubIntegration();
-provideServiceWorkerUpdates();
-const themeService = provideThemeService();
 
 const isTouchDevice = useIsTouchDevice();
 

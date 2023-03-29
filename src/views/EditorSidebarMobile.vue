@@ -17,11 +17,13 @@ import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
-import { useEditorService } from '@/services/editorService';
-import { useExplorerService } from '@/services/explorerService';
 
-const editorService = useEditorService();
-const explorerService = useExplorerService();
+import { useService } from '@/utils/injector';
+import { EditorService } from '@/services/EditorService';
+import { ExplorerService } from '@/services/ExplorerService';
+
+const editorService = useService(EditorService);
+const explorerService = useService(ExplorerService);
 
 function locationReload() {
   if (import.meta.env.DEV) {

@@ -7,17 +7,19 @@ import BasicButton from '@/components/BasicButton.vue';
 import NoteszLogo from '@/components/NoteszLogo.vue';
 import MessageBox from '@/components/MessageBox.vue';
 import { trial } from '@/utils/trial';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useGitHubIntegration } from '@/services/integration/githubIntegration';
-import { useSettings } from '@/services/settingsService';
-import { useUserModel } from '@/services/model/userModel';
+import { useService } from '@/utils/injector';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { GitHubIntegration } from '@/services/integration/GitHubIntegration';
+import { Settings } from '@/services/Settings';
+import { UserModel } from '@/services/model/UserModel';
 import { useAsyncState } from '@/composables/useAsyncState';
 
+const settings = useService(Settings);
+const githubIntegration = useService(GitHubIntegration);
+const userModel = useService(UserModel);
+const messages = useService(NoteszMessageBus);
+
 const router = useRouter();
-const settings = useSettings();
-const githubIntegration = useGitHubIntegration();
-const userModel = useUserModel();
-const messages = useNoteszMessageBus();
 
 const user = useAsyncState({
   get: userModel.get

@@ -2,8 +2,9 @@ import { z } from 'zod';
 import { waitForCallback } from '@/utils/waitForCallback';
 import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';
-import { useUserModel } from '@/services/model/userModel';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import type { InjectResult } from '@/utils/injector';
+import { UserModel } from '@/services/model/UserModel';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 
 const AuthCallbackParamsSchema = z.object({
   code: z.string(),
@@ -14,9 +15,10 @@ const TokenResponseSchema = z.object({
   token: z.string()
 });
 
-export function useAuthorize() {
-  const userModel = useUserModel();
-  const messageBus = useNoteszMessageBus();
+const dependencies = [UserModel, NoteszMessageBus];
+useAuthorize.dependencies = dependencies;
+
+export function useAuthorize({ userModel, noteszMessageBus }: InjectResult<typeof dependencies>) {
 
   return async function authorize() {
     // Redirect to GitHub
@@ -32,7 +34,7 @@ export function useAuthorize() {
     const callback = await waitForCallback(
       'githubAuthorize',
       childWindow!,
-      messageBus
+      noteszMessageBus
     );
     if (callback.canceled) {
       throw new NoteszError('GitHub authorization was canceled', {

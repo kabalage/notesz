@@ -23,12 +23,16 @@ import {
   handleShowNonIos,
   type VirtualKeyboardChangeEvent,
 } from '@/utils/VirtualKeyboardEvents';
-import { useSettings } from '@/services/settingsService';
+
+import { useService } from '@/utils/injector';
+import { Settings } from '@/services/Settings';
 
 const props = defineProps<{
   value: string
 }>();
 const emit = defineEmits(['input', 'focus', 'blur']);
+
+const settings = useService(Settings);
 const isFocused = ref(false);
 
 // TODO temporary solution until this gets sorted out:
@@ -40,8 +44,6 @@ if (!app._context.components.VueCodemirror) {
     extensions: []
   });
 }
-
-const settings = useSettings();
 
 const syntaxThemes = {
   'dracula': draculaTheme,

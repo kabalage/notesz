@@ -32,7 +32,9 @@ import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
 import RibbonButton from '@/components/RibbonButton.vue';
 import IconButton from '@/components/IconButton.vue';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
-import { useEditorService } from '@/services/editorService';
+
+import { useService } from '@/utils/injector';
+import { EditorService } from '@/services/EditorService';
 
 const CodemirrorEditor = defineAsyncComponent({
   loader: () => import('./CodemirrorEditor.vue'),
@@ -40,8 +42,8 @@ const CodemirrorEditor = defineAsyncComponent({
   delay: 0
 });
 
+const editorService = useService(EditorService);
 const isTouchDevice = useIsTouchDevice();
-const editorService = useEditorService();
 const editorFocused = ref<boolean>(false);
 const selectMode = ref<boolean>(false);
 let editorBlurTimeout: ReturnType<typeof setTimeout> | undefined;

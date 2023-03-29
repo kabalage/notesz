@@ -9,9 +9,10 @@ import {
 import CheckIcon from '@/assets/icons/check.svg?component';
 import CaretUpDownIcon from '@/assets/icons/caret-up-down.svg?component';
 import BetterPointerActive from './BetterPointerActive.vue';
-import { useSettings } from '@/services/settingsService';
+import { useService } from '@/utils/injector';
+import { Settings } from '@/services/Settings';
 
-const settings = useSettings();
+const settings = useService(Settings);
 
 const props = defineProps<{
   darken?: boolean,

@@ -1,29 +1,35 @@
 import { openDB, type IDBPDatabase, type IDBPTransaction, type StoreNames } from 'idb';
-import { defineService } from '@/utils/defineService';
-import type { NoteszDb } from './noteszDb/noteszDbSchema';
-import { initDb } from './noteszDb/initDb';
-import { upgradeDb } from './noteszDb/upgradeDb';
+import { defineService } from '@/utils/injector';
+import type { NoteszDbSchema } from './NoteszDb/noteszDbSchema';
 
 export type NoteszDbTransaction = IDBPTransaction<
-  NoteszDb, ArrayLike<StoreNames<NoteszDb>>, Exclude<IDBTransactionMode, 'readonly'>> & {
-    id?: string
-  };
+  NoteszDbSchema,
+  ArrayLike<StoreNames<NoteszDbSchema>>,
+  Exclude<IDBTransactionMode, 'readonly'>
+> & { id?: string };
 
-export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
-  let db: IDBPDatabase<NoteszDb> | undefined;
-  let dbPromise: Promise<IDBPDatabase<NoteszDb>> | undefined;
+export const NoteszDb = defineService({
+  name: 'NoteszDb',
+  setup
+});
+
+function setup() {
+  let db: IDBPDatabase<NoteszDbSchema> | undefined;
+  let dbPromise: Promise<IDBPDatabase<NoteszDbSchema>> | undefined;
   let closeTimeout: ReturnType<typeof setTimeout> | undefined;
 
   async function openNoteszDb() {
     if (dbPromise) {
       return dbPromise;
     }
-    console.log('DB open');
-    dbPromise = openDB<NoteszDb>('notesz', 4, {
+    // console.log('DB open');
+    dbPromise = openDB<NoteszDbSchema>('notesz', 4, {
       async upgrade(db, oldVersion, newVersion, tx) {
         if (oldVersion === 0) {
+          const { initDb } = await import('./NoteszDb/initDb');
           await initDb(db);
         } else {
+          const { upgradeDb } = await import('./NoteszDb/upgradeDb');
           await upgradeDb(db, oldVersion, tx);
         }
         if (navigator.storage) {
@@ -41,7 +47,7 @@ export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
     }
     closeTimeout = setTimeout(() => {
       if (!db) return;
-      console.log('DB close');
+      // console.log('DB close');
       db.close();
       db = undefined;
       dbPromise = undefined;
@@ -50,7 +56,7 @@ export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
   }
 
   type InitTransactionCallback<T> =
-    (tx: NoteszDbTransaction, db: IDBPDatabase<NoteszDb>) => Promise<T>;
+    (tx: NoteszDbTransaction, db: IDBPDatabase<NoteszDbSchema>) => Promise<T>;
 
   async function initTransaction<T>(
     transaction: NoteszDbTransaction | undefined,
@@ -116,4 +122,4 @@ export const [provideNoteszDb, useNoteszDb] = defineService('NoteszDb', () => {
   return {
     initTransaction
   };
-});
+}

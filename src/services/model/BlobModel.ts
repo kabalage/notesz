@@ -1,16 +1,23 @@
-import { defineService } from '@/utils/defineService';
+import { defineService, type InjectResult } from '@/utils/injector';
 import { NoteszError } from '@/utils/NoteszError';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
-import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import { NoteszDb, type NoteszDbTransaction } from '@/services/model/NoteszDb';
 
 export interface BlobRefCount {
   blobId: string,
   refCount: number
 }
 
-export const [provideBlobModel, useBlobModel] = defineService('BlobModel', () => {
-  const { initTransaction } = useNoteszDb();
-  const messages = useNoteszMessageBus();
+const dependencies = [NoteszDb, NoteszMessageBus];
+
+export const BlobModel = defineService({
+  name: 'BlobModel',
+  dependencies,
+  setup
+});
+
+function setup({ noteszDb, noteszMessageBus }: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   async function get(id: string, transaction?: NoteszDbTransaction) {
     return initTransaction(transaction, async (tx) => {
@@ -28,7 +35,7 @@ export const [provideBlobModel, useBlobModel] = defineService('BlobModel', () =>
         await blobRefCountStore.put({ blobId: id, refCount: 0 });
       }
       await blobStore.put(value, id);
-      messages.emit('change:blob', id);
+      noteszMessageBus.emit('change:blob', id);
     });
   }
 
@@ -92,7 +99,7 @@ export const [provideBlobModel, useBlobModel] = defineService('BlobModel', () =>
         const blobId = garbageBlobIds[i];
         await blobStore.delete(blobId);
         await blobRefCountStore.delete(blobId);
-        messages.emit('change:blob', blobId);
+        noteszMessageBus.emit('change:blob', blobId);
       }
     });
   }
@@ -114,4 +121,4 @@ export const [provideBlobModel, useBlobModel] = defineService('BlobModel', () =>
     applyBlobRefCountChanges,
     collectGarbage
   };
-});
+}

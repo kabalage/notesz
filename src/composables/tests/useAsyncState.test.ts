@@ -47,13 +47,16 @@ describe('useAsyncState with `get`', () => {
       watch() {
         return i.value;
       },
-      async get (params){
+      async get(params){
         return { foo: params };
       }
     });
     await flushPromises();
     expect(resource.data).toEqual({ foo: 0 });
     i.value++;
+    expect(resource.isGetting).toBe(false);
+    await nextTick();
+    expect(resource.isGetting).toBe(true);
     await flushPromises();
     expect(resource.data).toEqual({ foo: 1 });
   });
@@ -73,9 +76,12 @@ describe('useAsyncState with `get`', () => {
     expect(resource.data).toEqual({ foo: 0 });
     expect(resource.isGetting).toBe(false);
     i.value++;
-    await flushPromises();
-    expect(resource.data).toEqual({ foo: 1 });
     expect(resource.isGetting).toBe(false);
+    await nextTick();
+    expect(resource.isGetting).toBe(true);
+    await flushPromises();
+    expect(resource.isGetting).toBe(false);
+    expect(resource.data).toEqual({ foo: 1 });
     expect(get).toHaveBeenCalledTimes(2);
   });
 

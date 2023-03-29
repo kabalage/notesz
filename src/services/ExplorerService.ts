@@ -1,12 +1,17 @@
 import { computed, ref, watch, reactive } from 'vue';
-import { defineService } from '@/utils/defineService';
-import { useEditorService } from '@/services/editorService';
-import { useFileIndexModel, type File, type Tree } from '@/services/model/fileIndexModel';
+import { defineService, type InjectResult } from '@/utils/injector';
+import { EditorService } from '@/services/EditorService';
+import { FileIndexModel, type File, type Tree } from '@/services/model/FileIndexModel';
 
-export const [provideExplorerService, useExplorerService] = defineService('ExplorerService', () => {
-  const editorService = useEditorService();
-  const fileIndexModel = useFileIndexModel();
+const dependencies = [EditorService, FileIndexModel];
 
+export const ExplorerService = defineService({
+  name: 'ExplorerService',
+  dependencies,
+  setup
+});
+
+function setup({ editorService, fileIndexModel }: InjectResult<typeof dependencies>) {
   const path = ref('');
   const browseAllDuringManualRebase = ref(false);
   const stringCompare = new Intl.Collator('en').compare;
@@ -125,4 +130,4 @@ export const [provideExplorerService, useExplorerService] = defineService('Explo
     navigateBack,
     toggleBrowseAllDuringManualRebase
   });
-});
+}

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import BasicButton from '@/components/BasicButton.vue';
-import { useDialogService } from '@/services/dialogService';
 
+import { useService } from '@/utils/injector';
+import { DialogService } from '@/services/DialogService';
+
+const dialogService = useService(DialogService);
 const persisted = ref<boolean|null>(null);
 const persistResult = ref<boolean|null>(null);
-const dialogService = useDialogService();
 
 onMounted(async () => {
   if (navigator.storage) {

@@ -7,9 +7,10 @@ import {
   DialogPanel,
 } from '@headlessui/vue';
 import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
-import { useSettings } from '@/services/settingsService';
+import { useService } from '@/utils/injector';
+import { Settings } from '@/services/Settings';
 
-const settings = useSettings();
+const settings = useService(Settings);
 
 const props = defineProps<{
   initialFocus?: HTMLElement | null,

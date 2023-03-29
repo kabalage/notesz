@@ -1,9 +1,10 @@
 import threeWayMerge from 'three-way-merge';
 import { filterMap, keyByMap } from '@/utils/mapUtils';
 import { gitBlobHash } from '@/utils/gitBlobHash';
-import { useFileIndexModel, type File } from '@/services/model/fileIndexModel';
-import { useBlobModel } from '@/services/model/blobModel';
-import { useRepositoryModel } from '@/services/model/repositoryModel';
+import type { InjectResult } from '@/utils/injector';
+import { FileIndexModel, type File } from '@/services/model/FileIndexModel';
+import { BlobModel } from '@/services/model/BlobModel';
+import { RepositoryModel } from '@/services/model/RepositoryModel';
 
 /* eslint-disable max-len */
 
@@ -84,10 +85,14 @@ import { useRepositoryModel } from '@/services/model/repositoryModel';
 
 /* eslint-enable max-len */
 
-export function useRebase() {
-  const fileIndexModel = useFileIndexModel();
-  const blobModel = useBlobModel();
-  const repositoryModel = useRepositoryModel();
+const dependencies = [FileIndexModel, BlobModel, RepositoryModel];
+useRebase.dependencies = dependencies;
+
+export function useRebase({
+  fileIndexModel,
+  blobModel,
+  repositoryModel
+}: InjectResult<typeof dependencies>) {
 
   /**
    * Rebases the **local** changes on top of the **remote** fileIndex.

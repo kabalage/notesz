@@ -1,14 +1,17 @@
 import { onScopeDispose } from 'vue';
-import { defineService } from '@/utils/defineService';
+import { defineService, type InjectResult } from '@/utils/injector';
 import { registerSW } from 'virtual:pwa-register';
-import { useDialogService } from '@/services/dialogService';
+import { DialogService } from '@/services/DialogService';
 
-export const [
-  provideServiceWorkerUpdates,
-  useServiceWorkerUpdates
-] = defineService('ServiceWorkerUpdates', () => {
+const dependencies = [DialogService];
 
-  const dialogService = useDialogService();
+export const ServiceWorkerUpdates = defineService({
+  name: 'ServiceWorkerUpdates',
+  dependencies,
+  setup
+});
+
+function setup({ dialogService }: InjectResult<typeof dependencies>) {
   let swRegistration: ServiceWorkerRegistration | undefined;
   let swUrl = '';
   const updateInterval = 1000 * 60 * 60;
@@ -75,4 +78,4 @@ export const [
   return {
     checkForUpdates: () => checkForUpdates(true)
   };
-});
+}

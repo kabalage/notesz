@@ -3,17 +3,19 @@ import { ref, watch } from 'vue';
 import CheckIcon from '@/assets/icons/check.svg?component';
 import CaretLeftIcon from '@/assets/icons/caret-left.svg?component';
 import CaretRightIcon from '@/assets/icons/caret-right.svg?component';
+import { useService } from '@/utils/injector';
 import BaseButton from '@/components/BaseButton.vue';
 import BasicButton from '@/components/BasicButton.vue';
 import NoteszTransition from '@/components/NoteszTransition.vue';
 import { mainPalette, backgroundPalette, type ColorName }
-  from '@/services/model/settingsModel/themeData';
+  from '@/services/model/SettingsModel/themeData';
 import { useEventListener, useThrottleFn, useScroll } from '@vueuse/core';
-import { useThemeService } from '@/services/themeService';
+import { ThemeService } from '@/services/ThemeService';
 import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
 
+const themeService = useService(ThemeService);
+
 const virtualKeyboard = useVirtualKeyboard();
-const themeService = useThemeService();
 const scrollContainer = ref<HTMLElement | null>(null);
 const { x } = useScroll(scrollContainer, {
   throttle: 200

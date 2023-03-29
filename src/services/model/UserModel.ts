@@ -1,6 +1,6 @@
-import { defineService } from '@/utils/defineService';
-import { useNoteszDb, type NoteszDbTransaction } from '@/services/model/noteszDb';
-import { useNoteszMessageBus } from '@/services/noteszMessageBus';
+import { defineService, type InjectResult } from '@/utils/injector';
+import { NoteszDb, type NoteszDbTransaction } from '@/services/model/NoteszDb';
+import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 
 export interface User {
   readonly type: 'user',
@@ -16,9 +16,16 @@ export function createUser(
   };
 }
 
-export const [provideUserModel, useUserModel] = defineService('UserModel', () => {
-  const { initTransaction } = useNoteszDb();
-  const messages = useNoteszMessageBus();
+const dependencies = [NoteszDb, NoteszMessageBus];
+
+export const UserModel = defineService({
+  name: 'UserModel',
+  dependencies,
+  setup
+});
+
+function setup({ noteszDb, noteszMessageBus }: InjectResult<typeof dependencies>) {
+  const { initTransaction } = noteszDb;
 
   async function get(transaction?: NoteszDbTransaction) {
     return initTransaction(transaction, async (tx) => {
@@ -31,7 +38,7 @@ export const [provideUserModel, useUserModel] = defineService('UserModel', () =>
     return initTransaction(transaction, async (tx) => {
       const appStore = tx.objectStore('app');
       const result = await appStore.put(user);
-      messages.emit('change:user');
+      noteszMessageBus.emit('change:user');
       return result;
     });
   }
@@ -41,4 +48,4 @@ export const [provideUserModel, useUserModel] = defineService('UserModel', () =>
     get,
     put
   };
-});
+}

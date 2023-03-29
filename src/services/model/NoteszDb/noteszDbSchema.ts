@@ -1,11 +1,11 @@
 import type { DBSchema } from 'idb';
-import type { Settings } from '../settingsModel';
-import type { User } from '../userModel';
-import type { Repository } from '../repositoryModel';
-import type { FileIndex } from '../fileIndexModel';
-import type { BlobRefCount } from '../blobModel';
+import type { Settings } from '../SettingsModel';
+import type { User } from '../UserModel';
+import type { Repository } from '../RepositoryModel';
+import type { FileIndex } from '../FileIndexModel';
+import type { BlobRefCount } from '../BlobModel';
 
-export interface NoteszDb extends DBSchema {
+export interface NoteszDbSchema extends DBSchema {
   repositories: {
     key: string,
     value: Repository

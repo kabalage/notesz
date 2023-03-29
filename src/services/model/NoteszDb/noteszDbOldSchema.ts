@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import type { DBSchema } from 'idb';
-import type { Settings } from '../settingsModel';
-import type { User } from '../userModel';
-import type { Repository } from '../repositoryModel';
-import type { FileIndex } from '../fileIndexModel';
-import type { BlobRefCount } from '../blobModel';
+import type { Settings } from '../SettingsModel';
+import type { User } from '../UserModel';
+import type { Repository } from '../RepositoryModel';
+import type { FileIndex } from '../FileIndexModel';
+import type { BlobRefCount } from '../BlobModel';
 
-export type NoteszDbVersions = {
-  1: NoteszDbV1,
-  2: NoteszDbV2,
-  3: NoteszDbV3,
-  4: NoteszDbV4
+export type NoteszDbSchemaVersions = {
+  1: NoteszDbSchemaV1,
+  2: NoteszDbSchemaV2,
+  3: NoteszDbSchemaV3,
+  4: NoteszDbSchemaV4
 };
 
-export interface NoteszDbV1 extends DBSchema {
+export interface NoteszDbSchemaV1 extends DBSchema {
   repositories: {
     key: string,
     value: RepositoryV1
@@ -54,11 +54,11 @@ interface SettingsV1 {
   selectedRepositoryId: string | null
 }
 
-export interface NoteszDbV2 extends DBSchema {
-  repositories: NoteszDbV1['repositories'],
-  fileIndexes: NoteszDbV1['fileIndexes'],
-  blobs: NoteszDbV1['blobs'],
-  blobRefCounts: NoteszDbV1['blobRefCounts'],
+export interface NoteszDbSchemaV2 extends DBSchema {
+  repositories: NoteszDbSchemaV1['repositories'],
+  fileIndexes: NoteszDbSchemaV1['fileIndexes'],
+  blobs: NoteszDbSchemaV1['blobs'],
+  blobRefCounts: NoteszDbSchemaV1['blobRefCounts'],
   app: {
     key: string,
     value: SettingsV2 | UserV1
@@ -71,11 +71,11 @@ interface SettingsV2 {
   selectedTheme: number
 }
 
-export interface NoteszDbV3 extends DBSchema {
-  repositories: NoteszDbV1['repositories'],
-  fileIndexes: NoteszDbV1['fileIndexes'],
-  blobs: NoteszDbV1['blobs'],
-  blobRefCounts: NoteszDbV1['blobRefCounts'],
+export interface NoteszDbSchemaV3 extends DBSchema {
+  repositories: NoteszDbSchemaV1['repositories'],
+  fileIndexes: NoteszDbSchemaV1['fileIndexes'],
+  blobs: NoteszDbSchemaV1['blobs'],
+  blobRefCounts: NoteszDbSchemaV1['blobRefCounts'],
   app: {
     key: string,
     value: SettingsV2 | UserV2
@@ -84,11 +84,11 @@ export interface NoteszDbV3 extends DBSchema {
 
 interface UserV2 extends User {}
 
-export interface NoteszDbV4 extends DBSchema {
-  repositories: NoteszDbV1['repositories'],
-  fileIndexes: NoteszDbV1['fileIndexes'],
-  blobs: NoteszDbV1['blobs'],
-  blobRefCounts: NoteszDbV1['blobRefCounts'],
+export interface NoteszDbSchemaV4 extends DBSchema {
+  repositories: NoteszDbSchemaV1['repositories'],
+  fileIndexes: NoteszDbSchemaV1['fileIndexes'],
+  blobs: NoteszDbSchemaV1['blobs'],
+  blobRefCounts: NoteszDbSchemaV1['blobRefCounts'],
   app: {
     key: string,
     value: SettingsV4 | UserV2

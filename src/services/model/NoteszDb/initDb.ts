@@ -1,9 +1,9 @@
 import type { IDBPDatabase } from 'idb';
-import type { NoteszDb } from './noteszDbSchema';
-import { createSettings } from '../settingsModel';
+import type { NoteszDbSchema } from './noteszDbSchema';
+import { createSettings } from '../SettingsModel';
 
 export async function initDb(
-  db: IDBPDatabase<NoteszDb>,
+  db: IDBPDatabase<NoteszDbSchema>,
   // tx: VersionChangeTransaction<NoteszDb>
 ) {
   db.createObjectStore('repositories', {
