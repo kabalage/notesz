@@ -17,14 +17,14 @@ import { useAsyncState } from '@/composables/useAsyncState';
 const settings = useService(Settings);
 const githubIntegration = useService(GitHubIntegration);
 const userModel = useService(UserModel);
-const messages = useService(NoteszMessageBus);
+const noteszMessageBus = useService(NoteszMessageBus);
 
 const router = useRouter();
 
 const user = useAsyncState({
   get: userModel.get
 });
-messages.on('change:user', () => {
+noteszMessageBus.on('change:user', () => {
   user.refetch();
 });
 

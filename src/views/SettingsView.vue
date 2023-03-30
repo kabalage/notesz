@@ -34,7 +34,7 @@ import { RepositoryModel } from '@/services/model/RepositoryModel';
 const themeService = useService(ThemeService);
 const dialogService = useService(DialogService);
 const settings = useService(Settings);
-const messages = useService(NoteszMessageBus);
+const noteszMessageBus = useService(NoteszMessageBus);
 const repositoryModel = useService(RepositoryModel);
 const githubIntegration = useService(GitHubIntegration);
 const userModel = useService(UserModel);
@@ -58,14 +58,14 @@ const repositoryList = useAsyncState({
     return repositoryModel.list();
   }
 });
-messages.on('change:repository', () => {
+noteszMessageBus.on('change:repository', () => {
   repositoryList.refetch();
 });
 
 const user = useAsyncState({
   get: userModel.get
 });
-messages.on('change:user', () => {
+noteszMessageBus.on('change:user', () => {
   user.refetch();
 });
 

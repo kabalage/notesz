@@ -36,7 +36,7 @@ const props = defineProps<{
   redirect: string
 }>();
 
-const messages = useService(NoteszMessageBus);
+const noteszMessageBus = useService(NoteszMessageBus);
 const repositoryModel = useService(RepositoryModel);
 const settingsModel = useService(SettingsModel);
 const githubIntegration = useService(GitHubIntegration);
@@ -47,14 +47,19 @@ const filterText = ref('');
 const debouncedFilterText = refDebounced(filterText, 250);
 const isAuthorizing = ref(false);
 const authError = ref<Error | undefined>();
+const connectingRepositoryId = ref<string | undefined>();
 
 const repositoryList = useAsyncState({
   get() {
     return repositoryModel.list();
   }
 });
-messages.on('change:repository', () => {
-  repositoryList.refetch();
+noteszMessageBus.on('change:repository', (id) => {
+  // Only refetch if the changed repository is not the one we're currently connecting.,
+  // It's disorienting to pull out the repository immediately from the list after selecting it.
+  if (connectingRepositoryId.value !== id) {
+    repositoryList.refetch();
+  }
 });
 
 const connectedRepositories = computed(() => {
@@ -114,6 +119,7 @@ async function _authorize() {
 }
 
 async function connect(repoId: string) {
+  connectingRepositoryId.value = repoId;
   await repositoryModel.add(repositoryModel.createRepository({ id: repoId }));
   await settingsModel.update((settings) => {
     settings.selectedRepositoryId = repoId;
