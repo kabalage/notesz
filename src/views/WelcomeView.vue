@@ -30,6 +30,7 @@ noteszMessageBus.on('change:user', () => {
 
 const authError = ref<Error | undefined>(undefined);
 const isAuthorizing = ref(false);
+const appVersion = import.meta.env.APP_VERSION;
 
 async function authorizeThenRedirect() {
   isAuthorizing.value = true;
@@ -71,51 +72,79 @@ async function clearStorage() {
 </script>
 
 <template>
-  <div class="h-full grid overflow-y-auto">
-    <div
-      v-if="settings.data && !settings.data.selectedRepositoryId"
-      class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
-    >
-      <h1 class="font-medium mb-4 text-center">
-        Welcome to
-        <span class="sr-only">Notesz</span>
-      </h1>
+  <div class="h-full overflow-y-auto flex flex-col">
+
+    <div class="flex-1 grid">
       <div
-        class="flex justify-center mb-8"
-        aria-hidden="true"
-        @click="clearStorage"
+        v-if="settings.data && !settings.data.selectedRepositoryId"
+        class="place-self-center px-8 py-8 max-w-xl mx-auto text-center mb-safe-b"
       >
-        <NoteszLogo
-          class="h-12"
-          text-class="text-white"
-          icon-class="text-accent-300"
-          icon-shade-class="text-main-400/40"
+        <h1 class="font-medium mb-4 text-center">
+          Welcome to
+          <span class="sr-only">Notesz</span>
+        </h1>
+        <div
+          class="flex justify-center mb-8"
+          aria-hidden="true"
+          @click="clearStorage"
+        >
+          <NoteszLogo
+            class="h-12"
+            text-class="text-white"
+            icon-class="text-accent-300"
+            icon-shade-class="text-main-400/40"
+          />
+        </div>
+        <p class="max-w-sm mx-auto font-medium text-white mb-4">
+          An open-source note taking app that stores your notes on GitHub.
+        </p>
+        <p class="max-w-sm mx-auto mb-4">
+          Add it to your Home Screen on your phone to use it like a native app.
+          It works offline, and all your data is synced directly from the browser to GitHub,
+          no third party involved.
+        </p>
+        <p class="max-w-sm mx-auto mb-8 text-orange-300 font-medium">
+          It's still in beta, so be prepared for bugs.
+        </p>
+        <BasicButton
+          class="mx-auto"
+          :loading="isAuthorizing"
+          @click="authorizeThenRedirect()"
+        >
+          <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" aria-hidden="true" />
+          <div class="text-center">
+            Connect GitHub repository
+          </div>
+        </BasicButton>
+        <MessageBox
+          v-if="authError"
+          class="mt-4 justify-center"
+          :message="authError.message"
+          type="error"
+          role="alert"
         />
       </div>
-      <p class="max-w-sm mx-auto font-medium text-white mb-4">
-        A cross-platform, open-source note taking app that stores your notes on GitHub.
+    </div>
+    <div class="pb-safe-b">
+      <p class="mb-8 max-w-sm mx-auto text-center text-sm">
+        Built by
+        <a
+          class="text-white cursor-pointer underline underline-offset-2
+            decoration-white/40 mouse:hover:decoration-white"
+          href="https://github.com/kabalage"
+          target="_blank"
+          v-text="'Balázs Kaufmann'"
+        />.
+        <br>The source is available on
+        <a
+          class="text-white cursor-pointer underline underline-offset-2
+            decoration-white/40 mouse:hover:decoration-white"
+          href="https://github.com/kabalage/notesz"
+          target="_blank"
+          v-text="'GitHub'"
+        />.
+        <br>Version: {{ appVersion }}
       </p>
-      <p class="max-w-sm mx-auto mb-8">
-        It works offline, and all your data is saved only in your browser and in your GitHub
-        repositories, nowhere else.
-      </p>
-      <BasicButton
-        class="mx-auto"
-        :loading="isAuthorizing"
-        @click="authorizeThenRedirect()"
-      >
-        <GitHubIcon class="flex-none h-6 w-6 text-main-400 mr-2" aria-hidden="true" />
-        <div class="text-center">
-          Connect GitHub repository
-        </div>
-      </BasicButton>
-      <MessageBox
-        v-if="authError"
-        class="mt-4 justify-center"
-        :message="authError.message"
-        type="error"
-        role="alert"
-      />
     </div>
   </div>
 </template>

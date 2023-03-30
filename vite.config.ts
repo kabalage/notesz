@@ -1,10 +1,13 @@
 import { fileURLToPath, URL } from 'node:url';
+import fs from 'node:fs';
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
 import svgLoader from 'vite-svg-loader';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const appVersion = JSON.parse(fs.readFileSync('./package.json', 'utf-8')).version;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -54,6 +57,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
       'node-fetch': 'src/utils/nodeFetchDummy.ts'
     },
+  },
+  define: {
+    'import.meta.env.APP_VERSION': JSON.stringify(appVersion)
   },
   server: {
     port: 5000

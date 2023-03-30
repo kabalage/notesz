@@ -71,6 +71,7 @@ noteszMessageBus.on('change:user', () => {
 
 const authError = ref<Error | undefined>(undefined);
 const isAuthorizing = ref(false);
+const appVersion = import.meta.env.APP_VERSION;
 
 async function authorizeThenRedirect() {
   isAuthorizing.value = true;
@@ -386,16 +387,14 @@ async function clearStorage() {
         </div>
         <article class="text-main-200 space-y-6" aria-label="About">
           <p>
-            I'm <span class="text-white font-medium">Balázs Kaufmann</span> (
-            <a
+            I'm <span class="text-white font-medium">Balázs Kaufmann</span>
+            (<a
               href="https://github.com/kabalage"
               target="_blank"
               class="text-accent-300 cursor-pointer underline underline-offset-2
                 decoration-accent-300/40 mouse:hover:decoration-accent-300"
-            >
-              @kabalage
-            </a>
-            ), and I created
+              v-text="'@kabalage'"
+            />), and I created
             <span class="text-white font-medium">Notesz</span>
             as a personal project. My goal was to create a simple, serverless note-taking app that
             stores everything on GitHub, and also works well on phones.
@@ -405,7 +404,10 @@ async function clearStorage() {
             discussions on GitHub, or create issues if you run into bugs.
           </p>
           <p>
-            <span class="font-medium text-white">Source:</span>
+          </p>
+          <p>
+            <span class="font-medium text-white">Version:</span> {{ appVersion }}
+            <br><span class="font-medium text-white">Source:</span>
             <a
               class="ml-2 text-accent-300 cursor-pointer underline underline-offset-2
                 decoration-accent-300/40 mouse:hover:decoration-accent-300"

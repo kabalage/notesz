@@ -4,6 +4,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_GITHUB_APP_CLIENT_ID: string
+  readonly APP_VERSION: string
 }
 
 interface Error {
