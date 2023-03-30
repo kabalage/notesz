@@ -132,7 +132,8 @@ async function deleteAllLocalData() {
     description: 'All your data already synced to GitHub will be kept.'
       +' This will only delete your local data.',
     confirmButtonLabel: 'Delete',
-    rejectButtonLabel: 'Cancel'
+    rejectButtonLabel: 'Cancel',
+    confirmDanger: true
   });
   if (!confirmed) return;
   isDeletingAllLocalData.value = true;

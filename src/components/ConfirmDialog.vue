@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<{
   description?: string,
   confirmButtonLabel?: string,
   rejectButtonLabel?: string,
+  confirmDanger?: boolean
 }>(), {
   confirmButtonLabel: 'Yes',
   rejectButtonLabel: 'No',
@@ -62,6 +63,7 @@ async function close(value: boolean) {
       <BasicButton
         class="min-w-[6rem]"
         @click="close(true)"
+        :danger="props.confirmDanger"
       >
         {{ props.confirmButtonLabel }}
       </BasicButton>

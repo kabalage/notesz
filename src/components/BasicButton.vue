@@ -38,8 +38,13 @@ const props = defineProps<{
       '[&>*]:invisible': props.loading,
       'disabled:opacity-50': !props.loading
     }"
-    active-class="border-transparent scale-75 motion-reduce:opacity-50
-      before:scale-133 motion-reduce:before:opacity-50"
+    :active-class="`border-transparent scale-75 motion-reduce:opacity-50
+      before:scale-133 motion-reduce:before:opacity-50 `
+        + (props.accent
+          ? '!bg-accent-400/30'
+          : props.danger
+            ? '!bg-red-500/80'
+            : '!bg-main-400/30')"
     :to="props.to"
     :disabled="props.disabled || props.loading"
     :tag="tag"
