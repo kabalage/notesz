@@ -8,6 +8,7 @@ import ArrowLeftIcon from '@/assets/icons/arrow-left.svg?component';
 import PlusIcon from '@/assets/icons/plus.svg?component';
 import ExternalLinkIcon20 from '@/assets/icons/external-link-20.svg?component';
 import CheckIcon from '@/assets/icons/check.svg?component';
+import TrashIcon from '@/assets/icons/trash.svg?component';
 
 import ButtonBarMobile from '@/components/ButtonBarMobile.vue';
 import ButtonBarMobileButton from '@/components/ButtonBarMobileButton.vue';
@@ -123,9 +124,33 @@ function selectRepository(repoId: string) {
   settings.data.selectedRepositoryId = repoId;
 }
 
-async function clearStorage() {
+const isDeletingAllLocalData = ref(false);
+
+async function deleteAllLocalData() {
+  const confirmed = await dialogService.confirm({
+    title: 'Delete all local data?',
+    description: 'All your data already synced to GitHub will be kept.'
+      +' This will only delete your local data.',
+    confirmButtonLabel: 'Delete',
+    rejectButtonLabel: 'Cancel'
+  });
+  if (!confirmed) return;
+  isDeletingAllLocalData.value = true;
   localStorage.clear();
   await deleteDB('notesz');
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  for (const registration of registrations) {
+    await registration.unregister();
+  }
+  const allCaches = await caches.keys();
+  for (const cache of allCaches) {
+    await caches.delete(cache);
+  }
+  await dialogService.alert({
+    title: 'Completed',
+    description: 'All local data was deleted.',
+    buttonLabel: 'Reload'
+  });
   location.href = '/';
 }
 
@@ -429,12 +454,24 @@ async function clearStorage() {
           </p>
         </article>
 
+        <!-- About -->
+        <div class="flex items-center mt-16 mb-8">
+          <h2 class="text-xl font-semibold text-accent-300 text-left">
+            Reset
+          </h2>
+          <div
+            class="ml-4 flex-1 h-[2px] rounded bg-gradient-to-r from-main-400/40 to-transparent
+              self-center"
+          />
+        </div>
         <BasicButton
-          v-if="false"
-          @click="clearStorage"
-          class="mx-auto mt-16"
+          @click="deleteAllLocalData"
+          class="mx-auto"
+          :loading="isDeletingAllLocalData"
+          danger
         >
-          Delete all data
+          <TrashIcon class="w-6 h-6 text-red-200 mr-2" aria-hidden="true"/>
+          <span>Delete all local data</span>
         </BasicButton>
 
       </div>
