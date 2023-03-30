@@ -22,14 +22,17 @@ function setup() {
     if (dbPromise) {
       return dbPromise;
     }
+    // These must be imported here to avoid circular dependencies.
+    // They also cannot be used in the upgrade function to adhere to idb's
+    // transaction model.
+    const { initDb } = await import('./NoteszDb/initDb');
+    const { upgradeDb } = await import('./NoteszDb/upgradeDb');
     // console.log('DB open');
     dbPromise = openDB<NoteszDbSchema>('notesz', 4, {
       async upgrade(db, oldVersion, newVersion, tx) {
         if (oldVersion === 0) {
-          const { initDb } = await import('./NoteszDb/initDb');
           await initDb(db);
         } else {
-          const { upgradeDb } = await import('./NoteszDb/upgradeDb');
           await upgradeDb(db, oldVersion, tx);
         }
         if (navigator.storage) {
