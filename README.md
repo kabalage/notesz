@@ -1,52 +1,51 @@
+
+<a href="https://notesz.app" target="_blank" rel="noopener noreferrer">
+<img width="96" src="https://notesz.app/favicon.svg" alt="Notesz logo">
+</a>
+
 # Notesz
 
-This template should help get you started developing with Vue 3 in Vite.
+> Open-source note taking app that stores your notes on GitHub
 
-## Recommended IDE Setup
+👉 Live app: [https://notesz.app](https://notesz.app)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
 
-## Type Support for `.vue` Imports in TS
+Add it to your Home Screen on your phone to use it like a native app. It works offline, and all your data is synced directly from the browser to GitHub, no third party involved.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+## About
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+I created *Notesz* as a personal project. My goal was to create a simple, serverless, progressive web app (PWA) for note-taking that stores everything on GitHub, and also works well on phones. I'm trying my best to deliver a user experience as close to a native mobile app as possible with web technologies.
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+I'm still deciding on how I'd like to handle collaboration, but feel free to create discussions or issues if you run into bugs.
 
-## Customize configuration
+> Fun fact: “Notesz” means “pocket notebook” in Hungarian. It's pronounced “not-ass”, IPA: /ˈnotɛs/.
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+## 👨‍💻 Tech stack
 
-## Project Setup
+[TypeScript](https://www.typescriptlang.org/) ·
+[Vue 3](https://vuejs.org/) ·
+[Tailwind CSS](https://tailwindcss.com/) ·
+[CodeMirror](https://codemirror.net/) ·
+[IndexedDB with idb](https://github.com/jakearchibald/idb) ·
+[Vite](https://vitejs.dev/) ·
+[PWA Vite Plugin](https://vite-pwa-org.netlify.app/) ·
+[Vitest](https://vitest.dev/) ·
+[Vercel](https://vercel.com/)
 
-```sh
-npm install
-```
+## 📝 Planned features
 
-### Compile and Hot-Reload for Development
+- Light theme
+- File/folder renaming (moving)
+- Folder deletion
+- More vibrant dynamic syntax themes (Notesz theme)
+- Add to Home Screen prompts on iOS and Android
+- Keeping the scroll position when switching between files
+- Keyboard shortcuts
+- Search in current file
+- Fuzzy find to open files
 
-```sh
-npm run dev
-```
 
-### Type-Check, Compile and Minify for Production
+## License
 
-```sh
-npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+Source code: [MIT](LICENSE.md)\
+Notesz logo: [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/)

@@ -1,6 +1,9 @@
 {
   "name": "@kabalage/notesz",
   "version": "0.1.0",
+  "author": "Balázs Kaufmann <k4balage@gmail.com>",
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "dev": "npm-run-all -p vdev devProxy",
     "vdev": "vercel dev --listen 5001 --local-config ./vercel-dev.json",
@@ -24,7 +27,6 @@
     "codemirror": "6.0.1",
     "idb": "7.1.1",
     "lodash-es": "4.17.21",
-    "pinia": "2.0.32",
     "string-similarity-js": "2.1.4",
     "three-way-merge": "0.1.0",
     "vue": "3.2.47",
