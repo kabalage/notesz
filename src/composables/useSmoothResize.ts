@@ -19,6 +19,14 @@ const defaultOptions: SmoothResizeOptions = {
   watchParent: false
 };
 
+/**
+ * Animates the size of an element when it changes.
+ * @param target The element to observe
+ * @param options
+ * @param options.animationDuration The duration of the animation in milliseconds
+ * @param options.watchParent If true, the parent element will be observed instead of the target.
+ * This is useful for flex children, which can change size when siblings change size.
+ */
 export function useSmoothResize(
   target: MaybeComputedRef<HTMLElement | null | undefined>,
   options: Partial<SmoothResizeOptions> = {}

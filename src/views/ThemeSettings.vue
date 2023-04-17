@@ -11,7 +11,7 @@ import { mainPalette, backgroundPalette, type ColorName }
   from '@/services/model/SettingsModel/themeData';
 import { useEventListener, useThrottleFn, useScroll } from '@vueuse/core';
 import { ThemeService } from '@/services/ThemeService';
-import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
+import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard';
 
 const themeService = useService(ThemeService);
 

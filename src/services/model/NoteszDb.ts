@@ -1,3 +1,11 @@
+/*
+  NoteszDb
+
+    A wrapper around the idb instance of the Notesz database.
+    All database access is constrained to be done within a transaction provided by
+    `NoteszDb.initTransaction`. The limitation of idb's transaction model must be adhered to.
+*/
+
 import { openDB, type IDBPDatabase, type IDBPTransaction, type StoreNames } from 'idb';
 import { defineService } from '@/utils/injector';
 import type { NoteszDbSchema } from './NoteszDb/noteszDbSchema';
@@ -61,6 +69,19 @@ function setup() {
   type InitTransactionCallback<T> =
     (tx: NoteszDbTransaction, db: IDBPDatabase<NoteszDbSchema>) => Promise<T>;
 
+  /**
+   * Ensures that the callback is executed in a transaction.
+   *
+   * Never await non-db operations in the callback, as this will end the transaction. Check the
+   * idb transaction model for more information.
+   *
+   * For ease of use, the created transaction will be created in `readwrite` mode and all stores
+   * will be accessible. While this greedily locks all stores, it should not pose a problem as
+   * the database does not receive much traffic.
+   *
+   * @param [transaction] An existing transaction. If not given, a new transaction is created.
+   * @param callback The function to execute in the transaction.
+   */
   async function initTransaction<T>(
     transaction: NoteszDbTransaction | undefined,
     callback: InitTransactionCallback<T>

@@ -1,6 +1,10 @@
 import { shallowRef } from 'vue';
 import { tryOnScopeDispose } from '@vueuse/core';
 
+/**
+ * Creates a message bus that ensures type safety for messages and allows communication
+ * between browser tabs.
+ */
 export function createMessageBus<MessageTypes extends { [topic: string]: any }>() {
   type Callback = (data: MessageTypes[keyof MessageTypes]) => void;
   type TabMessage<T extends keyof MessageTypes> = {

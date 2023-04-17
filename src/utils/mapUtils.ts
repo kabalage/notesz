@@ -1,3 +1,6 @@
+/**
+ * It's like _.keyBy, but returns a Map
+ */
 export function keyByMap<K, V>(
   iterable: Iterable<V>,
   keySelector: (value: V) => K | undefined
@@ -12,6 +15,9 @@ export function keyByMap<K, V>(
   return result;
 }
 
+/**
+ * It's like Array.prototype.filter, but works with Maps
+ */
 export function filterMap<K, V, V2 extends V>(
   map: Map<K, V>,
   predicate: ((value: V, key: K) => value is V2) | ((value: V, key: K) => boolean)
@@ -23,12 +29,4 @@ export function filterMap<K, V, V2 extends V>(
     }
   }
   return result;
-}
-
-export function updateMapValue<K, V>(
-  map: Map<K, V>, key: K,
-  updater: (value: V | undefined, key: K) => V
-) {
-  const newValue = updater(map.get(key), key);
-  map.set(key, newValue);
 }

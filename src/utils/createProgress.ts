@@ -8,6 +8,10 @@ export type Progress = {
     cb: (progress: Progress) => void): Promise<void>;
 };
 
+/**
+ * Creates a progress object that can be used to track and show the progress of a compound task.
+ * See usage example in `src/services/integration/github/useSyncAction.ts`
+ */
 export function createProgress({ from, to, setProgress, setMessage }: {
   from: number;
   to: number;

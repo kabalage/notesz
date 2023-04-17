@@ -1,10 +1,19 @@
 import { debounce } from '@/utils/debounce';
 
+/**
+ * Waits for a child window to be closed.
+ * Can be aborted by passing an AbortSignal.
+ *
+ * @param childWindow
+ * @param abortSignal
+ */
 export async function waitForChildWindowClose(
   childWindow: Window,
   abortSignal?: AbortSignal
 ): Promise<void> {
   return new Promise((resolve) => {
+    // TODO check if this can be lower, the debounce was needed because of the focus event
+    // being triggered multiple times when the window is closed
     const debouncedFocusHandler = debounce(focusHandler, 500);
     window.addEventListener('focus', debouncedFocusHandler);
     const interval = setInterval(handleWindowClosed, 1000);

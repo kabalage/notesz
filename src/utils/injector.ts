@@ -1,3 +1,70 @@
+/*
+  # Vue service injector
+
+  A state management solution similar to Pinia, but with a twist of Angular's dependency injection
+  built on top of Vue's `provide` and `inject` APIs.
+
+  ## Notable features
+
+  - Think of services as stores but they are available only to the component and its children where
+    they are created with `provideServices` and its lifecycle is tied to the providing component's
+    lifecycle. You may have multiple instances of a service with different parameters when they're
+    provided in every component of a list for example. To provide a service to the whole app, you
+    can use `provideServices` in the root component.
+  - Services may depend on other services, and these are automatically injected into the service.
+  - Services can be anything. They aren't restricted to be a collection of refs, computeds,
+    and functions. Just return the thing you want when you define the service with `defineService`.
+  - Services can be used with `useService` in any component where that service is available.
+  - Supports circular dependencies with `useServiceDeferred`
+  - During development, you can browse the available services in the browser console with
+    `window.$services`.
+
+  ## Example
+
+  `@/services/ServiceA.ts`:
+  ```ts
+    import { reactive, ref, computed } from 'vue';
+    import { defineService } from '@/utils/injector';
+    import { ServiceB } from '@/services/ServiceB';
+
+    export const ServiceA = defineService({
+      name: 'ServiceA',
+      dependencies: [ServiceB],
+      setup({ serviceB }) {
+        const foo = ref(0);
+        const doubleFoo = computed(() => foo.value * 2);
+        const doubleOther = computed(() => serviceB.foo * 2);
+
+        return reactive({
+          foo,
+          doubleFoo,
+          doubleOther
+        });
+      }
+    });
+  ```
+
+  `App.vue`:
+  ```ts
+    import { ServiceA } from '@/services/ServiceA';
+    import { ServiceB } from '@/services/ServiceB';
+    import { ServiceC } from '@/services/ServiceC';
+    import { ServiceD } from '@/services/ServiceD';
+    import { provideServices, useService } from '@/utils/injector';
+
+    const { serviceA } = provideServices([ServiceA, ServiceB, ServiceC, ServiceD]);
+  ```
+
+  `ChildView.vue`:
+  ```ts
+    import { ServiceA } from '@/services/ServiceA';
+    import { useService } from '@/utils/injector';
+
+    const serviceA = useService(ServiceA);
+  ```
+
+*/
+
 import {
   provide,
   getCurrentInstance,
@@ -45,6 +112,19 @@ export type InjectResult<T extends readonly ServiceDefinition<any, string, reado
   [E in T[number] as Uncapitalize<E['name']>]: ReturnType<E['setup']>;
 };
 
+/**
+ * Creates a service definition.
+ *
+ * @param options
+ * @param options.name The name of the service.
+ * @param options.dependencies An array of service definitions that this service depends on.
+ * @param options.setup A factory function that should return the service instance. It receives an
+ *   object with the dependencies as properties. The keys are the names of the dependencies
+ *   uncapitalized. When the setup function is not defined inlined, you can use the `InjectResult`
+ *   type to type the dependencies object.
+ *   (e.g. `setup({ serviceA }: InjectResult<typeof depedencies>)`
+ * @returns The service definition.
+ */
 export function defineService<
   Service, Name extends string,
   Dependencies extends readonly ServiceDefinition<any, string, readonly any[]>[]
@@ -98,6 +178,17 @@ function uncapitalize(str: string) {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
+/**
+ * Provides services in the current component that can be injected with `useService` in descendant
+ * components.
+ *
+ * Like vue's `provide()`, this function must be called synchronously during a component's `setup()`
+ * phase.
+ *
+ * @param serviceDefinitions An array of service definitions.
+ * @returns An object with the service instances as properties. The keys are the names of the
+ *  services uncapitalized.
+ */
 export function provideServices<
   ServiceDefinitions extends ServiceDefinition<any, string, readonly any[]>[]
 >(serviceDefinitions: ServiceDefinitions) {
@@ -161,6 +252,16 @@ export function provideServices<
   return serviceInstances as InjectResult<ServiceDefinitions>;
 }
 
+/**
+ * Injects a service provided by the current component or an ancestor.
+ *
+ * Like vue's `inject()`, this function must be called synchronously during a component's `setup()`
+ * phase. Note that this differs from vue's `inject`, as that only injects values provided by
+ * ancestors.
+ *
+ * @param serviceDefinition
+ * @returns The service instance.
+ */
 export function useService<
   Service, Name extends string,
   Dependencies extends readonly ServiceDefinition<any, string, readonly any[]>[]
@@ -172,6 +273,18 @@ export function useService<
   return injectFromComponentInstance(serviceDefinition, componentInstance);
 }
 
+/**
+ * Injects a service that is not yet available, but will be available after the current component's
+ * `setup` phase has finished has finished. Unlike `useService`, this function returns a `Ref` that
+ * will be updated after the `setup()`.
+ *
+ * Like vue's `inject()`, this function must be called synchronously during a component's `setup()`
+ * phase.
+ *
+ * @param loader A function that returns a promise that resolves to the service definition.
+ * @returns A `Ref` to the service instance that will be set after the `setup()` phase has finished.
+ *
+ */
 export function useServiceDeferred<
   Service, Name extends string,
   Dependencies extends readonly ServiceDefinition<any, string, readonly any[]>[]

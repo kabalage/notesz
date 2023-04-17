@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
+import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard';
 import { useService } from '@/utils/injector';
 import { ThemeService } from '@/services/ThemeService';
 

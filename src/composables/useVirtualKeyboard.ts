@@ -5,7 +5,10 @@ import {
   type VirtualKeyboardChangeEvent
 } from '@/utils/VirtualKeyboardEvents';
 
-export default createSharedComposable(() => {
+/**
+ * A composable that provides information about the virtual keyboard.
+ */
+export const useVirtualKeyboard = createSharedComposable(() => {
   const visible = ref(false);
   const keyboardHeight = ref(0);
   const viewportHeight = ref(window.visualViewport?.height || window.innerHeight);

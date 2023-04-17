@@ -1,3 +1,9 @@
+/*
+  ExplorerService
+
+    Manages the state of the file explorer sidebar.
+*/
+
 import { computed, ref, watch, reactive } from 'vue';
 import { defineService, type InjectResult } from '@/utils/injector';
 import { EditorService } from '@/services/EditorService';

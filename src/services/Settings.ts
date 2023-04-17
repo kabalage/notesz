@@ -1,3 +1,10 @@
+/*
+  Settings
+
+    Loads and saves the settings data.
+    Changes to the settings are automatically persisted to the database.
+*/
+
 import { defineService, type InjectResult } from '@/utils/injector';
 import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 import { useAsyncState } from '@/composables/useAsyncState';

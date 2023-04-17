@@ -1,3 +1,9 @@
+/*
+  ServiceWorkerUpdates
+
+    This service is responsible for checking for updates to the service worker.
+*/
+
 import { onScopeDispose } from 'vue';
 import { defineService, type InjectResult } from '@/utils/injector';
 import { registerSW } from 'virtual:pwa-register';

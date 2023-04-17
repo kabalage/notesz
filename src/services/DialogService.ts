@@ -1,3 +1,16 @@
+/*
+  DialogService
+
+    Provides a way to show dialogs as part of an async operation.
+
+    `showDialog` returns a promise that resolves when the dialog is closed.
+    There are 3 built-in dialogs: `AlertDialog`, `ConfirmDialog`, and `PromptDialog` with
+    a shorthand method for each.
+    (`DialogService.alert`, `DialogService.confirm`, and `DialogService.prompt`)
+
+    You can also create custom dialogs, and show them by passing them to `showDialog`.
+*/
+
 import { ref, computed, reactive, markRaw, type Component } from 'vue';
 import { defineService } from '@/utils/injector';
 import type { PropsType, EventType, ComponentWithEvent } from '@/utils/vueTsUtils';
@@ -19,6 +32,12 @@ function setup() {
   const dialogs = ref<Dialog<Component>[]>([]);
   const currentDialog = computed(() => dialogs.value.at(-1));
 
+  /**
+   * Shows a dialog and returns a promise that resolves when the dialog is closed.
+   *
+   * @param component The component to use for the dialog. Must have a `close` event.
+   * @param props The props to pass to the dialog component
+   */
   function showDialog<C extends Component>(
     component: ComponentWithEvent<C, 'close'>,
     props: PropsType<C>
@@ -41,14 +60,23 @@ function setup() {
     });
   }
 
+  /**
+   * Shorthand for showing the `AlertDialog` component.
+   */
   async function alert(props: PropsType<typeof AlertDialog>) {
     return showDialog(AlertDialog, props);
   }
 
+  /**
+   * Shorthand for showing the `ConfirmDialog` component.
+   */
   async function confirm(props: PropsType<typeof ConfirmDialog>) {
     return showDialog(ConfirmDialog, props);
   }
 
+  /**
+   * Shorthand for showing the `PromptDialog` component.
+   */
   async function prompt(props: PropsType<typeof PromptDialog>) {
     return showDialog(PromptDialog, props);
   }

@@ -6,7 +6,7 @@ import {
   Dialog,
   DialogPanel,
 } from '@headlessui/vue';
-import useVirtualKeyboard from '@/composables/useVirtualKeyboard';
+import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard';
 import { useService } from '@/utils/injector';
 import { Settings } from '@/services/Settings';
 

@@ -1,3 +1,10 @@
+/*
+  NoteszMessageBus
+
+    A global message bus for Notesz.
+    Events types must be defined here. Messages are also sent across browser tabs.
+*/
+
 import { onScopeDispose } from 'vue';
 import { defineService } from '@/utils/injector';
 import { createMessageBus } from '@/utils/createMessageBus';

@@ -1,3 +1,9 @@
+/*
+  EditorService
+
+    Manages the state of the editor UI.
+*/
+
 import { computed, ref, watch, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useOnline } from '@vueuse/core';

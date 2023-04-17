@@ -1,3 +1,26 @@
+/*
+  VirtualKeyboardEvents
+
+    This module provides a way to listen to virtual keyboard events. If the browser supports the
+    VirtualKeyboard API, it will use that. Otherwise, it will use a fallback method that relies on
+    resize events.
+
+    `setupDefaultHandler` must be called before any listeners are added. This enables a default
+    behavior that improves the user experience for every input field.
+
+    This default behavior does the following:
+    - Constrains the viewport height to the available space, to prevent the keyboard overlapping the
+      content.
+    - On Android it blurs the focus when the keyboard is hidden manually.
+
+    When the default behavior is not desired, call `onChange` with a custom handler, and use
+    `preventDefault` to disable the default behavior. Parts of the default behavior are exported
+    to make it easier to override just what you need.
+
+    TODO: the API needs to be improved, it's not very intuitive.
+
+*/
+
 import { isIos, isIpad } from '@/utils/iDeviceDetection';
 
 declare global {

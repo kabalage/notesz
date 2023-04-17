@@ -8,6 +8,16 @@ interface CallbackData {
   params: any;
 }
 
+/**
+ * Waits for a callback message from the child window and returns the callback parameters.
+ *
+ * If the child window is closed before the callback message is received, the promise
+ * resolves with `canceled: true`.
+ *
+ * @param type string identifier for the callback
+ * @param childWindow window handler for the child window we are waiting for to close
+ * @param messageBus message bus instance to listen for the `callback` message
+ */
 export async function waitForCallback<T extends {
   'callback': CallbackData
 }>(

@@ -2,6 +2,12 @@ import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 import { trial } from '@/utils/trial';
 import throttle from 'lodash-es/throttle';
 
+/**
+ * A composable for asynchronous state management similar to `useAsyncState` in `vueuse`,
+ * but it can:
+ * - Persist changes to the data (that also supports throttling)
+ * - Watch for arbitrary parameters and re-fetch the data when they change
+ */
 export function useAsyncState<T, WatchParam>({
   get,
   put,

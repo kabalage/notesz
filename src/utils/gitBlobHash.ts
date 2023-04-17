@@ -1,3 +1,8 @@
+/**
+ * Hashes a string as a Git blob object
+ * @param blob The string contents of the blob to hash
+ * @returns The SHA-1 hash of the blob
+ */
 export async function gitBlobHash(blob: string) {
   const blobEncoded = new TextEncoder().encode(blob);
   const prefixEncoded = new TextEncoder().encode(`blob ${blobEncoded.length}\0`);

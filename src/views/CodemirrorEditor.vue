@@ -7,7 +7,7 @@ import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { drawSelection, EditorView, highlightSpecialChars, keymap }
   from '@codemirror/view';
-import { darkTheme, draculaTheme } from '@/utils/codeMirrorTheme';
+import { darkTheme, draculaTheme } from '@/utils/codeMirrorThemes';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches, search, openSearchPanel }
   from '@codemirror/search';
@@ -153,7 +153,7 @@ function onReady(payload: {
   state: EditorState;
   container: HTMLDivElement;
 }) {
-  console.log('Codemirror ready', payload.state);
+  // console.log('Codemirror ready', payload.state);
   cmEditorView.value = payload.view;
 
   VirtualKeyboardEvents.onChange(onVirtualKeyboardChange);
@@ -184,7 +184,7 @@ function onChange(newContents: string) {
   lastEmitTime = Date.now();
   modelValue.value = newContents;
   emit('input', newContents);
-  console.log('change', newContents.slice(0, 10));
+  // console.log('change', newContents.slice(0, 10));
 }
 
 function insertText(text: string) {

@@ -1,3 +1,9 @@
+/*
+  ThemeService
+
+    Manages the UI theme settings.
+*/
+
 import { computed, ref, watch, reactive } from 'vue';
 import { defineService, type InjectResult } from '@/utils/injector';
 import { mainPalette, backgroundPalette, type ColorName }
