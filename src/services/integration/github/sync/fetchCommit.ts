@@ -167,7 +167,8 @@ export function useFetchCommit({
           blobIdInBase: baseNode.blobId
         }));
       } else if (newFile.blobId === baseNode.blobId) {
-        filesUnchanged.push(newFile);
+        const baseFile = baseNode;
+        filesUnchanged.push(baseFile);
       }
     }
 
