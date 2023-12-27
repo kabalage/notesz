@@ -1,4 +1,4 @@
-import threeWayMerge from 'three-way-merge';
+import diff3Merge from 'diff3';
 import { filterMap, keyByMap } from '@/utils/mapUtils';
 import { gitBlobHash } from '@/utils/gitBlobHash';
 import type { InjectResult } from '@/utils/injector';
@@ -87,6 +87,8 @@ import { RepositoryModel } from '@/services/model/RepositoryModel';
 
 const dependencies = [FileIndexModel, BlobModel, RepositoryModel];
 useRebase.dependencies = dependencies;
+
+const LINEBREAKS = /^.*(\r?\n|$)/gm;
 
 export function useRebase({
   fileIndexModel,
@@ -681,22 +683,50 @@ export function useRebase({
     if (localBlob === undefined) {
       throw new Error('Missing local blob');
     }
-    const mergeResult = await threeWayMerge(remoteBlob, baseBlob, localBlob);
-    const mergedBlob = mergeResult.joinedResults()
-      .replace('<<<<<<< YOUR CHANGES', `<<<<<<< Remote changes (${remoteCommitSha.slice(0, 7)})`)
-      .replace('>>>>>>> APP AUTHORS CHANGES', '>>>>>>> Local changes');
-    const mergedBlobHash = await gitBlobHash(mergedBlob);
+    const mergeResult = diff3Merge(
+      ensureNewlineEnding(localBlob).match(LINEBREAKS)!,
+      ensureNewlineEnding(baseBlob).match(LINEBREAKS)!,
+      ensureNewlineEnding(remoteBlob).match(LINEBREAKS)!
+    );
 
+    let mergedText = '';
+    let conflicting = false;
+
+    for (const item of mergeResult) {
+      if (item.ok) {
+        mergedText += item.ok.join('');
+      }
+      if (item.conflict) {
+        conflicting = true;
+        mergedText += `${'<'.repeat(7)} Local changes\n`;
+        mergedText += item.conflict.a.join('');
+
+        if (item.conflict.o.length > 0) {
+          mergedText += `${'|'.repeat(7)} Base\n`;
+          mergedText += item.conflict.o.join('');
+        }
+
+        mergedText += `${'='.repeat(7)}\n`;
+        mergedText += item.conflict.b.join('');
+        mergedText += `${'>'.repeat(7)} Remote changes (${remoteCommitSha.slice(0, 7)})\n`;
+      }
+    }
+
+    const mergedBlobHash = await gitBlobHash(mergedText);
     const modified = mergedBlobHash !== remoteBlobId;
     let mergedBlobId = remoteBlobId;
     if (modified) {
       mergedBlobId = Math.random().toString().slice(2);
-      await blobModel.put(mergedBlobId, mergedBlob);
+      await blobModel.put(mergedBlobId, mergedText);
     }
     return {
       blobId: mergedBlobId,
       blobHash: mergedBlobHash,
-      conflicting: mergeResult.conflict
+      conflicting
     };
+  }
+
+  function ensureNewlineEnding(str: string) {
+    return str.endsWith('\n') ? str : str + '\n';
   }
 }
