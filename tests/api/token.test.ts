@@ -37,8 +37,11 @@ describe('oauthTokenRequest', () => {
     expect(res.status).toBeCalledTimes(1);
     expect(res.status).toBeCalledWith(200);
     expect(res.json).toBeCalledTimes(1);
-    const responseJson = res.json.mock.lastCall?.[0];
-    expect(responseJson?.token).toBe(MOCK_TOKEN);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        token: MOCK_TOKEN
+      })
+    );
   });
 
   it('should return 500 if token creation fails', async () => {
@@ -59,8 +62,11 @@ describe('oauthTokenRequest', () => {
     expect(res.status).toBeCalledTimes(1);
     expect(res.status).toBeCalledWith(500);
     expect(res.json).toBeCalledTimes(1);
-    const responseJson = res.json.mock.lastCall?.[0];
-    expect(responseJson).toHaveProperty('message');
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.any(String)
+      })
+    );
   });
 
   it('should return 400 if code is missing', async () => {
@@ -76,8 +82,11 @@ describe('oauthTokenRequest', () => {
     expect(res.status).toBeCalledTimes(1);
     expect(res.status).toBeCalledWith(400);
     expect(res.json).toBeCalledTimes(1);
-    const responseJson = res.json.mock.lastCall?.[0];
-    expect(responseJson).toHaveProperty('message');
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.any(String)
+      })
+    );
   });
 
   it('should return 404 if method is not POST', async () => {
