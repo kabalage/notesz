@@ -6,9 +6,9 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "22",
-    "pnpm": "9"
+    "node": "22"
   },
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "npm-run-all -p vdev devProxy",
     "vdev": "vercel dev --listen 5001 --local-config ./vercel-dev.json",
@@ -36,8 +36,8 @@
     "@lezer/highlight": "1.1.6",
     "@octokit/oauth-app": "4.1.0",
     "@octokit/request": "6.2.2",
-    "@octokit/types": "^8.0.0",
-    "@octokit/request-error": "^3.0.0",
+    "@octokit/request-error": "3.0.3",
+    "@octokit/types": "8.2.1",
     "@types/diff3": "0.0.2",
     "@uiw/codemirror-extensions-hyper-link": "4.13.2",
     "@uiw/codemirror-themes": "4.12.4",
@@ -81,6 +81,7 @@
     "vite-plugin-vue-devtools": "7.6.8",
     "vite-svg-loader": "5.1.0",
     "vitest": "3.0.2",
-    "vue-tsc": "2.2.0"
+    "vue-tsc": "2.2.0",
+    "workbox-window": "7.3.0"
   }
 }
