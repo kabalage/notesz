@@ -2,16 +2,19 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.config.json"
+      "path": "./tsconfig.configs.json"
     },
     {
       "path": "./tsconfig.app.json"
     },
     {
-      "path": "./tsconfig.functions.json"
+      "path": "./tsconfig.app-vitest.json"
     },
     {
-      "path": "./tsconfig.vitest.json"
+      "path": "./tsconfig.vercel-api.json"
+    },
+    {
+      "path": "./tsconfig.vercel-api-vitest.json"
     }
   ]
 }

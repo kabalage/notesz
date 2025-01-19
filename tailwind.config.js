@@ -1,6 +1,5 @@
-/* eslint-env node */
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: [
     './index.html',
     './src/**/*.{vue,ts}',
@@ -66,3 +65,5 @@ module.exports = {
   },
   plugins: []
 };
+
+export default config;

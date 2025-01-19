@@ -12,7 +12,7 @@ if (process.env.GITHUB_APP_CLIENT_ID && process.env.GITHUB_APP_CLIENT_SECRET) {
 
 export default async (req: VercelRequest, res: VercelResponse ) => {
   const { method, body } = req;
-  // console.log(body);
+  // console.log(method, body);
   if (method === 'POST') {
     if (!app) {
       return res.status(500).json({
@@ -25,6 +25,7 @@ export default async (req: VercelRequest, res: VercelResponse ) => {
       });
     }
     try {
+      // console.log('before create');
       const tokenResponse = await app.createToken({
         code: body.code
       });
@@ -32,7 +33,7 @@ export default async (req: VercelRequest, res: VercelResponse ) => {
       return res.status(200).json({
         token: tokenResponse.authentication.token
       });
-    } catch (err) {
+    } catch {
       // console.error(err);
       return res.status(500).json({
         message: 'Token creation failed'

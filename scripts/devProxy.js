@@ -1,6 +1,6 @@
 /* eslint-env node */
-const httpProxy = require('http-proxy');
-const { getCertificate } = require('@vitejs/plugin-basic-ssl');
+import httpProxy from 'http-proxy';
+import { getCertificate } from '@vitejs/plugin-basic-ssl';
 
 const port = 5000;
 const targetHost = 'localhost';

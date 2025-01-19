@@ -1,4 +1,3 @@
-
 import { OAuthApp } from '@octokit/oauth-app';
 import type { Mock } from 'vitest';
 import { createMockVercelRequest, createMockVercelResponse } from './helpers';
@@ -6,7 +5,7 @@ import { createMockVercelRequest, createMockVercelResponse } from './helpers';
 process.env.GITHUB_APP_CLIENT_ID = 'requiredByTheTokenRequest';
 process.env.GITHUB_APP_CLIENT_SECRET = 'requiredByTheTokenRequest';
 
-import oauthTokenRequest from '../../api/github/oauth/token';
+import oauthTokenRequest from '../github/oauth/token';
 
 const MOCK_TOKEN = '123456789';
 

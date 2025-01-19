@@ -1,10 +1,9 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json",
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "tests/**/*", "api/**/*"],
-  "exclude": ["src/**/__tests__/*", "src/**/*.test.ts", "src/**/*.test-d.ts", "tests/**/*", "api/**/*"],
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
+  "exclude": ["src/**/*.test.ts"],
   "compilerOptions": {
-    "composite": true,
-    "baseUrl": ".",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "paths": {
       "@/*": ["./src/*"]
     }

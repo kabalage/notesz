@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.vercel-api.json",
+  "include": ["api/__tests__/*.ts"],
+  "exclude": [],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vercel-api-vitest.tsbuildinfo",
+    "lib": [],
+    "types": ["vitest/importMeta", "vitest/globals", "node"]
+  }
+}
