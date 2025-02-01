@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { watch, shallowRef, inject, onUnmounted, ref, type App, type RendererElement, onMounted, effect, computed } from 'vue';
-// import { Codemirror } from 'vue-codemirror';
-// import VueCodemirror from 'vue-codemirror';
+import { watch, shallowRef, inject, onUnmounted, ref, type App, type RendererElement } from 'vue';
+import { Codemirror } from 'vue-codemirror';
+import VueCodemirror from 'vue-codemirror';
 import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
   from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { drawSelection, EditorView, highlightSpecialChars, keymap, placeholder as placeholderExtension }
+import { drawSelection, EditorView, highlightSpecialChars, keymap }
   from '@codemirror/view';
 import { darkTheme, draculaTheme } from '@/utils/codeMirrorThemes';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches, search, openSearchPanel }
   from '@codemirror/search';
-import { Compartment, EditorState } from '@codemirror/state';
+import type { EditorState } from '@codemirror/state';
 import * as commands from '@codemirror/commands';
-import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { isIos } from '@/utils/iDeviceDetection';
@@ -30,52 +30,25 @@ import { Settings } from '@/services/Settings';
 const props = defineProps<{
   value: string
 }>();
-const emit = defineEmits(['changeSignal', 'focus', 'blur']);
-
-console.log('CodemirrorEditor setup');
-
-const wrapper = ref<HTMLDivElement | null>(null);
+const emit = defineEmits(['input', 'focus', 'blur']);
 
 const settings = useService(Settings);
 const isFocused = ref(false);
 
-const cmEditorView = shallowRef<EditorView>();
-let lastGetDocumentTime = 0;
-let lastEmitValue: string | undefined;
-const isTouchDevice = useIsTouchDevice();
-
-const placeholder = computed(() => {
-  if (isFocused.value || props.value) {
-    return '';
-  }
-  if (isTouchDevice.value) {
-    return 'Tap to start editing...';
-  } else {
-    return 'Click to start editing...';
-  }
-});
-
-const fontSize = computed(() => {
-  if (settings.data?.editorFontSize) {
-    return `${settings.data.editorFontSize}rem`;
-  } else {
-    return '0.875rem';
-  }
-});
+// TODO temporary solution until this gets sorted out:
+// https://github.com/surmon-china/vue-codemirror/issues/167
+const app = inject('app') as App<RendererElement>;
+if (!app._context.components.VueCodemirror) {
+  app.use(VueCodemirror, {
+    // keep the global default extensions empty
+    extensions: []
+  });
+}
 
 const syntaxThemes = {
   'dracula': draculaTheme,
   'notesz': darkTheme
 };
-
-const compartments = {
-  placeholder: new Compartment(),
-  fontSize: new Compartment()
-};
-
-function fontSizeExtension(fontSize: string) {
-  return EditorView.theme({ '&': { fontSize } });
-}
 
 const extensions = [
   highlightSpecialChars(),
@@ -90,8 +63,7 @@ const extensions = [
     ...closeBracketsKeymap,
     ...defaultKeymap,
     ...searchKeymap,
-    ...historyKeymap,
-    indentWithTab
+    ...historyKeymap
   ]),
   markdown({
     codeLanguages: [
@@ -124,9 +96,6 @@ const extensions = [
   syntaxThemes[settings.data?.syntaxTheme || 'notesz'],
   EditorView.lineWrapping,
   EditorView.theme({
-    '&': {
-      height: '100%'
-    },
     '.cm-line': {
       paddingLeft: '1.5rem',
       paddingRight: '1.5rem'
@@ -150,18 +119,18 @@ const extensions = [
       '-webkit-overflow-scrolling': 'touch'
     }
   }),
-  EditorView.updateListener.of((viewUpdate) => {
-    if (viewUpdate.docChanged) {
-      emit('changeSignal');
-    }
-  }),
+  // EditorView.updateListener.of((v: ViewUpdate) => {
+  //   console.log('Codemirror ViewUpdate', v);
+  //   if (v.docChanged) {
+  //     // Document changed
+  //   }
+  // }),
   EditorView.domEventHandlers({
     blur() {
       isFocused.value = false;
       emit('blur');
     },
     focus() {
-      console.log('focused');
       isFocused.value = true;
       emit('focus');
     }
@@ -171,81 +140,56 @@ const extensions = [
     autocorrect: settings.data?.autocorrect ? 'on' : 'off',
     spellcheck: settings.data?.spellcheck ? 'true' : 'false'
   }),
-  EditorState.tabSize.of(4),
-  compartments.placeholder.of(placeholderExtension(placeholder.value)),
-  compartments.fontSize.of(fontSizeExtension(fontSize.value))
 ];
 
-onMounted(() => {
-  cmEditorView.value = new EditorView({
-    doc: props.value,
-    parent: wrapper.value!,
-    extensions
-  });
+const cmEditorView = shallowRef<EditorView>();
+const modelValue = ref(props.value);
+let lastEmitTime = 0;
+let lastEmitValue: string | undefined;
+const isTouchDevice = useIsTouchDevice();
+
+// Lifecycle
+
+function onReady(payload: {
+  view: EditorView;
+  state: EditorState;
+  container: HTMLDivElement;
+}) {
+  // console.log('Codemirror ready', payload.state);
+  cmEditorView.value = payload.view;
+
   VirtualKeyboardEvents.onChange(onVirtualKeyboardChange);
+  onUnmounted(() => {
+    VirtualKeyboardEvents.off(onVirtualKeyboardChange);
+  });
 
-  watch(() => props.value, (newContents) => {
-    if (Date.now() - lastGetDocumentTime > 1000 && newContents !== lastEmitValue) {
-      setDoc(newContents);
+  function onVirtualKeyboardChange(event: VirtualKeyboardChangeEvent) {
+    if (event.visible) {
+      event.preventDefault();
+      handleShowIos(event);
+      handleShowNonIos(event);
+      scrollIntoView();
     }
-  });
-
-  watch(() => placeholder.value, (newValue) => {
-    console.log('reconfiguring placeholder', newValue);
-    cmEditorView.value!.dispatch({
-      effects: compartments.placeholder.reconfigure(placeholderExtension(newValue))
-    });
-  });
-
-  watch(() => fontSize.value, (newValue) => {
-    console.log('reconfiguring fontSize', newValue);
-    cmEditorView.value!.dispatch({
-      effects: compartments.fontSize.reconfigure(fontSizeExtension(newValue))
-    });
-  });
-
-  doAutoFocus();
-});
-
-onUnmounted(() => {
-  VirtualKeyboardEvents.off(onVirtualKeyboardChange);
-});
-
-function onVirtualKeyboardChange(event: VirtualKeyboardChangeEvent) {
-  if (event.visible) {
-    event.preventDefault();
-    handleShowIos(event);
-    handleShowNonIos(event);
-    scrollIntoView();
   }
+
 }
 
-function doAutoFocus() {
-  if (!cmEditorView.value) return;
-  if (!isTouchDevice.value || (!isIos && props.value === '')) {
-    cmEditorView.value.focus();
+watch(() => props.value, (newContents) => {
+  if (Date.now() - lastEmitTime > 1000 && newContents !== lastEmitValue) {
+    modelValue.value = newContents;
   }
-}
+}, { immediate: true });
 
-function setDoc(newDoc: string) {
-  if (!cmEditorView.value) return;
-  cmEditorView.value.dispatch({
-    changes: {
-      from: 0,
-      to: cmEditorView.value.state.doc.length,
-      insert: newDoc
-    }
-  });
+function onChange(newContents: string) {
+  // Change is called on every input. We just save the value and emit change when blur occurs.
+  lastEmitValue = newContents;
+  lastEmitTime = Date.now();
+  modelValue.value = newContents;
+  emit('input', newContents);
+  // console.log('change', newContents.slice(0, 10));
 }
 
 // Exposed functions
-
-function getDocument() {
-  if (!cmEditorView.value) return '';
-  console.log('compiling document');
-  lastGetDocumentTime = Date.now();
-  return cmEditorView.value.state.doc.toString();
-}
 
 function insertText(text: string) {
   if (!cmEditorView.value) return;
@@ -423,7 +367,6 @@ async function pasteFromClipboard() {
 }
 
 defineExpose({
-  getDocument,
   insertBrackets,
   insertText,
   getSelectionText,
@@ -458,9 +401,30 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    ref="wrapper"
-    class="!block select-auto cursor-text [&_.cm-placeholder]:font-sans
-      [&_.cm-placeholder]:text-main-200/60"
+  <Codemirror
+    :model-value="modelValue"
+    @update:model-value="onChange"
+    class="!block select-auto cursor-text"
+    :class="{
+      '[&_.cm-placeholder]:font-sans [&_.cm-placeholder]:text-main-200/60':
+        props.value === '' && !isFocused
+    }"
+    :style="{
+      height: '100%',
+      fontSize: settings.data?.editorFontSize
+        ? `${settings.data.editorFontSize}rem`
+        : '0.875rem'
+
+    }"
+    :autofocus="!isTouchDevice || (!isIos && props.value === '')"
+    :placeholder="!isFocused
+      ? isTouchDevice
+        ? 'Tap to start editing...'
+        : 'Click to start editing...'
+      : ''"
+    :indent-with-tab="true"
+    :tab-size="2"
+    :extensions="extensions"
+    @ready="onReady"
   />
 </template>

@@ -50,9 +50,16 @@ let editorBlurTimeout: ReturnType<typeof setTimeout> | undefined;
 
 const codemirrorEditor = ref<InstanceType<typeof CodemirrorEditor> | null>(null);
 
-async function onNoteInput(newValue: string) {
-  // console.log('input', editorService.currentFile?.path);
-  editorService.currentFileBlob.data = newValue;
+function onChangeSignal() {
+  console.log('change signal');
+  editorService.throttledUpdateCurrentFileBlob(pullDocument);
+}
+
+function pullDocument() {
+  if (!codemirrorEditor.value) {
+    throw new Error('CodeMirrorEditor not available');
+  }
+  return codemirrorEditor.value?.getDocument();
 }
 
 function onEditorFocus() {
@@ -66,12 +73,12 @@ function onEditorFocus() {
 function onEditorBlur() {
   editorBlurTimeout = setTimeout(() => {
     editorFocused.value = false;
-    editorService.currentFileBlob.flushThrottledPut();
+    editorService.throttledUpdateCurrentFileBlob.flush();
   }, 200);
 }
 
 onBeforeUnmount(() => {
-  editorService.currentFileBlob.flushThrottledPut();
+  editorService.throttledUpdateCurrentFileBlob.flush();
 });
 
 </script>
@@ -149,9 +156,9 @@ onBeforeUnmount(() => {
         class="flex-1 overflow-hidden lg:mx-8"
         role="region"
         aria-label="Editor"
-        :key="editorService.currentFile.path"
+        :key="editorService.currentFileBlob.key"
         :value="editorService.currentFileBlob.data"
-        @input="onNoteInput"
+        @change-signal="onChangeSignal"
         @focus="onEditorFocus"
         @blur="onEditorBlur"
       />

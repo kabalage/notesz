@@ -9,6 +9,7 @@ export default mergeConfig(
     test: {
       globals: true,
       env: loadEnv('', process.cwd(), ''),
+      environment: 'jsdom',
       workspace: [{
         extends: true,
         test: {

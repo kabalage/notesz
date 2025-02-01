@@ -13,6 +13,7 @@ describe('useAsyncState with `get`', () => {
     });
     expect(resource.data).toBeUndefined();
     expect(resource.isGetting).toBe(true);
+    expect(resource.isReady).toBe(false);
     await flushPromises();
     expect(resource.data).toEqual({ foo: 'bar' });
     expect(resource.isGetting).toBe(false);
@@ -33,6 +34,7 @@ describe('useAsyncState with `get`', () => {
       });
       expect(resource.data).toBeUndefined();
       expect(resource.isGetting).toBe(true);
+      expect(resource.isReady).toBe(false);
       await flushPromises();
       expect(resource.data).toEqual({ foo: 'bar' });
       expect(resource.isGetting).toBe(false);
@@ -199,6 +201,7 @@ describe('useAsyncState with `get` and `put`', () => {
     });
     expect(resource.data).toBeUndefined();
     expect(resource.isGetting).toBe(true);
+    expect(resource.isReady).toBe(false);
     await flushPromises();
     expect(resource.data).toEqual('a');
     expect(resource.isPutting).toBe(false);
@@ -234,6 +237,7 @@ describe('useAsyncState with `get` and `put`', () => {
     });
     expect(resource.data).toBeUndefined();
     expect(resource.isGetting).toBe(true);
+    expect(resource.isReady).toBe(false);
     vi.advanceTimersByTime(1000);
     await flushPromises();
     // initial get is done
@@ -450,7 +454,7 @@ describe('useAsyncState with `get` and `put`', () => {
     vi.useRealTimers();
   });
 
-  it('should flush throttled `put` with `flushThrottledPut`', async () => {
+  it('should flush throttled `put` with `flushPut`', async () => {
     vi.useFakeTimers();
     let remoteValue = 'a';
     const get = vi.fn(async () => {
@@ -477,7 +481,7 @@ describe('useAsyncState with `get` and `put`', () => {
     vi.advanceTimersByTime(200);
     await flushPromises();
     const flushTime = Date.now();
-    await resource.flushThrottledPut();
+    await resource.flushPut();
     expect(Date.now() - flushTime).toBeLessThan(100);
     expect(resource.isPutting).toEqual(false);
     expect(remoteValue).toEqual('c');
@@ -487,7 +491,47 @@ describe('useAsyncState with `get` and `put`', () => {
     vi.useRealTimers();
   });
 
-  it('should resolve `flushThrottledPut` when there is no throttled `put`', async () => {
+  it('should resolve `flushPut` when an ongoing `put` finishes', async () => {
+    vi.useFakeTimers();
+    let remoteValue = 'a';
+    const get = vi.fn(async () => {
+      return remoteValue;
+    });
+    const put = vi.fn(async (data) => {
+      remoteValue = data;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    });
+    const resource = useAsyncState({
+      get,
+      put,
+    });
+    await flushPromises();
+    resource.data = 'b';
+    await nextTick();
+
+    expect(resource.isPutting).toEqual(true);
+
+    const flushPutSpy = vi.spyOn(resource, 'flushPut');
+    resource.flushPut();
+    expect(flushPutSpy).not.toHaveResolved();
+    vi.advanceTimersByTime(1000);
+    await flushPromises();
+
+    expect(resource.isPutting).toEqual(true);
+    expect(flushPutSpy).not.toHaveResolved();
+
+    vi.advanceTimersByTime(4000);
+    await flushPromises();
+
+    expect(resource.isPutting).toEqual(false);
+    expect(flushPutSpy).toHaveResolved();
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(put).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+
+  it('should resolve `flushPut` when there is no throttled or ongoing `put`', async () => {
     vi.useFakeTimers();
     let remoteValue = 'a';
     const get = vi.fn(async () => {
@@ -502,7 +546,7 @@ describe('useAsyncState with `get` and `put`', () => {
       putThrottling: 1000
     });
     await flushPromises();
-    await resource.flushThrottledPut();
+    await resource.flushPut();
     expect(get).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(0);
     vi.useRealTimers();

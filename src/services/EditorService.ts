@@ -15,6 +15,7 @@ import { BlobModel } from '@/services/model/BlobModel';
 import { FileIndexModel } from '@/services/model/FileIndexModel';
 import { RepositoryModel } from '@/services/model/RepositoryModel';
 import { DialogService } from '@/services/DialogService';
+import throttle from 'lodash-es/throttle';
 
 export type EditorService = ServiceInstance<typeof EditorService>;
 
@@ -128,8 +129,7 @@ function setup({
         currentFile.value.path,
         data
       );
-    },
-    putThrottling: 5000
+    }
   });
   noteszMessageBus.on('change:blob', (blobId) => {
     // message emitted by the ongoing put is ignored
@@ -148,19 +148,26 @@ function setup({
     // Don't allow deleting all files, because GitHub throws an error
   });
 
+  const throttledUpdateCurrentFileBlob = throttle(async (pullValue: () => string) => {
+    currentFileBlob.data = pullValue();
+    await currentFileBlob.flushPut();
+  }, 5000, {
+    leading: false
+  });
+
   async function startSync() {
-    await currentFileBlob.flushThrottledPut();
+    await throttledUpdateCurrentFileBlob.flush();
     router.push(`/sync/${repositoryId.value}?redirect=${router.currentRoute.value.fullPath}`);
   }
 
   async function openFile(filePath: string) {
-    await currentFileBlob.flushThrottledPut();
+    await throttledUpdateCurrentFileBlob.flush();
     router.push(`/edit/${repositoryId.value}/${filePath}`);
   }
 
   async function closeFile() {
     if (!currentTree.value) return;
-    await currentFileBlob.flushThrottledPut();
+    await throttledUpdateCurrentFileBlob.flush();
     sidebarIsOpen.value = true;
     router.push(`/edit/${repositoryId.value}/${currentTree.value.path}`);
   }
@@ -213,7 +220,7 @@ function setup({
 
   async function deleteCurrentFile() {
     if (!currentFile.value || !currentFileIndexId.value) return;
-    await currentFileBlob.flushThrottledPut();
+    await throttledUpdateCurrentFileBlob.flush();
     const confirmed = await dialogService.confirm({
       title: 'Delete file?',
       description: `Are you sure you want to delete <em class="break-words">${currentFile.value.path}</em>?`,
@@ -233,7 +240,7 @@ function setup({
   async function resolveConflict() {
     if (!currentFile.value || !currentFileIndexId.value) return;
     const currentFilePath = currentFile.value.path;
-    await currentFileBlob.flushThrottledPut();
+    await throttledUpdateCurrentFileBlob.flush();
     await fileIndexModel.resolveConflict(
       repositoryId.value,
       currentFileIndexId.value,
@@ -252,6 +259,7 @@ function setup({
     currentTree,
     currentFileBlob,
     syncDisabled,
+    throttledUpdateCurrentFileBlob,
     startSync,
     openFile,
     closeFile,

@@ -1,4 +1,4 @@
-import { debounce } from '@/utils/debounce';
+import debounce from 'lodash-es/debounce';
 
 /**
  * Waits for a child window to be closed.

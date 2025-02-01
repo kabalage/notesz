@@ -1,5 +1,6 @@
 import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
 import { trial } from '@/utils/trial';
+// import { throttle } from '@/utils/debounce';
 import throttle from 'lodash-es/throttle';
 
 /**
@@ -11,7 +12,7 @@ import throttle from 'lodash-es/throttle';
 export function useAsyncState<T, WatchParam>({
   get,
   put,
-  putThrottling = 1000,
+  putThrottling = 0,
   watch: watchFn
 }: {
   get: (params?: WatchParam) => Promise<T> | T,
@@ -24,6 +25,7 @@ export function useAsyncState<T, WatchParam>({
   const isGetting = ref(false);
   const isPutting = ref(false);
   const isReady = ref(false);
+  const key = ref<string | undefined>(undefined);
   const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let getQueued: {
@@ -98,6 +100,7 @@ export function useAsyncState<T, WatchParam>({
       if (!putQueued) {
         // don't update data if in the meantime a put has been queued
         data.value = structuredClone(newValue);
+        key.value = params ? JSON.stringify(params) : undefined;
       }
     });
     if (getError) {
@@ -134,7 +137,11 @@ export function useAsyncState<T, WatchParam>({
     updateWatchStopHandler = watch(data, function updateWatchHandler(newValue) {
       if (newValue !== undefined && newValue !== null) {
         // console.log('useAsyncState updateWatchHandler', newValue);
-        throttledQueuePut(newValue);
+        if (putThrottling) {
+          throttledQueuePut(newValue);
+        } else {
+          queuePut(newValue);
+        }
       }
     }, {
       deep: true
@@ -149,7 +156,7 @@ export function useAsyncState<T, WatchParam>({
     }
   }
 
-  async function flushThrottledPut() {
+  async function flushPut() {
     const putPromise = throttledQueuePut.flush();
     if (putPromise) {
       return putPromise;
@@ -163,8 +170,9 @@ export function useAsyncState<T, WatchParam>({
     isGetting,
     isPutting,
     isReady,
+    key,
     refetch: queueGet,
     put: queuePut,
-    flushThrottledPut
+    flushPut
   });
 }
