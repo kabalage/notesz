@@ -54,8 +54,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'node-fetch': fileURLToPath(new URL('./src/utils/nodeFetchDummy.ts', import.meta.url)),
+      '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
   optimizeDeps: {
