@@ -80,7 +80,8 @@ export const darkTheme = createTheme({
     },
     {
       tag: t.strikethrough,
-      textDecoration: 'line-through'
+      textDecoration: 'line-through',
+      opacity: '0.35'
     }
   ]
 });
@@ -93,8 +94,8 @@ export const draculaTheme = createTheme({
     caret: '#f8f8f0',
     selection: 'rgba(255, 255, 255, 0.2)',
     selectionMatch: 'rgba(255, 255, 255, 0.1)',
-    gutterBackground: '#282a36',
-    gutterForeground: '#6D8A88',
+    // gutterBackground: '#282a36',
+    // gutterForeground: '#6D8A88',
     lineHighlight: 'rgba(255, 255, 255, 0.1)',
   },
   styles: [
@@ -153,7 +154,8 @@ export const draculaTheme = createTheme({
     },
     {
       tag: t.strikethrough,
-      textDecoration: 'line-through'
+      textDecoration: 'line-through',
+      opacity: '0.35'
     }
   ]
 });

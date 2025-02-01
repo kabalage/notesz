@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { watch, shallowRef, inject, onUnmounted, ref, type App, type RendererElement, onMounted, effect, computed } from 'vue';
-// import { Codemirror } from 'vue-codemirror';
-// import VueCodemirror from 'vue-codemirror';
+import { watch, shallowRef, onUnmounted, ref, onMounted, computed } from 'vue';
+
 import { defaultHighlightStyle, LanguageDescription, syntaxHighlighting }
   from '@codemirror/language';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
-import { drawSelection, EditorView, highlightSpecialChars, keymap, placeholder as placeholderExtension }
+import { drawSelection, EditorView, highlightSpecialChars, keymap,
+  placeholder as placeholderExtension }
   from '@codemirror/view';
 import { darkTheme, draculaTheme } from '@/utils/codeMirrorThemes';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
@@ -70,6 +70,7 @@ const syntaxThemes = {
 
 const compartments = {
   placeholder: new Compartment(),
+  gutter: new Compartment(),
   fontSize: new Compartment()
 };
 
@@ -173,7 +174,33 @@ const extensions = [
   }),
   EditorState.tabSize.of(4),
   compartments.placeholder.of(placeholderExtension(placeholder.value)),
-  compartments.fontSize.of(fontSizeExtension(fontSize.value))
+  compartments.fontSize.of(fontSizeExtension(fontSize.value)),
+  // compartments.gutter.of([
+  //   lineNumbers(),
+  //   highlightActiveLine(),
+  //   highlightActiveLineGutter(),
+  //   EditorView.theme({
+  //     '.cm-scroller': {
+  //       borderTop: '2px solid rgb(255 255 255 / 0.2)',
+  //       backgroundColor: 'rgb(0 0 0 / 0.35)'
+  //     },
+  //     '.cm-line': {
+  //       paddingLeft: '0.75rem !important',
+  //     },
+  //     '.cm-gutters': {
+  //       backgroundColor: 'rgb(var(--color-background))',
+  //       color: 'rgba(255 255 255 / 35%)',
+  //       borderRight: '2px solid rgb(255 255 255 / 0.2)'
+  //     },
+  //     '.cm-lineNumbers': {
+  //       backgroundColor: 'rgb(0 0 0 / 1)'
+  //     },
+  //     '.cm-lineNumbers .cm-gutterElement': {
+  //       paddingRight: '0.75rem',
+  //       paddingLeft: '0.75rem',
+  //     }
+  //   }),
+  // ])
 ];
 
 onMounted(() => {
