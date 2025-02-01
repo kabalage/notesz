@@ -64,7 +64,7 @@ export function useInitializeRepository({
       });
     });
     if (commitsError && commitsError instanceof RequestError && commitsError.status === 409
-        && commitsError.message === 'Git Repository is empty.'
+        && commitsError.message.startsWith('Git Repository is empty.')
     ) {
       // repository is empty, continue
     } else if (commitsError) {
