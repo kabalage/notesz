@@ -98,13 +98,10 @@ async function clearStorage() {
         <p class="max-w-sm mx-auto font-medium text-white mb-4">
           An open-source note taking app that stores your notes on GitHub.
         </p>
-        <p class="max-w-sm mx-auto mb-4">
+        <p class="max-w-sm mx-auto mb-8">
           Add it to your Home Screen on your phone to use it like a native app.
           It works offline, and all your data is synced directly from the browser to GitHub,
           no third party involved.
-        </p>
-        <p class="max-w-sm mx-auto mb-8 text-orange-300 font-medium">
-          It's still in beta, so be prepared for bugs.
         </p>
         <BasicButton
           class="mx-auto"
