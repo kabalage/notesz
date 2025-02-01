@@ -31,6 +31,7 @@ import { RepositoryModel } from '@/services/model/RepositoryModel';
 import { SettingsModel } from '@/services/model/SettingsModel';
 import { GitHubIntegration } from '@/services/integration/GitHubIntegration';
 import { NoteszMessageBus } from '@/services/NoteszMessageBus';
+import type { InstallResult } from '@/services/integration/github/install';
 
 const props = defineProps<{
   redirect: string
@@ -71,7 +72,7 @@ const connectedRepositories = computed(() => {
 });
 
 const authorizedRepositories = useAsyncState({
-  get(update?: { installationId: number, setupAction: 'update' | 'install'}) {
+  get(update?: InstallResult) {
     return githubIntegration.listAuthorizedRepositories(update);
   }
 });
@@ -100,9 +101,9 @@ const filteredAuthorizedRepositories = computed(() => {
 });
 
 async function _install() {
-  const { canceled, update } = await githubIntegration.install();
+  const { canceled, result } = await githubIntegration.install();
   if (!canceled) {
-    authorizedRepositories.refetch(update);
+    authorizedRepositories.refetch(result);
   }
 }
 

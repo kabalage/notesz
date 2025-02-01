@@ -13,10 +13,21 @@ const CallbackParamsSchema = z.object({
 const dependencies = [NoteszMessageBus];
 useInstall.dependencies = dependencies;
 
+export type InstallResult = {
+  installationId: number,
+  setupAction: 'update' | 'install'
+}
+
 export function useInstall({ noteszMessageBus }: InjectResult<typeof dependencies>) {
 
-  return async function install() {
+  return async function install(): Promise<{
+    canceled: boolean,
+    result?: InstallResult
+  }> {
     // Redirect to GitHub
+
+    // eslint-disable-next-line max-len
+    // https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/about-the-setup-url
     const childWindow = window.open(
       `https://github.com/apps/${import.meta.env.VITE_GITHUB_APP_URL_NAME}/installations/new`,
       '_blank',
@@ -42,7 +53,7 @@ export function useInstall({ noteszMessageBus }: InjectResult<typeof dependencie
     }
     return {
       canceled: false,
-      update: {
+      result: {
         installationId: callbackParams.installation_id,
         setupAction: callbackParams.setup_action as typeof callbackParams.setup_action
       }

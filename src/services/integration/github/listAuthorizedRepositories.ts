@@ -5,16 +5,14 @@ import { NoteszError } from '@/utils/NoteszError';
 import { trial } from '@/utils/trial';
 import type { InjectResult } from '@/utils/injector';
 import { UserModel } from '@/services/model/UserModel';
+import type { InstallResult } from './install';
 
 const dependencies = [UserModel];
 useListAuthorizedRepositories.dependencies = dependencies;
 
 export function useListAuthorizedRepositories({ userModel }: InjectResult<typeof dependencies>) {
 
-  return async function listAuthorizedRepositories(update?: {
-    installationId: number,
-    setupAction: 'update' | 'install'
-  }) {
+  return async function listAuthorizedRepositories(installResult?: InstallResult) {
     const user = await userModel.get();
     if (!user) {
       throw new NoteszError('Unauthorized user', {
@@ -25,14 +23,14 @@ export function useListAuthorizedRepositories({ userModel }: InjectResult<typeof
     // Get installations
     const authHeader = `Bearer ${user.token}`;
     const [installationsResponse, installationsError] = await trial(() => {
-      const bypassCache = !update || update?.setupAction === 'install';
+      const bypassCache = !installResult || installResult?.setupAction === 'install';
       return octokitRequest('GET /user/installations', {
         headers: {
           authorization: authHeader
         },
         request: {
-          cache: bypassCache ? 'reload' : 'default'
-        }
+          fetch: bypassCache ? fetchThatBypassesCache : undefined
+        },
       });
     });
     if (installationsError) {
@@ -58,14 +56,15 @@ export function useListAuthorizedRepositories({ userModel }: InjectResult<typeof
     for (const i in installations) {
       const installation = installations[i];
       const [repositoriesResponse, repositoriesError] = await trial(() => {
-        const bypassCache = !update || update?.setupAction === 'update'
-          && update?.installationId === installation.id;
+        const bypassCache = !installResult || installResult?.setupAction === 'update'
+          && installResult?.installationId === installation.id;
+        console.log('bypassCache', bypassCache, installResult, installation.id);
         return octokitRequest(repositoriesRoute, {
           headers: {
             authorization: authHeader
           },
           request: {
-            cache: bypassCache ? 'reload' : 'default'
+            fetch: bypassCache ? fetchThatBypassesCache : undefined
           },
           installation_id: installation.id
         });
@@ -85,4 +84,11 @@ export function useListAuthorizedRepositories({ userModel }: InjectResult<typeof
     }
     return repositories;
   };
+}
+
+function fetchThatBypassesCache(url: RequestInfo | URL, requestInit?: RequestInit) {
+  return fetch(url, {
+    ...requestInit,
+    cache: 'reload'
+  });
 }
