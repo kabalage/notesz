@@ -9,8 +9,4 @@ VirtualKeyboardEvents.setupDefaultHandler();
 const app = createApp(App);
 app.use(router);
 
-// TODO temporary solution for EditorView until this gets sorted out:
-// https://github.com/surmon-china/vue-codemirror/issues/167
-app.provide('app', app);
-
 app.mount('#app');

@@ -32,7 +32,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['changeSignal', 'focus', 'blur']);
 
-console.log('CodemirrorEditor setup');
+// console.log('CodemirrorEditor setup');
 
 const wrapper = ref<HTMLDivElement | null>(null);
 
@@ -41,7 +41,7 @@ const isFocused = ref(false);
 
 const cmEditorView = shallowRef<EditorView>();
 let lastGetDocumentTime = 0;
-let lastEmitValue: string | undefined;
+let lastGetDocumentResult: string | undefined;
 const isTouchDevice = useIsTouchDevice();
 
 const placeholder = computed(() => {
@@ -162,7 +162,6 @@ const extensions = [
       emit('blur');
     },
     focus() {
-      console.log('focused');
       isFocused.value = true;
       emit('focus');
     }
@@ -204,32 +203,18 @@ const extensions = [
 ];
 
 onMounted(() => {
+  if (!wrapper.value) return;
+
   cmEditorView.value = new EditorView({
     doc: props.value,
-    parent: wrapper.value!,
+    parent: wrapper.value,
     extensions
   });
   VirtualKeyboardEvents.onChange(onVirtualKeyboardChange);
 
-  watch(() => props.value, (newContents) => {
-    if (Date.now() - lastGetDocumentTime > 1000 && newContents !== lastEmitValue) {
-      setDoc(newContents);
-    }
-  });
-
-  watch(() => placeholder.value, (newValue) => {
-    console.log('reconfiguring placeholder', newValue);
-    cmEditorView.value!.dispatch({
-      effects: compartments.placeholder.reconfigure(placeholderExtension(newValue))
-    });
-  });
-
-  watch(() => fontSize.value, (newValue) => {
-    console.log('reconfiguring fontSize', newValue);
-    cmEditorView.value!.dispatch({
-      effects: compartments.fontSize.reconfigure(fontSizeExtension(newValue))
-    });
-  });
+  watch(() => props.value, setDocIfNew);
+  watch(() => placeholder.value, reconfigurePlaceholder);
+  watch(() => fontSize.value, reconfigureFontSize);
 
   doAutoFocus();
 });
@@ -254,6 +239,12 @@ function doAutoFocus() {
   }
 }
 
+function setDocIfNew(newDoc: string) {
+  if (Date.now() - lastGetDocumentTime > 1000 && newDoc !== lastGetDocumentResult) {
+    setDoc(newDoc);
+  }
+}
+
 function setDoc(newDoc: string) {
   if (!cmEditorView.value) return;
   cmEditorView.value.dispatch({
@@ -265,13 +256,27 @@ function setDoc(newDoc: string) {
   });
 }
 
+function reconfigurePlaceholder(placeholder: string) {
+  if (!cmEditorView.value) return;
+  cmEditorView.value.dispatch({
+    effects: compartments.placeholder.reconfigure(placeholderExtension(placeholder))
+  });
+}
+
+function reconfigureFontSize(fontSize: string) {
+  if (!cmEditorView.value) return;
+  cmEditorView.value.dispatch({
+    effects: compartments.fontSize.reconfigure(fontSizeExtension(fontSize))
+  });
+}
+
 // Exposed functions
 
 function getDocument() {
   if (!cmEditorView.value) return '';
-  console.log('compiling document');
   lastGetDocumentTime = Date.now();
-  return cmEditorView.value.state.doc.toString();
+  lastGetDocumentResult = cmEditorView.value.state.doc.toString();
+  return lastGetDocumentResult;
 }
 
 function insertText(text: string) {
