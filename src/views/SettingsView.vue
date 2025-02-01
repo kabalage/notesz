@@ -426,12 +426,6 @@ async function deleteAllLocalData() {
             stores everything on GitHub, and also works well on phones.
           </p>
           <p>
-            I'm still deciding on how I'd like to handle collaboration, but feel free to create
-            discussions on GitHub, or create issues if you run into bugs.
-          </p>
-          <p>
-          </p>
-          <p>
             <span class="font-medium text-white">Version:</span> {{ appVersion }}
             <br><span class="font-medium text-white">Source:</span>
             <a

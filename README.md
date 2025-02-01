@@ -16,8 +16,6 @@ Add it to your Home Screen on your phone to use it like a native app. It works o
 
 I created *Notesz* as a personal project. My goal was to create a simple, serverless, progressive web app (PWA) for note-taking that stores everything on GitHub, and also works well on phones. I'm trying my best to deliver a user experience as close to a native mobile app as possible with web technologies.
 
-I'm still deciding on how I'd like to handle collaboration, but feel free to create discussions or issues if you run into bugs.
-
 > Fun fact: “Notesz” means “pocket notebook” in Hungarian. It's pronounced “not-ass”, IPA: /ˈnotɛs/.
 
 ## 👨‍💻 Tech stack
