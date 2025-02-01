@@ -1,38 +1,57 @@
-import { reactive, toRaw, ref, type UnwrapRef, watch } from 'vue';
+import { reactive, toRaw, ref, watch, type Ref } from 'vue';
 import { trial } from '@/utils/trial';
-// import { throttle } from '@/utils/debounce';
 import throttle from 'lodash-es/throttle';
 
+type UseAsyncStateReturn<T, WatchParam = void> = {
+  data: T | undefined
+  error: Error | undefined
+  isGetting: boolean
+  isPutting: boolean
+  isReady: boolean
+  refetch: ((params?: WatchParam) => Promise<void>) | (() => Promise<void>)
+  put: (newValue: T) => Promise<void>
+  flushPut: () => Promise<void>
+}
 /**
  * A composable for asynchronous state management similar to `useAsyncState` in `vueuse`,
  * but it can:
  * - Persist changes to the data (that also supports throttling)
  * - Watch for arbitrary parameters and re-fetch the data when they change
  */
-export function useAsyncState<T, WatchParam>({
+export function useAsyncState<T, WatchParam = void>(options: {
+  watch: () => WatchParam,
+  get: (params: WatchParam) => Promise<T> | T,
+  put?: ((data: T) => any),
+  putThrottling?: number
+}): UseAsyncStateReturn<T, WatchParam> & { refetch: (params?: WatchParam) => Promise<void> }
+export function useAsyncState<T, Q = any>(options: {
+  get: ((params: Q) => Promise<T> | T),
+  put?: ((data: T) => any),
+  putThrottling?: number
+}): UseAsyncStateReturn<T> & { refetch: (params: Q) => Promise<void> }
+export function useAsyncState<T, WatchParam = void>({
   get,
   put,
   putThrottling = 0,
   watch: watchFn
 }: {
-  get: (params?: WatchParam) => Promise<T> | T,
-  put?: ((data: UnwrapRef<T>) => any),
   watch?: () => WatchParam,
+  get: ((params?: WatchParam) => Promise<T> | T) | (() => Promise<T> | T) ,
+  put?: ((data: T) => any),
   putThrottling?: number
-}) {
-  const data = ref<T | undefined>(undefined);
-  const lastData = ref<T | undefined>(undefined);
+}): UseAsyncStateReturn<T, WatchParam> {
+  const data = ref(undefined) as Ref<T | undefined>;
+  const lastData = ref(undefined) as Ref<T | undefined>;
   const isGetting = ref(false);
   const isPutting = ref(false);
   const isReady = ref(false);
-  const key = ref<string | undefined>(undefined);
   const error = ref<Error | undefined>(undefined);
   let updateWatchStopHandler: ReturnType<typeof watch> | undefined;
   let getQueued: {
     params: WatchParam | undefined
   } | undefined;
   let putQueued: {
-    newValue: UnwrapRef<T>
+    newValue: T
   } | undefined;
   let processPromise: Promise<void> = Promise.resolve();
   let isProcessing = false;
@@ -58,7 +77,7 @@ export function useAsyncState<T, WatchParam>({
     }
   }
 
-  async function queuePut(newValue: UnwrapRef<T>) {
+  async function queuePut(newValue: T) {
     // console.log('useAsyncState queuePut');
     if (!put) throw new Error('No put function provided');
     if (!isReady.value) throw new Error('Cannot put before inital get finishes');
@@ -94,13 +113,12 @@ export function useAsyncState<T, WatchParam>({
     const [, getError] = await trial(async () => {
       isGetting.value = true;
       error.value = undefined;
-      const newValue = await get(params) as UnwrapRef<T>;
+      const newValue = await get(params);
       stopUpdateWatch();
       lastData.value = newValue;
       if (!putQueued) {
         // don't update data if in the meantime a put has been queued
         data.value = structuredClone(newValue);
-        key.value = params ? JSON.stringify(params) : undefined;
       }
     });
     if (getError) {
@@ -114,7 +132,7 @@ export function useAsyncState<T, WatchParam>({
     }
   }
 
-  async function _put(newValue: UnwrapRef<T>) {
+  async function _put(newValue: T) {
     if (!put) return;
     // console.log('useAsyncState _put');
     const [, putError] = await trial(async () => {
@@ -164,15 +182,21 @@ export function useAsyncState<T, WatchParam>({
     return processPromise;
   }
 
+  async function refetch(params?: WatchParam) {
+    if (!params && watchFn) {
+      params = watchFn();
+    }
+    await queueGet(params);
+  }
+
   return reactive({
     data,
     error,
     isGetting,
     isPutting,
     isReady,
-    key,
-    refetch: queueGet,
+    refetch,
     put: queuePut,
-    flushPut
+    flushPut,
   });
 }

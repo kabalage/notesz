@@ -150,14 +150,14 @@ onBeforeUnmount(() => {
         />
       </div>
       <CodemirrorEditor
-        v-if="editorService.currentFileBlob.data !== undefined"
+        v-if="editorService.currentFileBlob.data?.contents !== undefined"
         id="codemirrorEditor"
         ref="codemirrorEditor"
         class="flex-1 overflow-hidden lg:mx-8"
         role="region"
         aria-label="Editor"
-        :key="editorService.currentFileBlob.key"
-        :value="editorService.currentFileBlob.data"
+        :key="editorService.currentFileBlob.data.path"
+        :value="editorService.currentFileBlob.data.contents"
         @change-signal="onChangeSignal"
         @focus="onEditorFocus"
         @blur="onEditorBlur"

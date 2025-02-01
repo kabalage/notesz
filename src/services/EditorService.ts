@@ -80,9 +80,9 @@ function setup({
     watch() {
       return currentFileIndexId.value;
     },
-    get() {
-      if (!currentFileIndexId.value) return undefined;
-      return fileIndexModel.getFileIndex(repositoryId.value, currentFileIndexId.value);
+    get(currentFileIndexId) {
+      if (!currentFileIndexId) return undefined;
+      return fileIndexModel.getFileIndex(repositoryId.value, currentFileIndexId);
     }
   });
   noteszMessageBus.on('change:fileIndex', (change) => {
@@ -115,26 +115,47 @@ function setup({
 
   const currentFileBlob = useAsyncState({
     watch() {
-      return currentFile.value?.blobId;
+      return [currentFile.value?.blobId, currentFile.value?.path];
     },
-    get(blobId) {
-      if (!blobId) return undefined;
-      return blobModel.get(blobId);
+    async get([blobId, path]) {
+      if (!blobId) {
+        return {
+          contents: undefined,
+          path: path
+        };
+      }
+      const result = await blobModel.get(blobId);
+
+      // We need to identify the currently loaded blob.
+      // When we change files, the contents and the identifier has to change at the same time.
+      // Otherwise CodemirrorEditor will behave inconsistently, as we reset the editor when
+      // the file changes. (To reset the history for example.)
+      //
+      // Also, the blobId changes from a hash when we start changing the doc to a local id until
+      // it's commited, so we cannot use blobId because the first edit will reset the editor which
+      // is undesired.
+      return {
+        contents: result,
+        path
+      };
     },
     async put(data) {
-      if (!currentFile.value || !currentFileIndexId.value || data === undefined) return;
+      if (!currentFile.value || !currentFileIndexId.value || data.contents === undefined
+        || !data.path) {
+        return;
+      }
       await fileIndexModel.updateFile(
         repositoryId.value,
         currentFileIndexId.value,
-        currentFile.value.path,
-        data
+        data.path,
+        data.contents
       );
     }
   });
   noteszMessageBus.on('change:blob', (blobId) => {
     // message emitted by the ongoing put is ignored
     if (!currentFileBlob.isPutting && blobId === currentFile.value?.blobId) {
-      currentFileBlob.refetch(blobId);
+      currentFileBlob.refetch();
     }
   });
 
@@ -144,12 +165,12 @@ function setup({
     if (!isOnline.value || !fileIndex.data) return true;
     const rootTree = fileIndexModel.getRootTreeNode(fileIndex.data);
     return rootTree.fileStats.conflicting > 0
+      // Don't allow deleting all files, because GitHub throws an error
       || rootTree.fileStats.all === rootTree.fileStats.deleted;
-    // Don't allow deleting all files, because GitHub throws an error
   });
 
   const throttledUpdateCurrentFileBlob = throttle(async (pullValue: () => string) => {
-    currentFileBlob.data = pullValue();
+    currentFileBlob.data!.contents = pullValue();
     await currentFileBlob.flushPut();
   }, 5000, {
     leading: false
