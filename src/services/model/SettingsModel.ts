@@ -19,7 +19,8 @@ export interface Settings {
   editorFontSize?: number,
   spellcheck?: boolean,
   autocorrect?: boolean,
-  autocapitalize?: boolean
+  autocapitalize?: boolean,
+  useOsFonts?: boolean
 }
 
 export function createSettings(
@@ -36,6 +37,7 @@ export function createSettings(
     spellcheck: false,
     autocorrect: true,
     autocapitalize: true,
+    useOsFonts: false,
     ...initialValues,
   };
 }

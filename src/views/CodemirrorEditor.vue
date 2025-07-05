@@ -498,6 +498,6 @@ defineExpose({
   <div
     ref="wrapper"
     class="!block select-auto cursor-text [&_.cm-placeholder]:font-sans
-      [&_.cm-placeholder]:text-main-200/60"
+      [&_.cm-placeholder]:text-main-200/60 [&_.cm-scroller]:font-mono"
   />
 </template>

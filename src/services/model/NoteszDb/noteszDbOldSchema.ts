@@ -91,8 +91,8 @@ export interface NoteszDbSchemaV4 extends DBSchema {
   blobRefCounts: NoteszDbSchemaV1['blobRefCounts'],
   app: {
     key: string,
-    value: SettingsV4 | UserV2
+    value: SettingsV3 | UserV2
   }
 }
 
-interface SettingsV4 extends Settings {}
+interface SettingsV3 extends Settings {}

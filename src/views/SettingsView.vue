@@ -353,6 +353,18 @@ async function deleteAllLocalData() {
           </div>
           <div class="flex items-center py-2 pl-4 pr-2">
             <div
+              id="useOsFontsLabel"
+              class="text-white font-medium flex-1 mr-2"
+            >
+              Use OS fonts
+            </div>
+            <BasicSwitch
+              v-model="settings.data.useOsFonts"
+              label-id="useOsFontsLabel"
+            />
+          </div>
+          <div class="flex items-center py-2 pl-4 pr-2">
+            <div
               id="spellcheck"
               class="text-white font-medium flex-1 mr-2"
             >

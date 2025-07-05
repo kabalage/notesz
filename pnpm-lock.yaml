@@ -41,6 +41,15 @@ importers:
       '@codemirror/view':
         specifier: 6.36.2
         version: 6.36.2
+      '@fontsource-variable/inter':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource-variable/jetbrains-mono':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource/jetbrains-mono':
+        specifier: ^5.2.6
+        version: 5.2.6
       '@headlessui/vue':
         specifier: 1.7.11
         version: 1.7.11(vue@3.5.13(typescript@5.7.3))
@@ -954,6 +963,15 @@ packages:
   '@fastify/busboy@2.1.1':
     resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
     engines: {node: '>=14'}
+
+  '@fontsource-variable/inter@5.2.6':
+    resolution: {integrity: sha512-jks/bficUPQ9nn7GvXvHtlQIPudW7Wx8CrlZoY8bhxgeobNxlQan8DclUJuYF2loYRrGpfrhCIZZspXYysiVGg==}
+
+  '@fontsource-variable/jetbrains-mono@5.2.6':
+    resolution: {integrity: sha512-1pvtyK6H1paBOixbtZ9xfQgArVQ4SJMW3WSGZPOd5PiW3yg0t8umwKnjDMzW2ofb7qSdiXnsnIaHPT36vEOdlg==}
+
+  '@fontsource/jetbrains-mono@5.2.6':
+    resolution: {integrity: sha512-nz//dBr99hXZmHp10wgNI00qThWImkzRR5PQjvRM+rpmuHO5rYBJCqPPWufidCvmkkryXx/GOP/lgqsM3R3Org==}
 
   '@headlessui/vue@1.7.11':
     resolution: {integrity: sha512-VsNqx9Lc1ftOyIazBF9EX5BS4WYwwaFX+1jBWXQakeH1o4xnoZKlBSlvEgmAnFLO9GDVmn7kKVOWfFgQn2aRZA==}
@@ -5182,6 +5200,12 @@ snapshots:
       levn: 0.4.1
 
   '@fastify/busboy@2.1.1': {}
+
+  '@fontsource-variable/inter@5.2.6': {}
+
+  '@fontsource-variable/jetbrains-mono@5.2.6': {}
+
+  '@fontsource/jetbrains-mono@5.2.6': {}
 
   '@headlessui/vue@1.7.11(vue@3.5.13(typescript@5.7.3))':
     dependencies:

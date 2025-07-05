@@ -5,6 +5,7 @@
     Changes to the settings are automatically persisted to the database.
 */
 
+import { watch } from 'vue';
 import { defineService, type InjectResult } from '@/utils/injector';
 import { NoteszMessageBus } from '@/services/NoteszMessageBus';
 import { useAsyncState } from '@/composables/useAsyncState';
@@ -36,5 +37,14 @@ function setup({ noteszMessageBus, settingsModel }: InjectResult<typeof dependen
       settings.refetch();
     }
   });
+
+  watch(() => settings.data?.useOsFonts, (useOsFonts) => {
+    const sansFont = useOsFonts ? '""' : '"Inter Variable"';
+    const monoFont = useOsFonts ? '""' : '"JetBrains Mono Variable"';
+
+    document.documentElement.style.setProperty('--font-sans', sansFont);
+    document.documentElement.style.setProperty('--font-mono', monoFont);
+  }, { immediate: true });
+
   return settings;
 }

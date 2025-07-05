@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
@@ -6,6 +8,10 @@ const config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans, "")', ...defaultTheme.fontFamily.sans],
+        mono: ['var(--font-mono, "")', ...defaultTheme.fontFamily.mono]
+      },
       spacing: {
         'safe-b': 'env(safe-area-inset-bottom)',
         'safe-t': 'env(safe-area-inset-top)',
