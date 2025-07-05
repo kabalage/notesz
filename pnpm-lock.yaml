@@ -62,9 +62,6 @@ importers:
       '@types/diff3':
         specifier: 0.0.2
         version: 0.0.2
-      '@uiw/codemirror-extensions-hyper-link':
-        specifier: 4.23.7
-        version: 4.23.7(@codemirror/state@6.5.1)(@codemirror/view@6.36.2)
       '@uiw/codemirror-themes':
         specifier: 4.23.7
         version: 4.23.7(@codemirror/language@6.10.8)(@codemirror/state@6.5.1)(@codemirror/view@6.36.2)
@@ -1386,12 +1383,6 @@ packages:
   '@typescript-eslint/visitor-keys@8.20.0':
     resolution: {integrity: sha512-v/BpkeeYAsPkKCkR8BDwcno0llhzWVqPOamQrAEMdpZav2Y9OVjd9dwJyBLJWwf335B5DmlifECIkZRJCaGaHA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@uiw/codemirror-extensions-hyper-link@4.23.7':
-    resolution: {integrity: sha512-myn2LKwG4SpXvnMFDGpra6qCCtKtzCYu0LgakpqshOUkHc0Jo5L5EsjqAJM+d2Jbj8bkf57tpAgNjwkvb7Z1Yg==}
-    peerDependencies:
-      '@codemirror/state': '>=6.0.0'
-      '@codemirror/view': '>=6.0.0'
 
   '@uiw/codemirror-themes@4.23.7':
     resolution: {integrity: sha512-UNf1XOx1hG9OmJnrtT86PxKcdcwhaNhbrcD+nsk8WxRJ3n5c8nH6euDvgVPdVLPwbizsaQcZTILACgA/FjRpVg==}
@@ -5650,11 +5641,6 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 8.20.0
       eslint-visitor-keys: 4.2.0
-
-  '@uiw/codemirror-extensions-hyper-link@4.23.7(@codemirror/state@6.5.1)(@codemirror/view@6.36.2)':
-    dependencies:
-      '@codemirror/state': 6.5.1
-      '@codemirror/view': 6.36.2
 
   '@uiw/codemirror-themes@4.23.7(@codemirror/language@6.10.8)(@codemirror/state@6.5.1)(@codemirror/view@6.36.2)':
     dependencies:

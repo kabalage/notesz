@@ -9,13 +9,13 @@ import { drawSelection, EditorView, highlightSpecialChars, keymap,
   from '@codemirror/view';
 import { darkTheme, draculaTheme } from '@/utils/codemirror/themes';
 import { indentedLineWrap } from '@/utils/codemirror/indent-line-wrap';
+import { hyperLink } from '@/utils/codemirror/hyperlink';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches, search, openSearchPanel }
   from '@codemirror/search';
 import { Compartment, EditorState } from '@codemirror/state';
 import * as commands from '@codemirror/commands';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import { hyperLink } from '@uiw/codemirror-extensions-hyper-link';
 import { useIsTouchDevice } from '@/composables/useIsTouchDevice';
 import { isIos } from '@/utils/iDeviceDetection';
 import {
@@ -150,6 +150,9 @@ const extensions = [
     '.cm-scroller': {
       overscrollBehavior: 'contain',
       '-webkit-overflow-scrolling': 'touch'
+    },
+    '.cm-hyper-link-underline > *': {
+      wordBreak: 'break-all' // urls should be breakable anywhere
     }
   }),
   EditorView.updateListener.of((viewUpdate) => {

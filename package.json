@@ -39,7 +39,6 @@
     "@octokit/request-error": "6.1.6",
     "@octokit/types": "13.8.0",
     "@types/diff3": "0.0.2",
-    "@uiw/codemirror-extensions-hyper-link": "4.23.7",
     "@uiw/codemirror-themes": "4.23.7",
     "@vueuse/core": "9.13.0",
     "diff3": "0.0.3",
