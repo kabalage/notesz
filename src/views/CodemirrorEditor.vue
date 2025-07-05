@@ -7,7 +7,8 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { drawSelection, EditorView, highlightSpecialChars, keymap,
   placeholder as placeholderExtension }
   from '@codemirror/view';
-import { darkTheme, draculaTheme } from '@/utils/codeMirrorThemes';
+import { darkTheme, draculaTheme } from '@/utils/codemirror/themes';
+import { indentedLineWrap } from '@/utils/codemirror/indent-line-wrap';
 import { closeBrackets, closeBracketsKeymap, insertBracket } from '@codemirror/autocomplete';
 import { searchKeymap, highlightSelectionMatches, search, openSearchPanel }
   from '@codemirror/search';
@@ -172,6 +173,7 @@ const extensions = [
     spellcheck: settings.data?.spellcheck ? 'true' : 'false'
   }),
   EditorState.tabSize.of(4),
+  indentedLineWrap,
   compartments.placeholder.of(placeholderExtension(placeholder.value)),
   compartments.fontSize.of(fontSizeExtension(fontSize.value)),
   // compartments.gutter.of([
