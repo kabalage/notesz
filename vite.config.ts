@@ -63,6 +63,14 @@ export default defineConfig({
   define: {
     'import.meta.env.APP_VERSION': JSON.stringify(appVersion)
   },
+  build: {
+    assetsInlineLimit(filePath, content) {
+      if (filePath.includes('@fontsource-variable')) {
+        console.log('assetInlineLimit', filePath);
+        return false;
+      }
+    },
+  },
   server: {
     port: 5000
   }
